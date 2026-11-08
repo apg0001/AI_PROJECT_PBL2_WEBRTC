@@ -131,6 +131,9 @@ export function createUi({ role, room }) {
 
     attachSession(s) {
       // 새 세션(재연결)마다 표를 비운다. 이전 세션 기록은 events에 남아 있다.
+      // 이전 세션의 연결 결과가 남지 않게 비운다 (재연결 시 역할이 바뀔 수 있음)
+      $('result').innerHTML = '';
+      record.result = {};
       $('states').tBodies[0].innerHTML = '';
       $('cands').tBodies[0].innerHTML = '';
       record.candidates = [];

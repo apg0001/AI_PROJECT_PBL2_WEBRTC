@@ -12,9 +12,9 @@
 
 | 구분 | 이슈 |
 |---|---|
-| 완료 | #1 계획 · #36 범위 변경 · #3 Requirement · #4 Architecture · #5 Connection Sequence · #6 기술 결정 · #7 시험계획 · #9 Signaling Server · #46 1인 진행·보고서 · #10 1:1 연결 · #11 연결 과정 가시화 · #51 문서 정리 · #53 보고서용 그림 |
+| 완료 | #1 계획 · #36 범위 변경 · #3 Requirement · #4 Architecture · #5 Connection Sequence · #6 기술 결정 · #7 시험계획 · #9 Signaling Server · #46 1인 진행·보고서 · #10 1:1 연결 · #11 연결 과정 가시화 · #51 문서 정리 · #53 보고서용 그림 · #13 iPhone↔PC 연결 시험(2주차 작업을 앞당김) |
 | 진행 중 | #2 개발 환경 (폰 HTTPS 확인 남음) |
-| 남음 | #12 발표자료(템플릿 대기) · PC↔iPhone 실기기 연결 확인 |
+| 남음 | #12 발표자료 |
 | 제외 | #8 역할분담 (1인 진행) |
 
 ## 작업 기록
@@ -36,6 +36,7 @@
 | 11/09 | #11 · PR #50 | 상태 전이 시각표, ICE Candidate 표(type별 집계), 연결 결과 표, 로그 JSON 내보내기 | E2E 13개 항목 통과. 화면: `screenshots/expert-connected.png`, `field-connected.png` (Connection Time 139 ms, ICE RTT 12 ms, DataChannel 왕복 14.6 ms) |
 | 11/09 | #51 | 과제 설명 PDF를 `docs/reference/`로 이동, #11 PR에서 빠진 문서 갱신 반영 | 루트 정리 |
 | 11/09 | #53 | 보고서용 그림 4종: 시스템 아키텍처, 서버 구성도, 구현 계획(4주 로드맵), 클라이언트 모듈 구조. 직접 그린 아이콘 세트, `npm run diagrams`로 PNG 렌더링 | 아래 '그림' |
+| 11/09 | #13 | iPhone(Chrome) ↔ Mac(Chrome) 같은 Wi-Fi 연결 10회 시험. PC 쪽 자동 측정 스크립트(`server/e2e/measure-connection.mjs`) 추가. 재연결 시 결과 표가 남는 버그 수정 | 9/9 P2P 직접 연결, Connection Time 중앙값 50.5 ms(40~102, 8회), ICE RTT 중앙값 9 ms, DataChannel 왕복 중앙값 21.8 ms. 10회째는 폰 앱 전환으로 중단. `experiments/2026-11-09_T1-iphone-pc-lan/` |
 
 ## 그림
 
@@ -79,9 +80,10 @@
 - 저장소 루트에서 `npm run tunnel`을 실행하면 `package.json`이 없어 실패했다 → 루트 `package.json`을 추가해 해결 (PR #47).
 - **카메라 권한이 없으면 host Candidate의 사설 IP가 mDNS 이름(`xxxx.local`)으로 숨겨진다.** getStats의 local 주소가 비어 나온다. 개인정보 보호 기능이며, 같은 LAN에서는 mDNS가 풀려 연결된다. 다른 네트워크 분석(#14) 때 고려한다.
 - 같은 PC 두 브라우저 연결에서 전문가 쪽 local Candidate가 host 1개뿐이고 srflx가 수집되지 않았다(현장 쪽은 srflx 수집). 이 PC에 공인 IP 인터페이스(210.94.172.67)가 있어 srflx가 host와 같아 생략됐을 가능성이 있다. #14에서 확인한다.
+- **실제 iPhone ↔ PC 연결 경로는 host(mDNS) ↔ prflx였다.** 상대의 host 주소가 mDNS 이름으로 숨겨져 있어서, 연결성 검사 패킷이 온 실제 주소를 새 후보(prflx, peer reflexive)로 배운 것이다.
+- **연결 시점에 srflx 후보가 거의 없었다(9회 중 7회 host만).** 같은 LAN에서는 문제없지만 다른 네트워크에서는 srflx가 필요하다. #14에서 원인을 확인한다.
 - Chrome DevTools 네트워크 제한은 WebRTC에 적용되지 않는다 → 품질 실험은 Network Link Conditioner를 쓴다 (`docs/05-test-plan.md`).
 
 ## 다음 할 일
 
-- PC ↔ iPhone 같은 Wi-Fi 실기기 연결 확인
 - #12 Progress Check 발표자료 (템플릿을 받으면 작성)

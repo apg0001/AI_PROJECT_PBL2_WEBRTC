@@ -29,7 +29,7 @@
 - [x] #51 과제 설명 PDF를 `docs/reference/`로 정리
 - [x] #53 보고서용 그림 4종 (`docs/diagrams/`: 시스템 아키텍처, 서버 구성도, 구현 계획 로드맵, 클라이언트 모듈 구조)
 - [ ] #12 1주차 발표자료 — **팀 템플릿을 받아 그 형식으로 작성** (직접 디자인하지 않음)
-- [ ] PC ↔ iPhone 같은 Wi-Fi 연결 직접 확인 (`http://192.168.0.111:3000` → QR)
+- [x] #13 iPhone ↔ PC 같은 Wi-Fi 연결 시험: 9/9 P2P 직접 연결, Connection Time 중앙값 50.5 ms (`experiments/2026-11-09_T1-iphone-pc-lan/`)
 - [ ] #12 1주차 발표자료
 
 ## 결정 기록
@@ -46,6 +46,7 @@
 
 ## 미해결 위험
 
+- 연결 시점에 srflx 후보가 거의 수집되지 않았다(9회 중 7회 host만). 다른 네트워크 연결(#37)에 결정적이므로 #14에서 원인을 확인한다.
 - 이동통신망(CGNAT, Symmetric NAT 가능성)에서는 STUN만으로 P2P가 실패할 수 있다. 실패도 증거와 함께 결과로 남긴다(#37).
 - ngrok 무료 플랜은 실행할 때마다 URL이 바뀐다. 시험 때 URL을 공유하는 절차가 필요하다.
 - Chrome DevTools 네트워크 제한은 WebRTC에 적용되지 않는다. 품질 실험은 Network Link Conditioner 등 OS 수준 제한이 필요하다(#21).
