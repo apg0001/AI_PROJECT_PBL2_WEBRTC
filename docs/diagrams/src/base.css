@@ -1,0 +1,28 @@
+/* 다이어그램 공통 스타일 — 1600×900(16:9), 밝은 배경 고정 (보고서·슬라이드용) */
+:root {
+  --ink: #212529;
+  --muted: #6c757d;
+  --line: #dee2e6;
+  --field: #e8590c;      /* 현장 */
+  --field-bg: #fff4e6;
+  --expert: #1c7ed6;     /* 전문가 */
+  --expert-bg: #e7f5ff;
+  --signal: #7048e8;     /* 시그널링 */
+  --signal-bg: #f3f0ff;
+  --media: #0ca678;      /* P2P 미디어·데이터 */
+  --stun: #868e96;
+  --turn: #f59f00;
+  --done: #2f9e44;
+  --todo: #adb5bd;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #fff; }
+body { font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif; color: var(--ink); }
+#diagram { width: 1600px; height: 900px; position: relative; background: #fff; overflow: hidden; }
+svg text { font-family: inherit; }
+.t-title { font-size: 34px; font-weight: 800; fill: var(--ink); }
+.t-sub { font-size: 18px; fill: var(--muted); }
+.t-h { font-size: 24px; font-weight: 800; }
+.t-b { font-size: 18px; fill: var(--ink); }
+.t-s { font-size: 15px; fill: var(--muted); }
+.t-mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 15px; fill: var(--ink); }

@@ -26,6 +26,10 @@
 > 과목 명세는 5주 구성이지만 **4주 안에 끝내는 것으로 앞당긴다.** 마지막 주(4주차)는 요구사항이나 일정이 바뀔 수 있으므로 **버퍼**로 두고, 핵심 구현·실험·분석은 3주차까지 끝낸다.
 > 문서는 작업이 끝날 때마다 갱신한다. 모든 PR은 `docs/project-status.md`를 함께 갱신한다.
 
+![구현 계획 — 4주 로드맵](diagrams/implementation-plan.png)
+
+> 그림은 `docs/diagrams/src/implementation-plan.html`의 데이터(`status`, `TODAY`)를 고치고 `npm run diagrams implementation-plan`으로 다시 그린다.
+
 | 주차 | 기간 | 주제 | 과목 대응 산출물 | 주간 발표자료 |
 |---|---|---|---|---|
 | 1주차 | 11/09 – 11/15 | 설계 및 연결 | System Design v1.0 + 1:1 연결 | #12 Progress Check 1장 |

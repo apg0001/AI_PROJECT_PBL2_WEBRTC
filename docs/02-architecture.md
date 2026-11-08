@@ -5,6 +5,10 @@
 
 ## 1. 전체 구조
 
+![시스템 아키텍처](diagrams/system-architecture.png)
+
+아래는 같은 구조의 Mermaid 버전이다 (텍스트로 수정하기 쉬움).
+
 ```mermaid
 flowchart LR
   subgraph FIELD["현장 작업자 · Smartphone (Wi-Fi / LTE / 5G)"]
@@ -69,6 +73,8 @@ flowchart LR
 
 ## 4. 클라이언트 모듈 구조
 
+![클라이언트 모듈 구조](diagrams/client-modules.png)
+
 ```mermaid
 flowchart TB
   UI["ui.js<br/>상태 표시 · 로그 패널"] --> APP["field.html / expert.html"]
@@ -82,6 +88,8 @@ flowchart TB
 ```
 
 ## 5. 배포 구성 (PoC)
+
+![서버 구성도](diagrams/server-config.png)
 
 | 대상 | 위치 | 비고 |
 |---|---|---|

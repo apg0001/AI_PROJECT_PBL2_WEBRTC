@@ -12,9 +12,9 @@
 
 | 구분 | 이슈 |
 |---|---|
-| 완료 | #1 계획 · #36 범위 변경 · #3 Requirement · #4 Architecture · #5 Connection Sequence · #6 기술 결정 · #7 시험계획 · #9 Signaling Server · #46 1인 진행·보고서 · #10 1:1 연결 · #11 연결 과정 가시화 · #51 문서 정리 |
+| 완료 | #1 계획 · #36 범위 변경 · #3 Requirement · #4 Architecture · #5 Connection Sequence · #6 기술 결정 · #7 시험계획 · #9 Signaling Server · #46 1인 진행·보고서 · #10 1:1 연결 · #11 연결 과정 가시화 · #51 문서 정리 · #53 보고서용 그림 |
 | 진행 중 | #2 개발 환경 (폰 HTTPS 확인 남음) |
-| 남음 | 보고서용 그림 · #12 발표자료 · PC↔iPhone 실기기 연결 확인 |
+| 남음 | #12 발표자료(템플릿 대기) · PC↔iPhone 실기기 연결 확인 |
 | 제외 | #8 역할분담 (1인 진행) |
 
 ## 작업 기록
@@ -35,6 +35,31 @@
 | 11/09 | #10 · PR #49 | 1:1 RTCPeerConnection: Offer/Answer, Trickle ICE(대기열), negotiated DataChannel 2개, ping/pong, 선택 경로 표시, 시작 화면(Room 생성, 폰용 LAN 링크·QR) | 헤드리스 Chrome E2E 10개 항목 통과 (`npm run e2e`). Connection Time 1114 ms, P2P Direct, RTT 0~4 ms |
 | 11/09 | #11 · PR #50 | 상태 전이 시각표, ICE Candidate 표(type별 집계), 연결 결과 표, 로그 JSON 내보내기 | E2E 13개 항목 통과. 화면: `screenshots/expert-connected.png`, `field-connected.png` (Connection Time 139 ms, ICE RTT 12 ms, DataChannel 왕복 14.6 ms) |
 | 11/09 | #51 | 과제 설명 PDF를 `docs/reference/`로 이동, #11 PR에서 빠진 문서 갱신 반영 | 루트 정리 |
+| 11/09 | #53 | 보고서용 그림 4종: 시스템 아키텍처, 서버 구성도, 구현 계획(4주 로드맵), 클라이언트 모듈 구조. 직접 그린 아이콘 세트, `npm run diagrams`로 PNG 렌더링 | 아래 '그림' |
+
+## 그림
+
+### 시스템 아키텍처
+
+![시스템 아키텍처](../../docs/diagrams/system-architecture.png)
+
+### 서버 구성도
+
+![서버 구성도](../../docs/diagrams/server-config.png)
+
+### 구현 계획
+
+![구현 계획](../../docs/diagrams/implementation-plan.png)
+
+### 클라이언트 모듈 구조
+
+![클라이언트 모듈 구조](../../docs/diagrams/client-modules.png)
+
+### 실행 화면 (같은 LAN 연결)
+
+| 전문가 (PC) | 현장 (모바일 크기) |
+|---|---|
+| ![](screenshots/expert-connected.png) | ![](screenshots/field-connected.png) |
 
 ## 결정 · 변경
 
@@ -44,6 +69,7 @@
 | 다른 네트워크 실측 제외 → **포함** | NAT 통과 P2P가 WebRTC의 핵심. ngrok으로 시그널링을 공개하면 시험 가능 |
 | Glass-to-Glass 지연 측정 추가 | getStats RTT로는 사용자가 체감하는 종단 지연을 알 수 없음 |
 | 1인 진행, 역할분담 없음 | 과제를 혼자 수행 |
+| 발표자료는 팀 템플릿에 맞춰 작성 | 직접 디자인하지 않음 |
 | Offerer = Room에 먼저 있던 쪽, DataChannel은 `negotiated` id 고정 | glare 방지, Offerer가 누구든 같은 코드 |
 
 ## 관찰 · 문제
@@ -58,5 +84,4 @@
 ## 다음 할 일
 
 - PC ↔ iPhone 같은 Wi-Fi 실기기 연결 확인
-- 보고서용 그림 (시스템 아키텍처, 서버 구성도, 구현 계획)
-- #12 Progress Check 발표자료
+- #12 Progress Check 발표자료 (템플릿을 받으면 작성)
