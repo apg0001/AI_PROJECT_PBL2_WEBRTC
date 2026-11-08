@@ -29,7 +29,7 @@
 - [x] #51 과제 설명 PDF를 `docs/reference/`로 정리
 - [x] #53 보고서용 그림 4종 (`docs/diagrams/`: 시스템 아키텍처, 서버 구성도, 구현 계획 로드맵, 클라이언트 모듈 구조)
 - [ ] #12 1주차 발표자료 — **팀 템플릿을 받아 그 형식으로 작성** (직접 디자인하지 않음)
-- [x] #13 iPhone ↔ PC 같은 Wi-Fi 연결 시험: 9/9 P2P 직접 연결, Connection Time 중앙값 50.5 ms (`experiments/2026-11-09_T1-iphone-pc-lan/`)
+- [x] #13 iPhone ↔ PC 같은 Wi-Fi 연결 시험: 9/9 P2P 직접 연결, Connection Time 중앙값 50.5 ms (`experiments/2026-11-09_T1-iphone-pc-lan/`). iPad도 10/10, 중앙값 46 ms (`experiments/2026-11-09_T1-ipad-pc-lan/`)
 - [ ] #12 1주차 발표자료
 
 ## 결정 기록

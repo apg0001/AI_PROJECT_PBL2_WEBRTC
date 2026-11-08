@@ -1,0 +1,12 @@
+폰에서 열기: http://<PC LAN IP>:3000/field.html?room=w1ipad
+{"run":1,"role":"Offerer (먼저 입장)","connectionMs":null,"localPath":"host udp (mDNS로 숨김):55874","remotePath":"prflx udp (mDNS로 숨김):53920","pathType":"P2P Direct","iceRttMs":3,"dataChannelRttMs":8.1,"candidates":"local: host 1, srflx 1 / remote: host 1"}
+{"run":2,"role":"Answerer (나중 입장)","connectionMs":172,"localPath":"prflx udp (mDNS로 숨김):51382","remotePath":"host udp (mDNS로 숨김):52920","pathType":"P2P Direct","iceRttMs":6,"dataChannelRttMs":39.3,"candidates":"local: host 1 / remote: host 1, srflx 1"}
+{"run":3,"role":"Answerer (나중 입장)","connectionMs":42,"localPath":"prflx udp (mDNS로 숨김):56190","remotePath":"host udp (mDNS로 숨김):53067","pathType":"P2P Direct","iceRttMs":14,"dataChannelRttMs":29.3,"candidates":"local: host 1 / remote: host 1"}
+{"run":4,"role":"Answerer (나중 입장)","connectionMs":41,"localPath":"prflx udp (mDNS로 숨김):56961","remotePath":"host udp (mDNS로 숨김):59993","pathType":"P2P Direct","iceRttMs":9,"dataChannelRttMs":10.3,"candidates":"local: host 1 / remote: host 1"}
+{"run":5,"role":"Answerer (나중 입장)","connectionMs":126,"localPath":"prflx udp (mDNS로 숨김):59548","remotePath":"host udp (mDNS로 숨김):49866","pathType":"P2P Direct","iceRttMs":9,"dataChannelRttMs":41.5,"candidates":"local: host 1 / remote: host 1, srflx 1"}
+{"run":6,"role":"Answerer (나중 입장)","connectionMs":44,"localPath":"prflx udp (mDNS로 숨김):54609","remotePath":"host udp (mDNS로 숨김):63470","pathType":"P2P Direct","iceRttMs":6,"dataChannelRttMs":42,"candidates":"local: host 1 / remote: host 1"}
+{"run":7,"role":"Answerer (나중 입장)","connectionMs":46,"localPath":"prflx udp (mDNS로 숨김):57748","remotePath":"host udp (mDNS로 숨김):51712","pathType":"P2P Direct","iceRttMs":9,"dataChannelRttMs":58.1,"candidates":"local: host 1 / remote: host 1"}
+{"run":8,"role":"Answerer (나중 입장)","connectionMs":88,"localPath":"prflx udp (mDNS로 숨김):63528","remotePath":"host udp (mDNS로 숨김):58912","pathType":"P2P Direct","iceRttMs":13,"dataChannelRttMs":8.2,"candidates":"local: host 1 / remote: host 1"}
+{"run":9,"role":"Answerer (나중 입장)","connectionMs":46,"localPath":"prflx udp (mDNS로 숨김):56896","remotePath":"host udp (mDNS로 숨김):63874","pathType":"P2P Direct","iceRttMs":10,"dataChannelRttMs":39.2,"candidates":"local: host 1 / remote: host 1"}
+{"run":10,"role":"Answerer (나중 입장)","connectionMs":39,"localPath":"prflx udp (mDNS로 숨김):52976","remotePath":"host udp (mDNS로 숨김):52730","pathType":"P2P Direct","iceRttMs":7,"dataChannelRttMs":64.2,"candidates":"local: host 1 / remote: host 1"}
+완료 10회 · Connection Time 중앙값 46 ms (최소 39, 최대 172)

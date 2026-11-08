@@ -1,0 +1,913 @@
+[
+  {
+    "run": 1,
+    "role": "Offerer (먼저 입장)",
+    "connectionMs": null,
+    "localPath": "host udp (mDNS로 숨김):55874",
+    "remotePath": "prflx udp (mDNS로 숨김):53920",
+    "pathType": "P2P Direct",
+    "iceRttMs": 3,
+    "dataChannelRttMs": 8.1,
+    "candidates": "local: host 1, srflx 1 / remote: host 1",
+    "states": [
+      [
+        "61.791s",
+        "signalingState",
+        "stable"
+      ],
+      [
+        "61.791s",
+        "iceGatheringState",
+        "new"
+      ],
+      [
+        "61.791s",
+        "iceConnectionState",
+        "new"
+      ],
+      [
+        "61.791s",
+        "connectionState",
+        "new"
+      ],
+      [
+        "61.798s",
+        "signalingState",
+        "have-local-offer"
+      ],
+      [
+        "61.798s",
+        "iceGatheringState",
+        "gathering"
+      ],
+      [
+        "61.890s",
+        "iceConnectionState",
+        "checking"
+      ],
+      [
+        "61.890s",
+        "connectionState",
+        "connecting"
+      ],
+      [
+        "61.934s",
+        "signalingState",
+        "stable"
+      ],
+      [
+        "61.936s",
+        "iceGatheringState",
+        "complete"
+      ],
+      [
+        "61.937s",
+        "iceConnectionState",
+        "connected"
+      ],
+      [
+        "61.941s",
+        "connectionState",
+        "connected"
+      ]
+    ],
+    "cands": [
+      [
+        "61.801s",
+        "local",
+        "host",
+        "udp",
+        "ecbf8ef8-349c-45cc-bd02-24b1fad74b8e.local:55874"
+      ],
+      [
+        "61.834s",
+        "local",
+        "srflx",
+        "udp",
+        "210.94.172.67:55874"
+      ],
+      [
+        "61.933s",
+        "remote",
+        "host",
+        "udp",
+        "b53f0223-d804-4593-bb0d-0f4d5f231882.local:53920"
+      ]
+    ]
+  },
+  {
+    "run": 2,
+    "role": "Answerer (나중 입장)",
+    "connectionMs": 172,
+    "localPath": "prflx udp (mDNS로 숨김):51382",
+    "remotePath": "host udp (mDNS로 숨김):52920",
+    "pathType": "P2P Direct",
+    "iceRttMs": 6,
+    "dataChannelRttMs": 39.3,
+    "candidates": "local: host 1 / remote: host 1, srflx 1",
+    "states": [
+      [
+        "0.156s",
+        "signalingState",
+        "stable"
+      ],
+      [
+        "0.156s",
+        "iceGatheringState",
+        "new"
+      ],
+      [
+        "0.156s",
+        "iceConnectionState",
+        "new"
+      ],
+      [
+        "0.156s",
+        "connectionState",
+        "new"
+      ],
+      [
+        "0.158s",
+        "signalingState",
+        "have-remote-offer"
+      ],
+      [
+        "0.160s",
+        "signalingState",
+        "stable"
+      ],
+      [
+        "0.160s",
+        "iceGatheringState",
+        "gathering"
+      ],
+      [
+        "0.161s",
+        "iceConnectionState",
+        "checking"
+      ],
+      [
+        "0.161s",
+        "connectionState",
+        "connecting"
+      ],
+      [
+        "0.168s",
+        "iceConnectionState",
+        "connected"
+      ],
+      [
+        "0.168s",
+        "iceGatheringState",
+        "complete"
+      ],
+      [
+        "0.178s",
+        "connectionState",
+        "connected"
+      ]
+    ],
+    "cands": [
+      [
+        "0.157s",
+        "remote",
+        "host",
+        "udp",
+        "b53f0223-d804-4593-bb0d-0f4d5f231882.local:52920"
+      ],
+      [
+        "0.159s",
+        "remote",
+        "srflx",
+        "udp",
+        "210.94.172.71:52920"
+      ],
+      [
+        "0.161s",
+        "local",
+        "host",
+        "udp",
+        "63ca0c97-dc33-4349-8540-a405e147c0a0.local:51382"
+      ]
+    ]
+  },
+  {
+    "run": 3,
+    "role": "Answerer (나중 입장)",
+    "connectionMs": 42,
+    "localPath": "prflx udp (mDNS로 숨김):56190",
+    "remotePath": "host udp (mDNS로 숨김):53067",
+    "pathType": "P2P Direct",
+    "iceRttMs": 14,
+    "dataChannelRttMs": 29.3,
+    "candidates": "local: host 1 / remote: host 1",
+    "states": [
+      [
+        "0.022s",
+        "signalingState",
+        "stable"
+      ],
+      [
+        "0.022s",
+        "iceGatheringState",
+        "new"
+      ],
+      [
+        "0.022s",
+        "iceConnectionState",
+        "new"
+      ],
+      [
+        "0.022s",
+        "connectionState",
+        "new"
+      ],
+      [
+        "0.022s",
+        "signalingState",
+        "have-remote-offer"
+      ],
+      [
+        "0.022s",
+        "signalingState",
+        "stable"
+      ],
+      [
+        "0.023s",
+        "iceGatheringState",
+        "gathering"
+      ],
+      [
+        "0.023s",
+        "iceConnectionState",
+        "checking"
+      ],
+      [
+        "0.023s",
+        "connectionState",
+        "connecting"
+      ],
+      [
+        "0.037s",
+        "iceConnectionState",
+        "connected"
+      ],
+      [
+        "0.037s",
+        "iceGatheringState",
+        "complete"
+      ],
+      [
+        "0.046s",
+        "connectionState",
+        "connected"
+      ]
+    ],
+    "cands": [
+      [
+        "0.022s",
+        "remote",
+        "host",
+        "udp",
+        "b53f0223-d804-4593-bb0d-0f4d5f231882.local:53067"
+      ],
+      [
+        "0.023s",
+        "local",
+        "host",
+        "udp",
+        "ac272274-017b-43c7-9163-3846937874f3.local:56190"
+      ]
+    ]
+  },
+  {
+    "run": 4,
+    "role": "Answerer (나중 입장)",
+    "connectionMs": 41,
+    "localPath": "prflx udp (mDNS로 숨김):56961",
+    "remotePath": "host udp (mDNS로 숨김):59993",
+    "pathType": "P2P Direct",
+    "iceRttMs": 9,
+    "dataChannelRttMs": 10.3,
+    "candidates": "local: host 1 / remote: host 1",
+    "states": [
+      [
+        "0.028s",
+        "signalingState",
+        "stable"
+      ],
+      [
+        "0.028s",
+        "iceGatheringState",
+        "new"
+      ],
+      [
+        "0.028s",
+        "iceConnectionState",
+        "new"
+      ],
+      [
+        "0.028s",
+        "connectionState",
+        "new"
+      ],
+      [
+        "0.029s",
+        "signalingState",
+        "have-remote-offer"
+      ],
+      [
+        "0.029s",
+        "signalingState",
+        "stable"
+      ],
+      [
+        "0.030s",
+        "iceGatheringState",
+        "gathering"
+      ],
+      [
+        "0.032s",
+        "iceConnectionState",
+        "checking"
+      ],
+      [
+        "0.032s",
+        "connectionState",
+        "connecting"
+      ],
+      [
+        "0.041s",
+        "iceConnectionState",
+        "connected"
+      ],
+      [
+        "0.041s",
+        "iceGatheringState",
+        "complete"
+      ],
+      [
+        "0.048s",
+        "connectionState",
+        "connected"
+      ]
+    ],
+    "cands": [
+      [
+        "0.031s",
+        "local",
+        "host",
+        "udp",
+        "e504498b-ce76-40c6-9989-26e0c4f2caa8.local:56961"
+      ],
+      [
+        "0.032s",
+        "remote",
+        "host",
+        "udp",
+        "b53f0223-d804-4593-bb0d-0f4d5f231882.local:59993"
+      ]
+    ]
+  },
+  {
+    "run": 5,
+    "role": "Answerer (나중 입장)",
+    "connectionMs": 126,
+    "localPath": "prflx udp (mDNS로 숨김):59548",
+    "remotePath": "host udp (mDNS로 숨김):49866",
+    "pathType": "P2P Direct",
+    "iceRttMs": 9,
+    "dataChannelRttMs": 41.5,
+    "candidates": "local: host 1 / remote: host 1, srflx 1",
+    "states": [
+      [
+        "0.110s",
+        "signalingState",
+        "stable"
+      ],
+      [
+        "0.110s",
+        "iceGatheringState",
+        "new"
+      ],
+      [
+        "0.110s",
+        "iceConnectionState",
+        "new"
+      ],
+      [
+        "0.110s",
+        "connectionState",
+        "new"
+      ],
+      [
+        "0.111s",
+        "signalingState",
+        "have-remote-offer"
+      ],
+      [
+        "0.112s",
+        "signalingState",
+        "stable"
+      ],
+      [
+        "0.112s",
+        "iceGatheringState",
+        "gathering"
+      ],
+      [
+        "0.113s",
+        "iceConnectionState",
+        "checking"
+      ],
+      [
+        "0.113s",
+        "connectionState",
+        "connecting"
+      ],
+      [
+        "0.123s",
+        "iceConnectionState",
+        "connected"
+      ],
+      [
+        "0.123s",
+        "iceGatheringState",
+        "complete"
+      ],
+      [
+        "0.131s",
+        "connectionState",
+        "connected"
+      ]
+    ],
+    "cands": [
+      [
+        "0.111s",
+        "remote",
+        "host",
+        "udp",
+        "b53f0223-d804-4593-bb0d-0f4d5f231882.local:49866"
+      ],
+      [
+        "0.111s",
+        "remote",
+        "srflx",
+        "udp",
+        "210.94.172.71:49866"
+      ],
+      [
+        "0.113s",
+        "local",
+        "host",
+        "udp",
+        "43b2447b-4a1a-4c5c-96b4-649debd051b5.local:59548"
+      ]
+    ]
+  },
+  {
+    "run": 6,
+    "role": "Answerer (나중 입장)",
+    "connectionMs": 44,
+    "localPath": "prflx udp (mDNS로 숨김):54609",
+    "remotePath": "host udp (mDNS로 숨김):63470",
+    "pathType": "P2P Direct",
+    "iceRttMs": 6,
+    "dataChannelRttMs": 42,
+    "candidates": "local: host 1 / remote: host 1",
+    "states": [
+      [
+        "0.033s",
+        "signalingState",
+        "stable"
+      ],
+      [
+        "0.033s",
+        "iceGatheringState",
+        "new"
+      ],
+      [
+        "0.033s",
+        "iceConnectionState",
+        "new"
+      ],
+      [
+        "0.033s",
+        "connectionState",
+        "new"
+      ],
+      [
+        "0.033s",
+        "signalingState",
+        "have-remote-offer"
+      ],
+      [
+        "0.034s",
+        "signalingState",
+        "stable"
+      ],
+      [
+        "0.034s",
+        "iceGatheringState",
+        "gathering"
+      ],
+      [
+        "0.036s",
+        "iceConnectionState",
+        "checking"
+      ],
+      [
+        "0.036s",
+        "connectionState",
+        "connecting"
+      ],
+      [
+        "0.043s",
+        "iceConnectionState",
+        "connected"
+      ],
+      [
+        "0.043s",
+        "iceGatheringState",
+        "complete"
+      ],
+      [
+        "0.053s",
+        "connectionState",
+        "connected"
+      ]
+    ],
+    "cands": [
+      [
+        "0.035s",
+        "local",
+        "host",
+        "udp",
+        "8bb8a9bb-964c-4d02-b12b-a4c8bbf4de08.local:54609"
+      ],
+      [
+        "0.036s",
+        "remote",
+        "host",
+        "udp",
+        "b53f0223-d804-4593-bb0d-0f4d5f231882.local:63470"
+      ]
+    ]
+  },
+  {
+    "run": 7,
+    "role": "Answerer (나중 입장)",
+    "connectionMs": 46,
+    "localPath": "prflx udp (mDNS로 숨김):57748",
+    "remotePath": "host udp (mDNS로 숨김):51712",
+    "pathType": "P2P Direct",
+    "iceRttMs": 9,
+    "dataChannelRttMs": 58.1,
+    "candidates": "local: host 1 / remote: host 1",
+    "states": [
+      [
+        "0.030s",
+        "signalingState",
+        "stable"
+      ],
+      [
+        "0.030s",
+        "iceGatheringState",
+        "new"
+      ],
+      [
+        "0.030s",
+        "iceConnectionState",
+        "new"
+      ],
+      [
+        "0.030s",
+        "connectionState",
+        "new"
+      ],
+      [
+        "0.031s",
+        "signalingState",
+        "have-remote-offer"
+      ],
+      [
+        "0.032s",
+        "signalingState",
+        "stable"
+      ],
+      [
+        "0.032s",
+        "iceGatheringState",
+        "gathering"
+      ],
+      [
+        "0.033s",
+        "iceConnectionState",
+        "checking"
+      ],
+      [
+        "0.033s",
+        "connectionState",
+        "connecting"
+      ],
+      [
+        "0.042s",
+        "iceConnectionState",
+        "connected"
+      ],
+      [
+        "0.042s",
+        "iceGatheringState",
+        "complete"
+      ],
+      [
+        "0.053s",
+        "connectionState",
+        "connected"
+      ]
+    ],
+    "cands": [
+      [
+        "0.031s",
+        "remote",
+        "host",
+        "udp",
+        "b53f0223-d804-4593-bb0d-0f4d5f231882.local:51712"
+      ],
+      [
+        "0.033s",
+        "local",
+        "host",
+        "udp",
+        "67b7d145-9199-40ad-ad1d-4231ab9052f4.local:57748"
+      ]
+    ]
+  },
+  {
+    "run": 8,
+    "role": "Answerer (나중 입장)",
+    "connectionMs": 88,
+    "localPath": "prflx udp (mDNS로 숨김):63528",
+    "remotePath": "host udp (mDNS로 숨김):58912",
+    "pathType": "P2P Direct",
+    "iceRttMs": 13,
+    "dataChannelRttMs": 8.2,
+    "candidates": "local: host 1 / remote: host 1",
+    "states": [
+      [
+        "0.064s",
+        "signalingState",
+        "stable"
+      ],
+      [
+        "0.064s",
+        "iceGatheringState",
+        "new"
+      ],
+      [
+        "0.064s",
+        "iceConnectionState",
+        "new"
+      ],
+      [
+        "0.064s",
+        "connectionState",
+        "new"
+      ],
+      [
+        "0.065s",
+        "signalingState",
+        "have-remote-offer"
+      ],
+      [
+        "0.066s",
+        "signalingState",
+        "stable"
+      ],
+      [
+        "0.066s",
+        "iceGatheringState",
+        "gathering"
+      ],
+      [
+        "0.068s",
+        "iceConnectionState",
+        "checking"
+      ],
+      [
+        "0.068s",
+        "connectionState",
+        "connecting"
+      ],
+      [
+        "0.082s",
+        "iceConnectionState",
+        "connected"
+      ],
+      [
+        "0.082s",
+        "iceGatheringState",
+        "complete"
+      ],
+      [
+        "0.097s",
+        "connectionState",
+        "connected"
+      ]
+    ],
+    "cands": [
+      [
+        "0.067s",
+        "remote",
+        "host",
+        "udp",
+        "b53f0223-d804-4593-bb0d-0f4d5f231882.local:58912"
+      ],
+      [
+        "0.068s",
+        "local",
+        "host",
+        "udp",
+        "ed5d3513-2eca-4eed-9e14-aa2c0cfebaeb.local:63528"
+      ]
+    ]
+  },
+  {
+    "run": 9,
+    "role": "Answerer (나중 입장)",
+    "connectionMs": 46,
+    "localPath": "prflx udp (mDNS로 숨김):56896",
+    "remotePath": "host udp (mDNS로 숨김):63874",
+    "pathType": "P2P Direct",
+    "iceRttMs": 10,
+    "dataChannelRttMs": 39.2,
+    "candidates": "local: host 1 / remote: host 1",
+    "states": [
+      [
+        "0.030s",
+        "signalingState",
+        "stable"
+      ],
+      [
+        "0.031s",
+        "iceGatheringState",
+        "new"
+      ],
+      [
+        "0.031s",
+        "iceConnectionState",
+        "new"
+      ],
+      [
+        "0.031s",
+        "connectionState",
+        "new"
+      ],
+      [
+        "0.031s",
+        "signalingState",
+        "have-remote-offer"
+      ],
+      [
+        "0.032s",
+        "signalingState",
+        "stable"
+      ],
+      [
+        "0.032s",
+        "iceGatheringState",
+        "gathering"
+      ],
+      [
+        "0.033s",
+        "iceConnectionState",
+        "checking"
+      ],
+      [
+        "0.033s",
+        "connectionState",
+        "connecting"
+      ],
+      [
+        "0.043s",
+        "iceConnectionState",
+        "connected"
+      ],
+      [
+        "0.043s",
+        "iceGatheringState",
+        "complete"
+      ],
+      [
+        "0.052s",
+        "connectionState",
+        "connected"
+      ]
+    ],
+    "cands": [
+      [
+        "0.031s",
+        "remote",
+        "host",
+        "udp",
+        "b53f0223-d804-4593-bb0d-0f4d5f231882.local:63874"
+      ],
+      [
+        "0.033s",
+        "local",
+        "host",
+        "udp",
+        "0dd6cbcb-7261-4c8a-bdfc-78fe6bfe5405.local:56896"
+      ]
+    ]
+  },
+  {
+    "run": 10,
+    "role": "Answerer (나중 입장)",
+    "connectionMs": 39,
+    "localPath": "prflx udp (mDNS로 숨김):52976",
+    "remotePath": "host udp (mDNS로 숨김):52730",
+    "pathType": "P2P Direct",
+    "iceRttMs": 7,
+    "dataChannelRttMs": 64.2,
+    "candidates": "local: host 1 / remote: host 1",
+    "states": [
+      [
+        "0.029s",
+        "signalingState",
+        "stable"
+      ],
+      [
+        "0.029s",
+        "iceGatheringState",
+        "new"
+      ],
+      [
+        "0.029s",
+        "iceConnectionState",
+        "new"
+      ],
+      [
+        "0.029s",
+        "connectionState",
+        "new"
+      ],
+      [
+        "0.030s",
+        "signalingState",
+        "have-remote-offer"
+      ],
+      [
+        "0.030s",
+        "signalingState",
+        "stable"
+      ],
+      [
+        "0.030s",
+        "iceGatheringState",
+        "gathering"
+      ],
+      [
+        "0.033s",
+        "iceConnectionState",
+        "checking"
+      ],
+      [
+        "0.033s",
+        "connectionState",
+        "connecting"
+      ],
+      [
+        "0.041s",
+        "iceConnectionState",
+        "connected"
+      ],
+      [
+        "0.041s",
+        "iceGatheringState",
+        "complete"
+      ],
+      [
+        "0.048s",
+        "connectionState",
+        "connected"
+      ]
+    ],
+    "cands": [
+      [
+        "0.032s",
+        "local",
+        "host",
+        "udp",
+        "7f180121-3bf8-4fb7-a00b-ff445e1239fa.local:52976"
+      ],
+      [
+        "0.033s",
+        "remote",
+        "host",
+        "udp",
+        "b53f0223-d804-4593-bb0d-0f4d5f231882.local:52730"
+      ]
+    ]
+  }
+]
