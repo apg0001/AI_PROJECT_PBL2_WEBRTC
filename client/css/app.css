@@ -1,47 +1,129 @@
+/* 기준: docs/DESIGN.md - 색과 글꼴은 :root 토큰만 쓴다. 밝은 배경 고정. */
 :root {
-  --bg: #ffffff;
-  --fg: #1a1a1a;
-  --muted: #666;
-  --line: #ddd;
-  --ok: #0a7d32;
-  --warn: #b26a00;
-  --err: #c62828;
-  --busy: #1565c0;
-}
-@media (prefers-color-scheme: dark) {
-  :root { --bg: #121212; --fg: #eee; --muted: #aaa; --line: #333; --ok: #4caf50; --warn: #ffb74d; --err: #ef5350; --busy: #64b5f6; }
+  --paper: #ffffff;
+  --ink: #22272b;
+  --steel: #5f6b76;
+  --rule: #d5dadf;
+  --caution: #f5c400;
+  --caution-ink: #6b5400; /* 흰 배경 위 '주의' 글자용 (대비 확보) */
+  --ok: #1b7a47;
+  --stop: #b42318;
+  --hover: #f1f3f5;
+  --font: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --mono: "SF Mono", Menlo, Consolas, monospace;
+  --body: 17px;
+  color-scheme: light;
 }
 * { box-sizing: border-box; }
-body { margin: 0; padding: 16px; font-family: system-ui, sans-serif; background: var(--bg); color: var(--fg); line-height: 1.45; }
-h1 { font-size: 1.4rem; margin: 0 0 4px; }
-h2 { font-size: 1rem; margin: 20px 0 8px; }
-.meta { color: var(--muted); font-size: .9rem; }
-code { word-break: break-all; }
-.status { margin-top: 10px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); font-weight: 600; }
-.status.ok { color: var(--ok); border-color: var(--ok); }
-.status.warn { color: var(--warn); border-color: var(--warn); }
-.status.error { color: var(--err); border-color: var(--err); }
-.status.busy, .status.wait { color: var(--busy); border-color: var(--busy); }
-.actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
-button { font-size: 1rem; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: transparent; color: var(--fg); }
-table.kv { border-collapse: collapse; width: 100%; font-size: .9rem; }
-table.kv td { border-bottom: 1px solid var(--line); padding: 4px 6px; vertical-align: top; word-break: break-all; }
-table.kv td:first-child { color: var(--muted); width: 45%; }
-.log { list-style: none; padding: 0; margin: 0; font-family: ui-monospace, monospace; font-size: .78rem; max-height: 50vh; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; }
-.log li { padding: 3px 8px; border-bottom: 1px solid var(--line); word-break: break-all; }
-.log .t { color: var(--muted); }
-.log .c { font-weight: 600; }
-.log .cat-error .c { color: var(--err); }
-.log .cat-status .c { color: var(--busy); }
-.log .cat-data .c { color: var(--ok); }
-a.big { display: block; padding: 12px; margin: 8px 0; border: 1px solid var(--line); border-radius: 8px; color: inherit; text-decoration: none; }
-.qr svg { width: 200px; height: 200px; background: #fff; padding: 8px; border-radius: 8px; }
-table.grid { border-collapse: collapse; width: 100%; font-size: .78rem; font-family: ui-monospace, monospace; }
-table.grid th, table.grid td { border-bottom: 1px solid var(--line); padding: 3px 6px; text-align: left; word-break: break-all; }
-table.grid th { color: var(--muted); font-weight: 600; }
-table.grid tr.muted td { color: var(--muted); }
-tr.state-connected td, tr.state-completed td { color: var(--ok); }
-tr.state-disconnected td { color: var(--warn); }
-tr.state-failed td, tr.state-closed td { color: var(--err); }
-tr.ctype-srflx td:nth-child(3) { color: var(--busy); font-weight: 600; }
-tr.ctype-relay td:nth-child(3) { color: var(--warn); font-weight: 600; }
+html, body { overflow-x: clip; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: var(--body);
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+main { max-width: 1120px; margin: 0 auto; padding: 20px 16px 48px; }
+h1 { font-size: 24px; font-weight: 600; margin: 0; }
+h2 { font-size: 17px; font-weight: 600; margin: 32px 0 8px; }
+p { margin: 0 0 8px; }
+a { color: var(--ink); }
+code, .code { font-family: var(--mono); font-size: 0.88em; word-break: break-all; }
+.muted { color: var(--steel); }
+.small { font-size: 13px; }
+
+/* 머리말: 역할과 Room */
+.masthead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin-bottom: 16px; }
+.masthead .room { color: var(--steel); }
+.masthead .room code { color: var(--ink); font-size: 1em; }
+
+/* 점검 태그 - 현장 화면의 상태 표시. 대담함은 여기 한 곳에만 쓴다. */
+.tag {
+  position: relative;
+  padding: 18px 20px 18px 56px;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.25;
+  background: var(--caution);
+  color: var(--ink);
+  border-radius: 2px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.tag::before { /* 꼬리표 구멍 */
+  content: "";
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+.tag.ok { background: var(--ok); color: var(--paper); }
+.tag.error { background: var(--stop); color: var(--paper); }
+@media (prefers-reduced-motion: reduce) { .tag { transition: none; } }
+
+/* 전문가 화면의 상태 줄 - 조용하게, 색 칸 하나로 */
+.state-line { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 600; padding: 4px 0 12px; border-bottom: 2px solid var(--ink); }
+.state-line::before { content: ""; width: 14px; height: 14px; background: var(--caution); flex: none; }
+.state-line.ok::before { background: var(--ok); }
+.state-line.error::before { background: var(--stop); }
+
+/* 조작 */
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; }
+button {
+  font: inherit;
+  font-size: 15px;
+  padding: 10px 14px;
+  min-height: 44px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: 2px;
+  cursor: pointer;
+}
+button:hover { background: var(--hover); }
+button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid var(--caution); outline-offset: 2px; }
+
+/* 표 - 점검표처럼 칸 선만 */
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; vertical-align: top; padding: 7px 10px 7px 0; border-bottom: 1px solid var(--rule); }
+th { font-weight: 600; color: var(--steel); }
+table.kv th { width: 46%; font-weight: 400; }
+td.code, td code { font-family: var(--mono); font-size: 13px; }
+tr.state-connected td:last-child, tr.state-completed td:last-child { color: var(--ok); font-weight: 600; }
+tr.state-disconnected td:last-child { color: var(--caution-ink); font-weight: 600; }
+tr.state-failed td:last-child, tr.state-closed td:last-child { color: var(--stop); font-weight: 600; }
+tr.initial td { color: var(--steel); }
+
+/* 접는 부분 */
+details { margin-top: 24px; border-top: 1px solid var(--rule); }
+summary { font-weight: 600; padding: 12px 0; cursor: pointer; }
+.log { list-style: none; padding: 0; margin: 0; font-size: 13px; max-height: 50vh; overflow-y: auto; }
+.log li { display: grid; grid-template-columns: 64px 72px minmax(0, 1fr); gap: 8px; padding: 3px 0; border-bottom: 1px solid var(--rule); }
+.log .t, .log .c { color: var(--steel); }
+.log .x { word-break: break-all; }
+.log .cat-error .c, .log .cat-error .x { color: var(--stop); }
+
+/* 전문가 화면 2단 */
+.columns { display: grid; gap: 0 48px; }
+@media (min-width: 960px) {
+  .columns { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); }
+}
+body.field button { font-size: 17px; min-height: 48px; }
+body.expert main { max-width: 1280px; }
+
+/* 시작 화면 */
+.start .room-code { font-family: var(--mono); font-size: 38px; font-weight: 600; margin: 4px 0 8px; word-break: break-all; }
+.start ol.steps { list-style: none; counter-reset: step; padding: 0; margin: 24px 0 0; display: grid; gap: 32px; }
+@media (min-width: 900px) { .start ol.steps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 48px; } }
+.start ol.steps > li { counter-increment: step; border-top: 2px solid var(--ink); padding-top: 12px; }
+.start ol.steps > li h2 { margin-top: 0; }
+.start ol.steps > li h2::before { content: counter(step) ". "; }
+.start .link { display: block; word-break: break-all; margin-top: 8px; font-family: var(--mono); font-size: 13px; }
+.qr svg { width: 180px; height: 180px; display: block; margin-top: 8px; }
+.note { margin-top: 32px; padding-top: 12px; border-top: 1px solid var(--rule); color: var(--steel); font-size: 15px; }

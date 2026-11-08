@@ -3,28 +3,39 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>원격 현장지원 PoC</title>
+  <title>원격 현장지원</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600&display=swap">
   <link rel="stylesheet" href="css/app.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 </head>
 <body>
-  <main>
-    <h1>원격 현장지원 PoC</h1>
-    <p class="meta">Room을 만들고 현장(폰)과 전문가(PC)가 같은 Room에 들어갑니다.</p>
+  <main class="start">
+    <h1>원격 현장지원</h1>
+    <p class="muted">현장 작업자의 폰과 원격 전문가의 PC를 같은 Room으로 연결합니다.</p>
 
-    <h2>1. Room</h2>
-    <p>Room <code id="room"></code> <button id="newRoom">새 Room</button></p>
+    <ol class="steps">
+      <li>
+        <h2>Room 정하기</h2>
+        <p class="muted">두 사람이 같은 번호로 들어오면 연결됩니다.</p>
+        <p class="room-code" id="room"></p>
+        <button id="newRoom">새 번호 만들기</button>
+      </li>
+      <li>
+        <h2>현장 작업자: 폰으로 열기</h2>
+        <p class="muted">폰 카메라로 QR을 찍거나 주소를 입력합니다.</p>
+        <div class="qr" id="qr"></div>
+        <a class="link" id="fieldLink" target="_blank"></a>
+      </li>
+      <li>
+        <h2>원격 전문가: PC로 열기</h2>
+        <p class="muted">이 PC에서 엽니다.</p>
+        <a class="link" id="expertLink" target="_blank"></a>
+      </li>
+    </ol>
 
-    <h2>2. 현장 작업자 (폰)</h2>
-    <div class="qr" id="qr"></div>
-    <a class="big" id="fieldLink" target="_blank"></a>
-
-    <h2>3. 원격 전문가 (PC)</h2>
-    <a class="big" id="expertLink" target="_blank"></a>
-
-    <h2>기타</h2>
-    <a class="big" href="check.html">환경 점검 (HTTPS · 카메라 권한)</a>
-    <p class="meta" id="note"></p>
+    <p class="note" id="note"></p>
+    <p class="note"><a href="check.html">이 기기에서 카메라를 쓸 수 있는지 확인하기</a></p>
   </main>
   <script type="module">
     const $ = (id) => document.getElementById(id);
@@ -57,10 +68,10 @@
         const qr = qrcode(0, 'M');
         qr.addData(field);
         qr.make();
-        $('qr').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2 });
+        $('qr').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0 });
       }
       $('note').textContent = location.protocol === 'http:'
-        ? 'HTTP 접속: 같은 LAN 연결은 되지만 폰 카메라는 쓸 수 없습니다. 카메라·다른 네트워크 시험은 ngrok(https) 주소로 여세요.'
+        ? '지금은 http 주소라서 폰 카메라를 쓸 수 없습니다. 연결 시험은 그대로 되고, 카메라를 쓰려면 ngrok의 https 주소로 여세요.'
         : '';
     }
 

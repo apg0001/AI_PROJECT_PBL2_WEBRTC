@@ -5,6 +5,7 @@ WebRTC 기반 실시간 원격 현장 지원 시스템. 설치 없이 웹 브라
 - 계획: [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md)
 - 진행 상태: [docs/project-status.md](docs/project-status.md)
 - 협업 규칙: [CONTRIBUTING.md](CONTRIBUTING.md)
+- 디자인 기준: [docs/DESIGN.md](docs/DESIGN.md) (화면 캡처: [docs/screens/](docs/screens/))
 - 이슈: GitHub Issues (Milestone = 주차)
 
 ## 구조

@@ -12,7 +12,7 @@
 
 | 구분 | 이슈 |
 |---|---|
-| 완료 | #1 계획 · #36 범위 변경 · #3 Requirement · #4 Architecture · #5 Connection Sequence · #6 기술 결정 · #7 시험계획 · #9 Signaling Server · #46 1인 진행·보고서 · #10 1:1 연결 · #11 연결 과정 가시화 · #51 문서 정리 · #53 보고서용 그림 · #13 iPhone·iPad↔PC 연결 시험(2주차 작업을 앞당김) · #12 발표자료 |
+| 완료 | #1 계획 · #36 범위 변경 · #3 Requirement · #4 Architecture · #5 Connection Sequence · #6 기술 결정 · #7 시험계획 · #9 Signaling Server · #46 1인 진행·보고서 · #10 1:1 연결 · #11 연결 과정 가시화 · #51 문서 정리 · #53 보고서용 그림 · #13 iPhone·iPad↔PC 연결 시험(2주차 작업을 앞당김) · #12 발표자료 · #58 디자인 정리 |
 | 진행 중 | #2 개발 환경 (폰 HTTPS 확인 남음) |
 | 남음 | 없음 (폰 HTTPS 카메라 확인은 2주차 #15에서) |
 | 제외 | #8 역할분담 (1인 진행) |
@@ -39,6 +39,7 @@
 | 11/09 | #13 | iPhone(Chrome) ↔ Mac(Chrome) 같은 Wi-Fi 연결 10회 시험. PC 쪽 자동 측정 스크립트(`server/e2e/measure-connection.mjs`) 추가. 재연결 시 결과 표가 남는 버그 수정 | 9/9 P2P 직접 연결, Connection Time 중앙값 50.5 ms(40~102, 8회), ICE RTT 중앙값 9 ms, DataChannel 왕복 중앙값 21.8 ms. 10회째는 폰 앱 전환으로 중단. `experiments/2026-11-09_T1-iphone-pc-lan/` |
 | 11/09 | #13 | iPad ↔ Mac 같은 Wi-Fi 연결 10회 시험, 서버가 접속 기기의 User-Agent를 기록하도록 수정 | 10/10 P2P 직접 연결, Connection Time 중앙값 46 ms(39~172, 9회), ICE RTT 중앙값 9 ms, DataChannel 왕복 중앙값 39.3 ms. `experiments/2026-11-09_T1-ipad-pc-lan/` |
 | 11/09 | #12 | 1주차 발표자료 5장(표지, 시스템 구조, 연결 구현, 예상 난제, 남은 계획). 랩미팅 템플릿 사용, 모든 장에 발표자 노트 | `PBL2_1주차_261109.r1.pptx`. PowerPoint로 렌더링해 겹침·넘침 점검, 숫자는 실험 원자료와 대조 |
+| 11/09 | #58 | 'AI 티 나는 디자인' 정리. Anthropic 공식 `frontend-design` 스킬 하나만 골라 설치하고, 그 절차대로 `docs/DESIGN.md`(설비 점검 태그, 계통도, 안전 색)를 만든 뒤 웹 화면 5개, 다이어그램 4종, 발표자료 r2를 다시 만듦 | 카드, 가운뎃점 나열, 문장 앞 화살표, 어두운 화면, 고정폭 라벨 제거. E2E 13/13 유지. 발표자료 `PBL2_1주차_261109.r2.pptx`, 화면 `docs/screens/` |
 
 ## 그림
 
@@ -58,7 +59,13 @@
 
 ![클라이언트 모듈 구조](../../docs/diagrams/client-modules.png)
 
-### 실행 화면 (같은 LAN 연결)
+### 새 디자인 화면 (#58)
+
+| 현장 (폰, 연결됨) | 전문가 (PC) |
+|---|---|
+| ![](../../docs/screens/field-connected.png) | ![](../../docs/screens/expert-connected.png) |
+
+### 실행 화면 (같은 LAN 연결, 디자인 정리 전)
 
 | 전문가 (PC) | 현장 (모바일 크기) |
 |---|---|
@@ -73,6 +80,7 @@
 | Glass-to-Glass 지연 측정 추가 | getStats RTT로는 사용자가 체감하는 종단 지연을 알 수 없음 |
 | 1인 진행, 역할분담 없음 | 과제를 혼자 수행 |
 | 발표자료는 팀 템플릿에 맞춰 작성 | 직접 디자인하지 않음 |
+| 디자인 기준은 Anthropic `frontend-design` 하나 | 생성형 AI 티 제거. 여러 기준을 섞지 않음 (`docs/DESIGN.md`) |
 | Offerer = Room에 먼저 있던 쪽, DataChannel은 `negotiated` id 고정 | glare 방지, Offerer가 누구든 같은 코드 |
 
 ## 관찰 · 문제

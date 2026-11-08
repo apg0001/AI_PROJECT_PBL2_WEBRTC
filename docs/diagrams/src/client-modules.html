@@ -5,142 +5,154 @@
 <title>클라이언트 모듈 구조</title>
 <link rel="stylesheet" href="base.css">
 <style>
-  .name { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 19px; font-weight: 700; fill: #212529; }
-  .desc { font-size: 15px; fill: #495057; }
-  .tag { font-size: 13px; font-weight: 700; }
+  /* 기준: docs/DESIGN.md §6 계통도 규칙. 모듈 = 각진 사각형(먹 1.5px), 예정 = 강철 점선, import = 먹 가는 선 */
+  .mod { fill: var(--paper); stroke: var(--ink); stroke-width: 1.5; }
+  .mod-main { fill: var(--paper); stroke: var(--ink); stroke-width: 3; }
+  .mod-side { fill: var(--paper); stroke: var(--steel); stroke-width: 1.5; }
+  .mod-plan { fill: var(--paper); stroke: var(--steel); stroke-width: 1.5; stroke-dasharray: 6 5; }
+  .file { font-family: var(--mono); font-size: 17px; font-weight: 600; }
+  .file-main { font-family: var(--mono); font-size: 22px; font-weight: 600; }
+  .d { font-size: 15px; }
+  .no { font-size: 15px; fill: var(--steel); }
+  .wire { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+  .grid { stroke: var(--rule); stroke-width: 1; }
 </style>
 </head>
 <body>
 <div id="diagram">
 <svg width="1600" height="900" viewBox="0 0 1600 900">
   <defs>
-    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#495057"/></marker>
-    <marker id="arr-p" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7048e8"/></marker>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 1L10 5L0 9z" fill="var(--ink)"/></marker>
   </defs>
 
   <text x="60" y="66" class="t-title">클라이언트 모듈 구조</text>
-  <text x="60" y="100" class="t-sub">빌드 없는 Vanilla JS(ES Modules) · 현장·전문가 화면이 같은 모듈을 공유한다</text>
+  <text x="60" y="100" class="t-sub">빌드 없는 Vanilla JS(ES Modules). 현장 화면과 전문가 화면이 같은 모듈을 쓴다.</text>
 
   <!-- 페이지 -->
-  <text x="60" y="140" class="t-s" style="font-weight:700;fill:#495057">페이지</text>
-  <g>
-    <rect x="60" y="152" width="320" height="82" rx="14" fill="#fff" stroke="#ced4da" stroke-width="2"/>
-    <use href="#i-qr" x="76" y="170" width="44" height="44" color="#495057"/>
-    <text x="134" y="186" class="name">index.html</text>
-    <text x="134" y="210" class="desc">Room 생성 · 폰용 링크·QR</text>
-    <rect x="60" y="248" width="320" height="82" rx="14" fill="#fff" stroke="#ced4da" stroke-width="2"/>
-    <use href="#i-shield" x="76" y="266" width="44" height="44" color="#495057"/>
-    <text x="134" y="282" class="name">check.html</text>
-    <text x="134" y="306" class="desc">HTTPS · 카메라 권한 점검</text>
-    <text x="220" y="354" text-anchor="middle" class="t-s">독립 페이지</text>
+  <rect x="60" y="170" width="260" height="78" rx="2" class="mod-side"/>
+  <text x="80" y="200" class="file">index.html</text>
+  <text x="80" y="228" class="d">Room 생성, 폰용 링크와 QR</text>
 
-    <rect x="60" y="392" width="320" height="82" rx="14" fill="#fff4e6" stroke="#ffc078" stroke-width="2"/>
-    <use href="#i-phone" x="76" y="410" width="44" height="44" color="#e8590c"/>
-    <text x="134" y="426" class="name">field.html</text>
-    <text x="134" y="450" class="desc">현장 작업자 화면</text>
-    <rect x="60" y="488" width="320" height="82" rx="14" fill="#e7f5ff" stroke="#a5d8ff" stroke-width="2"/>
-    <use href="#i-laptop" x="76" y="506" width="44" height="44" color="#1c7ed6"/>
-    <text x="134" y="522" class="name">expert.html</text>
-    <text x="134" y="546" class="desc">원격 전문가 화면</text>
+  <rect x="60" y="262" width="260" height="78" rx="2" class="mod-side"/>
+  <text x="80" y="292" class="file">check.html</text>
+  <text x="80" y="320" class="d">HTTPS와 카메라 권한 점검</text>
+  <text x="60" y="368" class="t-s">독립 페이지</text>
+
+  <rect x="60" y="416" width="260" height="78" rx="2" class="mod"/>
+  <text x="80" y="446" class="file">field.html</text>
+  <text x="80" y="474" class="d">현장 작업자 화면</text>
+
+  <rect x="60" y="508" width="260" height="78" rx="2" class="mod"/>
+  <text x="80" y="538" class="file">expert.html</text>
+  <text x="80" y="566" class="d">원격 전문가 화면</text>
+
+  <!-- 페이지 → app.js -->
+  <path d="M320 455 H418" class="wire" marker-end="url(#arr)"/>
+  <path d="M320 547 H418" class="wire" marker-end="url(#arr)"/>
+
+  <!-- app.js: 위치와 선 굵기로 중심을 표시 -->
+  <rect x="420" y="410" width="280" height="170" rx="2" class="mod-main"/>
+  <text x="444" y="452" class="file-main">app.js</text>
+  <text x="444" y="486" class="t-code">startApp({ role })</text>
+  <text x="444" y="520" class="d">입장, Offer/Answer 교환,</text>
+  <text x="444" y="544" class="d">퇴장을 차례로 진행</text>
+
+  <!-- app.js → 구현 모듈 (분기 버스) -->
+  <path d="M700 495 H760" class="wire"/>
+  <path d="M760 218 V536" class="wire"/>
+  <circle cx="760" cy="495" r="3.5" fill="var(--ink)"/>
+  <path d="M760 218 H818" class="wire" marker-end="url(#arr)"/>
+  <path d="M760 375 H818" class="wire" marker-end="url(#arr)"/>
+  <path d="M760 536 H818" class="wire" marker-end="url(#arr)"/>
+
+  <!-- 1주차 구현 -->
+  <text x="820" y="150" class="t-s">1주차 구현, E2E 13/13 통과</text>
+
+  <rect x="820" y="170" width="380" height="96" rx="2" class="mod"/>
+  <text x="844" y="200" class="file">signaling.js</text>
+  <text x="844" y="228" class="d">WebSocket 클라이언트</text>
+  <text x="844" y="250" class="d">서버 메시지를 type별 이벤트로 나눔</text>
+
+  <rect x="820" y="290" width="380" height="170" rx="2" class="mod"/>
+  <text x="844" y="320" class="file">peer.js</text>
+  <text x="926" y="320" class="t-code" style="fill:var(--steel)">PeerSession</text>
+  <text x="844" y="348" class="d">RTCPeerConnection, Offer/Answer</text>
+  <text x="844" y="370" class="d">Trickle ICE, 원격 Candidate 대기열</text>
+  <text x="844" y="392" class="d">DataChannel control(id 0), pointer(id 1)</text>
+  <text x="844" y="414" class="d">측정 시점 t0~t7, 선택 경로 조회</text>
+  <text x="844" y="436" class="d">negotiated:true로 glare 없이 양쪽 같은 코드</text>
+
+  <!-- peer.js → signaling.js (send 호출) -->
+  <path d="M1150 290 V268" class="wire" marker-end="url(#arr)"/>
+  <text x="1160" y="284" class="t-code" style="font-size:13px;fill:var(--steel)">send()</text>
+
+  <rect x="820" y="488" width="380" height="96" rx="2" class="mod"/>
+  <text x="844" y="518" class="file">ui.js</text>
+  <text x="844" y="546" class="d">상태, 연결 정보, 상태 변화, 연결 후보</text>
+  <text x="844" y="568" class="d">연결 기록, 기록 저장(JSON)</text>
+
+  <!-- 2주차 추가 예정 -->
+  <text x="1260" y="150" class="t-s">2주차 추가 예정</text>
+
+  <rect x="1260" y="170" width="280" height="78" rx="2" class="mod-plan"/>
+  <text x="1280" y="200" class="file">media.js</text>
+  <text x="1520" y="200" text-anchor="end" class="no">#15</text>
+  <text x="1280" y="228" class="d" style="fill:var(--steel)">getUserMedia, 화질</text>
+
+  <rect x="1260" y="262" width="280" height="78" rx="2" class="mod-plan"/>
+  <text x="1280" y="292" class="file">datachannel.js</text>
+  <text x="1520" y="292" text-anchor="end" class="no">#16 #17</text>
+  <text x="1280" y="320" class="d" style="fill:var(--steel)">메시지, ack, 포인터</text>
+
+  <rect x="1260" y="354" width="280" height="78" rx="2" class="mod-plan"/>
+  <text x="1280" y="384" class="file">stats.js</text>
+  <text x="1520" y="384" text-anchor="end" class="no">#18</text>
+  <text x="1280" y="412" class="d" style="fill:var(--steel)">getStats 1초 간격, CSV</text>
+
+  <rect x="1260" y="446" width="280" height="78" rx="2" class="mod-plan"/>
+  <text x="1280" y="476" class="file">tools/g2g-latency</text>
+  <text x="1520" y="476" text-anchor="end" class="no">#19</text>
+  <text x="1280" y="504" class="d" style="fill:var(--steel)">QR 타임스탬프로 지연 측정</text>
+
+  <!-- 브라우저 내장 API: 표 한 줄 -->
+  <line x1="60" x2="1540" y1="640" y2="640" stroke="var(--ink)" stroke-width="1.5"/>
+  <line x1="60" x2="1540" y1="748" y2="748" class="grid"/>
+  <g class="grid">
+    <line x1="400" x2="400" y1="640" y2="748"/>
+    <line x1="628" x2="628" y1="640" y2="748"/>
+    <line x1="856" x2="856" y1="640" y2="748"/>
+    <line x1="1084" x2="1084" y1="640" y2="748"/>
+    <line x1="1312" x2="1312" y1="640" y2="748"/>
   </g>
+  <text x="60" y="678" class="t-b" style="font-weight:600">브라우저 내장 API</text>
+  <text x="60" y="704" class="t-s">설치 없이 사용</text>
 
-  <!-- app.js -->
-  <rect x="470" y="380" width="280" height="140" rx="20" fill="#212529"/>
-  <use href="#i-hex" x="490" y="400" width="46" height="46" color="#ffffff"/>
-  <text x="548" y="428" class="name" style="fill:#fff;font-size:22px">app.js</text>
-  <text x="490" y="470" class="desc" style="fill:#dee2e6">startApp({ role })</text>
-  <text x="490" y="496" class="desc" style="fill:#dee2e6">입장 → Offer/Answer → 퇴장</text>
-  <path d="M380 433 C 420 433, 430 430, 470 430" fill="none" stroke="#495057" stroke-width="2.5" marker-end="url(#arr)"/>
-  <path d="M380 529 C 420 529, 430 470, 470 470" fill="none" stroke="#495057" stroke-width="2.5" marker-end="url(#arr)"/>
+  <text x="420" y="678" class="t-code" style="font-size:17px">WebSocket</text>
+  <text x="420" y="704" class="t-s">signaling.js</text>
+  <text x="420" y="726" class="t-s">서버 /ws에 연결</text>
 
-  <!-- 구현된 모듈 -->
-  <text x="870" y="140" class="t-s" style="font-weight:700;fill:#2f9e44">1주차 구현</text>
-  <g>
-    <rect x="870" y="152" width="370" height="104" rx="14" fill="#f3f0ff" stroke="#b197fc" stroke-width="2"/>
-    <use href="#i-swap" x="886" y="170" width="40" height="40" color="#7048e8"/>
-    <text x="940" y="186" class="name">signaling.js</text>
-    <text x="940" y="212" class="desc">WebSocket 클라이언트</text>
-    <text x="940" y="236" class="desc">서버 메시지를 type별 이벤트로</text>
+  <text x="648" y="678" class="t-code" style="font-size:17px">RTCPeerConnection</text>
+  <text x="648" y="704" class="t-s">peer.js</text>
 
-    <rect x="870" y="272" width="370" height="178" rx="14" fill="#e6fcf5" stroke="#63e6be" stroke-width="2"/>
-    <use href="#i-relay" x="886" y="290" width="40" height="40" color="#0ca678"/>
-    <text x="940" y="306" class="name">peer.js · PeerSession</text>
-    <text x="940" y="332" class="desc">RTCPeerConnection, Offer/Answer</text>
-    <text x="940" y="356" class="desc">Trickle ICE + 원격 Candidate 대기열</text>
-    <text x="940" y="380" class="desc">DataChannel control(id 0) · pointer(id 1)</text>
-    <text x="940" y="404" class="desc">측정 시점 t0~t7 · 선택 경로 조회</text>
-    <text x="940" y="428" class="desc">negotiated:true → glare 없이 같은 코드</text>
+  <text x="876" y="678" class="t-code" style="font-size:17px">RTCDataChannel</text>
+  <text x="876" y="704" class="t-s">peer.js</text>
 
-    <rect x="870" y="466" width="370" height="104" rx="14" fill="#f8f9fa" stroke="#ced4da" stroke-width="2"/>
-    <use href="#i-chart" x="886" y="484" width="40" height="40" color="#495057"/>
-    <text x="940" y="500" class="name">ui.js</text>
-    <text x="940" y="526" class="desc">상태 · 연결 결과 · 상태 전이 · Candidate</text>
-    <text x="940" y="550" class="desc">이벤트 로그 · JSON 내보내기</text>
-  </g>
-  <path d="M750 410 C 810 410, 820 204, 870 204" fill="none" stroke="#495057" stroke-width="2.5" marker-end="url(#arr)"/>
-  <path d="M750 450 C 810 450, 820 361, 870 361" fill="none" stroke="#495057" stroke-width="2.5" marker-end="url(#arr)"/>
-  <path d="M750 490 C 810 490, 820 518, 870 518" fill="none" stroke="#495057" stroke-width="2.5" marker-end="url(#arr)"/>
-  <path d="M1222 272 L 1222 258" stroke="#7048e8" stroke-width="2.5" marker-end="url(#arr-p)"/>
-  <text x="1232" y="268" class="tag" style="fill:#7048e8">send</text>
+  <text x="1104" y="678" class="t-code" style="font-size:17px">getStats</text>
+  <text x="1104" y="704" class="t-s">peer.js, stats.js(예정)</text>
 
-  <!-- 예정 모듈 -->
-  <text x="1300" y="140" class="t-s" style="font-weight:700;fill:#868e96">2주차 추가 예정</text>
-  <g>
-    <rect x="1300" y="152" width="250" height="96" rx="14" fill="#fff" stroke="#adb5bd" stroke-width="2" stroke-dasharray="8 6"/>
-    <use href="#i-camera" x="1314" y="168" width="34" height="34" color="#868e96"/>
-    <text x="1358" y="186" class="name" style="font-size:17px">media.js</text>
-    <text x="1358" y="210" class="desc">getUserMedia · 화질</text>
-    <text x="1358" y="232" class="tag" style="fill:#868e96">#15</text>
-
-    <rect x="1300" y="260" width="250" height="96" rx="14" fill="#fff" stroke="#adb5bd" stroke-width="2" stroke-dasharray="8 6"/>
-    <use href="#i-pointer" x="1314" y="276" width="34" height="34" color="#868e96"/>
-    <text x="1358" y="294" class="name" style="font-size:17px">datachannel.js</text>
-    <text x="1358" y="318" class="desc">메시지 · ack · 포인터</text>
-    <text x="1358" y="340" class="tag" style="fill:#868e96">#16 #17</text>
-
-    <rect x="1300" y="368" width="250" height="96" rx="14" fill="#fff" stroke="#adb5bd" stroke-width="2" stroke-dasharray="8 6"/>
-    <use href="#i-chart" x="1314" y="384" width="34" height="34" color="#868e96"/>
-    <text x="1358" y="402" class="name" style="font-size:17px">stats.js</text>
-    <text x="1358" y="426" class="desc">getStats 1초 · CSV</text>
-    <text x="1358" y="448" class="tag" style="fill:#868e96">#18</text>
-
-    <rect x="1300" y="476" width="250" height="96" rx="14" fill="#fff" stroke="#adb5bd" stroke-width="2" stroke-dasharray="8 6"/>
-    <use href="#i-stopwatch" x="1314" y="492" width="34" height="34" color="#868e96"/>
-    <text x="1358" y="510" class="name" style="font-size:17px">g2g-latency</text>
-    <text x="1358" y="534" class="desc">QR 타임스탬프 지연</text>
-    <text x="1358" y="556" class="tag" style="fill:#868e96">#19 (tools/)</text>
-  </g>
-
-  <!-- 브라우저 API -->
-  <rect x="470" y="640" width="1080" height="124" rx="20" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2"/>
-  <use href="#i-globe" x="490" y="662" width="32" height="32" color="#495057"/>
-  <text x="530" y="686" class="t-b" style="font-weight:700">브라우저 내장 API</text>
-  <text x="530" y="712" class="t-s">설치 없이 사용</text>
-  <g font-family="ui-monospace, Menlo, monospace">
-    <rect x="720" y="668" width="140" height="52" rx="10" fill="#fff" stroke="#b197fc"/><text x="790" y="700" text-anchor="middle" class="t-mono">WebSocket</text>
-    <rect x="874" y="668" width="200" height="52" rx="10" fill="#fff" stroke="#63e6be"/><text x="974" y="700" text-anchor="middle" class="t-mono">RTCPeerConnection</text>
-    <rect x="1088" y="668" width="160" height="52" rx="10" fill="#fff" stroke="#63e6be"/><text x="1168" y="700" text-anchor="middle" class="t-mono">RTCDataChannel</text>
-    <rect x="1262" y="668" width="130" height="52" rx="10" fill="#fff" stroke="#ced4da"/><text x="1327" y="700" text-anchor="middle" class="t-mono">getStats</text>
-    <rect x="1406" y="668" width="130" height="52" rx="10" fill="#fff" stroke="#ced4da" stroke-dasharray="6 4"/><text x="1471" y="700" text-anchor="middle" class="t-mono">getUserMedia</text>
-  </g>
-  <g class="tag">
-    <text x="790" y="740" text-anchor="middle" style="fill:#7048e8">signaling.js → 서버 /ws</text>
-    <text x="1061" y="740" text-anchor="middle" style="fill:#0ca678">peer.js (RTCPeerConnection · RTCDataChannel)</text>
-    <text x="1327" y="740" text-anchor="middle" style="fill:#495057">peer.js · stats.js</text>
-    <text x="1471" y="740" text-anchor="middle" style="fill:#868e96">media.js (예정)</text>
-  </g>
+  <text x="1332" y="678" class="t-code" style="font-size:17px;fill:var(--steel)">getUserMedia</text>
+  <text x="1332" y="704" class="t-s">media.js(예정)</text>
 
   <!-- 범례 -->
-  <g transform="translate(60,830)">
-    <rect x="0" y="-16" width="40" height="26" rx="6" fill="#fff" stroke="#495057" stroke-width="2"/>
-    <text x="52" y="4" class="t-s" style="fill:#212529">구현 완료 (1주차, E2E 13/13 통과)</text>
-    <rect x="360" y="-16" width="40" height="26" rx="6" fill="#fff" stroke="#adb5bd" stroke-width="2" stroke-dasharray="6 4"/>
-    <text x="412" y="4" class="t-s" style="fill:#212529">2주차 추가 예정</text>
-    <line x1="620" y1="-3" x2="670" y2="-3" stroke="#495057" stroke-width="2.5" marker-end="url(#arr)"/>
-    <text x="682" y="4" class="t-s" style="fill:#212529">import / 호출</text>
+  <g transform="translate(60,810)">
+    <rect x="0" y="-13" width="36" height="22" rx="2" class="mod"/>
+    <text x="48" y="4" class="t-s" style="fill:var(--ink)">구현된 모듈</text>
+    <rect x="190" y="-13" width="36" height="22" rx="2" class="mod-plan"/>
+    <text x="238" y="4" class="t-s" style="fill:var(--ink)">추가 예정 모듈과 이슈 번호</text>
+    <path d="M490 -2 H536" class="wire" marker-end="url(#arr)"/>
+    <text x="548" y="4" class="t-s" style="fill:var(--ink)">import 또는 호출 (화살표 쪽 모듈을 쓴다)</text>
   </g>
 </svg>
 </div>
-<script src="icons.js"></script>
 </body>
 </html>

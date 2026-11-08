@@ -46,22 +46,22 @@ for (let i = 1; i <= RUNS; i++) {
   await new Promise((r) => setTimeout(r, 1500)); // 선택 경로·RTT 표시 대기
   await page.click('#ping');
   await page
-    .waitForFunction(() => document.getElementById('log').textContent.includes('DataChannel 왕복'), { timeout: 5000 })
+    .waitForFunction(() => document.getElementById('log').textContent.includes('데이터 통로 왕복'), { timeout: 5000 })
     .catch(() => {});
   const r = await readResult();
   const ping = await page.evaluate(() => {
-    const m = document.getElementById('log').textContent.match(/DataChannel 왕복 ([\d.]+) ms/);
+    const m = document.getElementById('log').textContent.match(/데이터 통로 왕복 ([\d.]+) ms/);
     return m ? Number(m[1]) : null;
   });
   const ms = (v) => (v ? Number(String(v).replace(/[^\d.]/g, '')) : null);
   const row = {
     run: i,
-    role: r.kv['역할'],
-    connectionMs: ms(r.kv['Connection Time (join → connected)']),
-    localPath: r.kv['선택 경로 (local)'],
-    remotePath: r.kv['선택 경로 (remote)'],
-    pathType: r.kv['경로 종류'],
-    iceRttMs: ms(r.kv['RTT (ICE)']),
+    role: r.kv['입장 순서'],
+    connectionMs: ms(r.kv['연결 시간 (입장 요청부터)']),
+    localPath: r.kv['내 쪽 주소'],
+    remotePath: r.kv['상대 쪽 주소'],
+    pathType: r.kv['경로'],
+    iceRttMs: ms(r.kv['왕복 지연 (RTT)']),
     dataChannelRttMs: ping,
     candidates: r.summary,
   };

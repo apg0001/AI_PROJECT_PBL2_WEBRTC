@@ -6,3 +6,4 @@
 - 1인 프로젝트다. 역할분담·팀원 배정은 하지 않는다.
 - 범위: 다른 네트워크 간 연결 시험(#37, ngrok으로 시그널링 공개)과 Glass-to-Glass 지연 측정 포함. TURN은 자체 구축하지 않고 필요 시 호스팅 TURN(#38).
 - PoC는 최소 수준이다. 상용 UI, 프레임워크, 복잡한 Backend를 추가하지 않는다.
+- 디자인 기준은 `docs/DESIGN.md` 하나다 (Anthropic `frontend-design` 스킬을 이 프로젝트에 적용한 것, `.claude/skills/frontend-design/`). 웹 화면, 다이어그램, 발표자료 꾸밈 모두 이것만 따르고 다른 디자인 스킬을 섞지 않는다.

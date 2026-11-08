@@ -61,7 +61,7 @@ try {
   check('로그 내보내기 파일 생성', /^events_expert_.*\.json$/.test(dl ?? ''), dl);
 
   await e.click('#ping');
-  await e.waitForFunction(() => document.getElementById('log').textContent.includes('DataChannel 왕복'), { timeout: 5000 });
+  await e.waitForFunction(() => document.getElementById('log').textContent.includes('데이터 통로 왕복'), { timeout: 5000 });
   check('DataChannel ping/pong', true);
 
   await e.click('#leave');
