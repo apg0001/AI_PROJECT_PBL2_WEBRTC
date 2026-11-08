@@ -12,9 +12,9 @@
 
 | 구분 | 이슈 |
 |---|---|
-| 완료 | #1 계획 · #36 범위 변경 · #3 Requirement · #4 Architecture · #5 Connection Sequence · #6 기술 결정 · #7 시험계획 · #9 Signaling Server · #46 1인 진행·보고서 · #10 1:1 연결 · #11 연결 과정 가시화 · #51 문서 정리 · #53 보고서용 그림 · #13 iPhone↔PC 연결 시험(2주차 작업을 앞당김) |
+| 완료 | #1 계획 · #36 범위 변경 · #3 Requirement · #4 Architecture · #5 Connection Sequence · #6 기술 결정 · #7 시험계획 · #9 Signaling Server · #46 1인 진행·보고서 · #10 1:1 연결 · #11 연결 과정 가시화 · #51 문서 정리 · #53 보고서용 그림 · #13 iPhone·iPad↔PC 연결 시험(2주차 작업을 앞당김) · #12 발표자료 |
 | 진행 중 | #2 개발 환경 (폰 HTTPS 확인 남음) |
-| 남음 | #12 발표자료 |
+| 남음 | 없음 (폰 HTTPS 카메라 확인은 2주차 #15에서) |
 | 제외 | #8 역할분담 (1인 진행) |
 
 ## 작업 기록
@@ -38,6 +38,7 @@
 | 11/09 | #53 | 보고서용 그림 4종: 시스템 아키텍처, 서버 구성도, 구현 계획(4주 로드맵), 클라이언트 모듈 구조. 직접 그린 아이콘 세트, `npm run diagrams`로 PNG 렌더링 | 아래 '그림' |
 | 11/09 | #13 | iPhone(Chrome) ↔ Mac(Chrome) 같은 Wi-Fi 연결 10회 시험. PC 쪽 자동 측정 스크립트(`server/e2e/measure-connection.mjs`) 추가. 재연결 시 결과 표가 남는 버그 수정 | 9/9 P2P 직접 연결, Connection Time 중앙값 50.5 ms(40~102, 8회), ICE RTT 중앙값 9 ms, DataChannel 왕복 중앙값 21.8 ms. 10회째는 폰 앱 전환으로 중단. `experiments/2026-11-09_T1-iphone-pc-lan/` |
 | 11/09 | #13 | iPad ↔ Mac 같은 Wi-Fi 연결 10회 시험, 서버가 접속 기기의 User-Agent를 기록하도록 수정 | 10/10 P2P 직접 연결, Connection Time 중앙값 46 ms(39~172, 9회), ICE RTT 중앙값 9 ms, DataChannel 왕복 중앙값 39.3 ms. `experiments/2026-11-09_T1-ipad-pc-lan/` |
+| 11/09 | #12 | 1주차 발표자료 5장(표지, 시스템 구조, 연결 구현, 예상 난제, 남은 계획). 랩미팅 템플릿 사용, 모든 장에 발표자 노트 | `PBL2_1주차_261109.r1.pptx`. PowerPoint로 렌더링해 겹침·넘침 점검, 숫자는 실험 원자료와 대조 |
 
 ## 그림
 
@@ -87,4 +88,3 @@
 
 ## 다음 할 일
 
-- #12 Progress Check 발표자료 (템플릿을 받으면 작성)
