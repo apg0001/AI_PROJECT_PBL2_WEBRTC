@@ -96,13 +96,13 @@
 
 ## 4. 시험 환경
 
-실제 기기는 팀원 확정 후 채운다.
-
 | 역할 | 기기 | OS | 브라우저 |
 |---|---|---|---|
-| 현장 1 | (Android 폰) | | Chrome |
-| 현장 2 | (iPhone) | | Safari |
-| 전문가 | MacBook | macOS | Chrome |
+| 현장 | iPhone | iOS 27.2 | Chrome(CriOS 157, WebKit 엔진), Safari |
+| 전문가 | MacBook Air | macOS | Chrome |
+| (가능하면) 현장 2 | Android 폰 (빌릴 수 있으면) | | Chrome |
+
+iOS의 모든 브라우저는 WebKit 엔진이므로 iPhone Chrome과 Safari의 WebRTC 동작은 거의 같다.
 
 ## 5. 기록 규칙
 

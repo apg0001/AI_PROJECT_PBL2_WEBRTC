@@ -16,7 +16,7 @@
 | 구분 | 내용 |
 |---|---|
 | **Core (필수)** | 1 Requirement · 2 Architecture · 3 Connection Sequence · 4 1:1 연결 · 5 Media · 6 DataChannel · 7 품질 측정 1개 이상 · 8 기업 확장문제(Think) 3개 이상 |
-| **추가 범위 (팀 결정)** | **Glass-to-Glass(G2G) 지연 측정 도구**: 카메라로 ms 타임스탬프 화면을 찍어 수신 화면까지의 종단 지연을 측정<br>**다른 네트워크 간 연결 시험**(#37): 폰 LTE/5G ↔ PC Wi-Fi 등 서로 다른 NAT 뒤에서 STUN만으로 P2P가 되는지 실측. 시그널링은 ngrok 터널로 공개 |
+| **추가 범위 (자체 결정)** | **Glass-to-Glass(G2G) 지연 측정 도구**: 카메라로 ms 타임스탬프 화면을 찍어 수신 화면까지의 종단 지연을 측정<br>**다른 네트워크 간 연결 시험**(#37): 폰 LTE/5G ↔ PC Wi-Fi 등 서로 다른 NAT 뒤에서 STUN만으로 P2P가 되는지 실측. 시그널링은 ngrok 터널로 공개 |
 | **축소** | 품질 비교의 기본은 동일 LAN + 대역폭 제한(throttling)으로 하고, 실제 Wi-Fi↔LTE 조건은 가능한 범위에서 추가한다. 다른 네트워크 연결이 실패하면 실패 단계와 원인을 증거로 설명한다(과제 명세 §23). |
 | **하지 않는 것** | 상용 수준 UI, 모바일 App, 복잡한 Backend, TURN 자체 구축, SFU 구축, 다중 사용자 구현 |
 | **Optional (+5점 이내)** | A 호스팅 TURN 적용·Direct vs Relay 비교(#38) → F Dashboard(#32) → C Adaptive Control(#33) → D Reconnection(#34) 순으로, 여유가 있을 때 진행 |
@@ -36,7 +36,7 @@
 ### 1주차 — 설계 및 연결
 - #1 프로젝트 계획·협업 규칙·저장소 구조 · #36 범위 변경(다른 네트워크 연결 포함)
 - #2 개발 환경 (Node.js, 모바일 HTTPS)
-- #3 Requirement · #4 Architecture · #5 Connection Sequence · #6 기술 결정 v1 · #7 PoC·시험계획 · #8 역할분담
+- #3 Requirement · #4 Architecture · #5 Connection Sequence · #6 기술 결정 v1 · #7 PoC·시험계획 (역할분담 #8은 1인 진행이라 종료)
 - #9 Signaling Server · #10 1:1 RTCPeerConnection · #11 연결 과정 가시화
 - #12 발표자료
 
@@ -114,7 +114,13 @@
 4. 보조 방법: 두 화면(타임스탬프, 수신 영상)을 나란히 두고 사진을 찍어 수동으로 비교한다.
 5. 오차 요인: 디스플레이 주사율(60Hz ≈ ±16.7ms), 카메라 노출·프레임 간격. 조건마다 N회 반복해 중앙값과 p95를 보고한다.
 
-## 5. 이슈·브랜치·커밋 규칙
+## 5. 주차별 보고서
+
+- `weekly/weekN/report.md`에 목표, 진행 현황, **작업 기록(날짜·이슈·PR·결과)**, 결정, 관찰·문제, 다음 할 일을 적는다.
+- **작업(PR)마다 갱신한다.** 주간 발표자료는 이 보고서를 요약해 만든다.
+- 프로젝트는 1인으로 진행한다. 과목의 역할 예시(A~D)는 문서의 장 구분으로만 쓴다.
+
+## 6. 이슈·브랜치·커밋 규칙
 
 `CONTRIBUTING.md`를 따른다. 요약하면 다음과 같다.
 
@@ -123,4 +129,4 @@
 - 커밋: `[type] 한국어 설명 (#이슈번호)`
 - PR: `develop` 대상, 제목 `[type] 설명 (#번호)`, 본문 첫 줄 `Closes #번호`
 - Milestone = 주차, Label = 영역(`signaling`, `connectivity`, `media-data`, `qos`) + 성격(`poc`, `presentation`, `optional`)
-- 매주 마지막 이슈는 **주간 발표자료**로, 그 주 결과를 `weekly/weekN/`에 정리한다.
+- 매주 마지막 이슈는 **주간 발표자료**로, 그 주 보고서를 바탕으로 `weekly/weekN/`에 만든다.
