@@ -1,0 +1,12 @@
+{
+  "name": "pbl2-webrtc",
+  "private": true,
+  "description": "저장소 루트에서 server/ 스크립트를 실행하기 위한 단축 명령",
+  "scripts": {
+    "postinstall": "npm --prefix server install",
+    "start": "npm --prefix server start",
+    "dev": "npm --prefix server run dev",
+    "test": "npm --prefix server test",
+    "tunnel": "ngrok http 3000"
+  }
+}
