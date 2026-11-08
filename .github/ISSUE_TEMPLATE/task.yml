@@ -1,0 +1,29 @@
+name: 작업
+description: 구현·문서·실험 작업을 등록합니다. 제목은 [feat|fix|docs|test|chore|refactor] 로 시작합니다.
+title: "[feat] "
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: 목표
+      description: 이 작업으로 무엇을 확인하거나 만들 수 있게 되는지 적으세요.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: 범위
+      description: 포함할 작업을 체크리스트로 적고, 제외할 것도 적으세요.
+      value: |
+        - [ ]
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 수락 기준
+      value: |
+        - [ ]
+        - [ ] `docs/project-status.md` 및 관련 문서 갱신
+    validations:
+      required: true

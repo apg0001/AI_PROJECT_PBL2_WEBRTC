@@ -1,0 +1,29 @@
+name: 버그
+description: 재현 가능한 결함을 보고합니다.
+title: "[fix] "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: 문제 요약
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 재현 절차와 환경
+      description: 기기, 브라우저, 네트워크, Room 상태를 포함하세요.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 기대 결과 / 실제 결과
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 로그·ICE Candidate·Stats 근거
