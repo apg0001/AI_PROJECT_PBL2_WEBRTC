@@ -9,12 +9,16 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "tunnel": "ngrok http 3000",
-    "test": "node --test"
+    "test": "node --test",
+    "e2e": "node e2e/connect.e2e.mjs"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
     "ws": "^8.22.2"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^24.43.1"
   }
 }
