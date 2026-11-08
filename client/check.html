@@ -3,40 +3,48 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>환경 점검</title>
+  <title>카메라 확인 - 원격 현장지원</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600&display=swap">
+  <link rel="stylesheet" href="css/app.css">
   <style>
-    body { font-family: system-ui, sans-serif; margin: 16px; line-height: 1.5; }
-    table { border-collapse: collapse; width: 100%; }
-    td { border-bottom: 1px solid #ddd; padding: 4px 6px; vertical-align: top; word-break: break-all; }
-    .ok { color: #0a7d32; } .bad { color: #c62828; }
-    video { width: 100%; max-width: 480px; background: #000; margin-top: 12px; }
-    button { font-size: 16px; padding: 8px 12px; margin-top: 12px; }
+    td.yes { color: var(--ok); font-weight: 600; }
+    td.no { color: var(--stop); font-weight: 600; }
+    video { width: 100%; max-width: 480px; margin-top: 16px; background: var(--rule); display: block; }
   </style>
 </head>
-<body>
-  <h1>환경 점검</h1>
-  <table id="t"></table>
-  <button id="cam">후면 카메라 + 마이크 시험</button>
-  <video id="v" autoplay playsinline muted></video>
+<body class="field">
+  <main>
+    <h1>이 기기에서 카메라를 쓸 수 있나요</h1>
+    <p class="muted">원격 지원에 필요한 브라우저 기능을 확인합니다.</p>
+    <table class="kv" id="t"></table>
+    <div class="actions"><button id="cam">후면 카메라와 마이크 켜 보기</button></div>
+    <video id="v" autoplay playsinline muted></video>
+    <p class="note"><a href="./">처음 화면으로</a></p>
+  </main>
   <script>
     const t = document.getElementById('t');
     function row(name, value, ok) {
       const tr = t.insertRow();
-      tr.insertCell().textContent = name;
+      const th = document.createElement('th');
+      th.scope = 'row';
+      th.textContent = name;
+      tr.appendChild(th);
       const c = tr.insertCell();
       c.textContent = String(value);
-      if (ok !== undefined) c.className = ok ? 'ok' : 'bad';
+      if (ok !== undefined) c.className = ok ? 'yes' : 'no';
     }
-    row('Secure Context (HTTPS)', window.isSecureContext, window.isSecureContext);
-    row('navigator.mediaDevices', !!navigator.mediaDevices, !!navigator.mediaDevices);
-    row('RTCPeerConnection', typeof RTCPeerConnection === 'function', typeof RTCPeerConnection === 'function');
-    row('BarcodeDetector (G2G용)', 'BarcodeDetector' in window);
-    row('User Agent', navigator.userAgent);
-    row('Origin', location.origin);
+    const yn = (b) => (b ? '있음' : '없음');
+    row('https 접속 (카메라 사용 조건)', window.isSecureContext ? '예' : '아니오', window.isSecureContext);
+    row('카메라·마이크 기능', yn(!!navigator.mediaDevices), !!navigator.mediaDevices);
+    row('실시간 연결 기능 (RTCPeerConnection)', yn(typeof RTCPeerConnection === 'function'), typeof RTCPeerConnection === 'function');
+    row('QR 읽기 기능 (지연 측정용)', yn('BarcodeDetector' in window));
+    row('브라우저', navigator.userAgent);
+    row('접속 주소', location.origin);
 
     document.getElementById('cam').onclick = async () => {
       if (!navigator.mediaDevices) {
-        row('카메라 사용 불가', 'HTTPS가 아니어서 브라우저가 카메라 API를 막았습니다. ngrok 주소(https://…)로 접속하세요.', false);
+        row('카메라', 'https 주소가 아니어서 브라우저가 카메라를 막았습니다. ngrok의 https 주소로 여세요.', false);
         return;
       }
       try {
@@ -46,10 +54,10 @@
         });
         document.getElementById('v').srcObject = s;
         const vs = s.getVideoTracks()[0].getSettings();
-        row('카메라', `${vs.width}x${vs.height} @ ${vs.frameRate ?? '?'}fps, facing=${vs.facingMode ?? '?'}`, true);
-        row('마이크', s.getAudioTracks()[0]?.label || '(label 없음)', s.getAudioTracks().length > 0);
+        row('카메라', `${vs.width}x${vs.height}, ${vs.frameRate ?? '?'}fps, 방향 ${vs.facingMode ?? '알 수 없음'}`, true);
+        row('마이크', s.getAudioTracks()[0]?.label || '이름 없음', s.getAudioTracks().length > 0);
       } catch (e) {
-        row('getUserMedia 실패', `${e.name}: ${e.message}`, false);
+        row('카메라를 켜지 못함', `${e.name}: ${e.message}`, false);
       }
     };
   </script>

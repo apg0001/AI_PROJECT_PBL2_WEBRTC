@@ -6,9 +6,10 @@
 <link rel="stylesheet" href="base.css">
 <script>
 /* ===================================================================
-   데이터 — 매주 이 부분만 고치고 `npm run diagrams implementation-plan`
+   데이터: 매주 이 부분만 고치고 `npm run diagrams implementation-plan`
    status: done | doing | todo
    kind:   design | feat | test | docs | slides | optional
+           (optional만 '선택(가산점)' 묶음으로 따로 그린다)
    =================================================================== */
 const TODAY = { week: 1, date: '11/09' };
 
@@ -23,7 +24,7 @@ const STORY = [
 
 const WEEKS = [
   {
-    week: 1, dates: '11/09–11/15', theme: '설계 및 연결',
+    week: 1, dates: '11/09-11/15', theme: '설계 및 연결',
     items: [
       { no: 3, title: 'Requirement', kind: 'design', status: 'done' },
       { no: 4, title: 'Architecture', kind: 'design', status: 'done' },
@@ -35,27 +36,28 @@ const WEEKS = [
       { no: 11, title: '연결 과정 가시화', kind: 'feat', status: 'done' },
       { no: 53, title: '보고서용 그림', kind: 'docs', status: 'done' },
       { no: 12, title: '발표자료 (5장)', kind: 'slides', status: 'done' },
+      { no: 58, title: '디자인 정리 (웹, 그림, 발표)', kind: 'docs', status: 'done' },
     ],
-    badge: { text: 'E2E 13/13 통과 · Connection 139 ms', tone: 'result' },
-    deliverable: ['System Design v1.0', '+ 같은 LAN 연결'],
+    badge: { text: 'E2E 13/13 통과, Connection 139 ms', tone: 'result' },
+    deliverable: ['System Design v1.0', '같은 LAN 연결'],
   },
   {
-    week: 2, dates: '11/16–11/22', theme: 'Media/Data · 측정 도구',
+    week: 2, dates: '11/16-11/22', theme: 'Media/Data와 측정 도구',
     items: [
       { no: 13, title: '폰↔PC 같은 LAN 검증', kind: 'test', status: 'done' },
       { no: 37, title: '다른 네트워크 연결 (LTE↔Wi-Fi)', kind: 'test', status: 'todo' },
       { no: 14, title: 'NAT / STUN / TURN 분석', kind: 'docs', status: 'todo' },
-      { no: 15, title: 'Video · Audio', kind: 'feat', status: 'todo' },
+      { no: 15, title: 'Video, Audio', kind: 'feat', status: 'todo' },
       { no: 16, title: 'DataChannel 프로토콜', kind: 'feat', status: 'todo' },
-      { no: 17, title: '채팅 · 포인터', kind: 'feat', status: 'todo' },
+      { no: 17, title: '채팅, 포인터', kind: 'feat', status: 'todo' },
       { no: 18, title: 'getStats 수집', kind: 'feat', status: 'todo' },
       { no: 19, title: 'Glass-to-Glass 측정 도구', kind: 'feat', status: 'todo' },
       { no: 20, title: '발표자료', kind: 'slides', status: 'todo' },
     ],
-    deliverable: ['LMS 제출', 'Sequence · Screenshot · 성공/실패 지점'],
+    deliverable: ['LMS 제출', 'Sequence, Screenshot, 성공/실패 지점'],
   },
   {
-    week: 3, dates: '11/23–11/29', theme: '품질 실험 · 분석',
+    week: 3, dates: '11/23-11/29', theme: '품질 실험과 분석',
     items: [
       { no: 21, title: '네트워크 조건별 품질 실험', kind: 'test', status: 'todo' },
       { no: 22, title: 'G2G 지연 실험', kind: 'test', status: 'todo' },
@@ -68,10 +70,10 @@ const WEEKS = [
       { no: 38, title: 'TURN 비교', kind: 'optional', status: 'todo' },
       { no: 32, title: 'Stats 대시보드', kind: 'optional', status: 'todo' },
     ],
-    deliverable: ['중간 점검 (5분)', '+ Integration Report'],
+    deliverable: ['중간 점검 (5분)', 'Integration Report'],
   },
   {
-    week: 4, dates: '11/30–12/06', theme: '최종 정리 (버퍼)',
+    week: 4, dates: '11/30-12/06', theme: '최종 정리 (버퍼)',
     items: [
       { no: 29, title: '최종 제출물 8종', kind: 'docs', status: 'todo' },
       { no: 30, title: '최종 발표 (12분)', kind: 'slides', status: 'todo' },
@@ -79,7 +81,7 @@ const WEEKS = [
       { no: 33, title: 'Adaptive Control', kind: 'optional', status: 'todo' },
       { no: 34, title: 'Reconnection', kind: 'optional', status: 'todo' },
     ],
-    badge: { text: '버퍼 · 요구사항 변동 대비', tone: 'note' },
+    badge: { text: '요구사항 변동에 대비한 버퍼', tone: 'note' },
     deliverable: ['Final Presentation'],
   },
 ];
@@ -88,35 +90,30 @@ const WEEKS = [
 <body>
 <div id="diagram">
 <svg id="plan" width="1600" height="900" viewBox="0 0 1600 900">
-  <text x="60" y="66" class="t-title">구현 계획 — 4주 로드맵</text>
-  <text x="60" y="100" class="t-sub">1~3주차에 구현·실험·분석을 끝내고, 4주차는 최종 정리와 변동 대비 버퍼</text>
-  <g id="story"></g>
-  <g id="cols"></g>
-  <g id="legend"></g>
+  <text x="60" y="66" class="t-title">4주 구현 계획</text>
+  <text x="60" y="100" class="t-sub">1~3주차에 구현, 실험, 분석을 끝내고 4주차는 최종 정리와 버퍼로 둔다.</text>
+  <g id="sheet"></g>
 </svg>
 </div>
-<script src="icons.js"></script>
 <script>
-/* ===================== 렌더러 (데이터만 바꾸면 됨) ===================== */
+/* ===================== 렌더러 (데이터만 바꾸면 됨) =====================
+   기준: docs/DESIGN.md. 칸 선으로 나눈 점검표 양식.
+   색은 뜻으로만: 초록 = 완료, 노랑 = 진행 중과 이번 주, 나머지는 먹과 강철. */
 const NS = 'http://www.w3.org/2000/svg';
-const KIND = {
-  design: { icon: 'hex', color: '#7048e8', label: '설계' },
-  feat: { icon: 'code', color: '#0ca678', label: '구현' },
-  test: { icon: 'flask', color: '#e8590c', label: '실험·검증' },
-  docs: { icon: 'doc', color: '#1c7ed6', label: '분석·문서' },
-  slides: { icon: 'slides', color: '#f59f00', label: '발표' },
+const L = {
+  x0: 60, x1: 1540,
+  story: 150,        // 흐름 글줄
+  top: 176,          // 표 윗선
+  headRule: 256,     // 머리칸 아래 선
+  itemTop: 266, row: 31,
+  badgeY: 690,       // 결과·메모 한 줄
+  delivRule: 708,    // 산출물 위 선
+  bottom: 806,       // 표 아랫선
+  legend: 852,
 };
-const STATUS = { done: '#2f9e44', doing: '#1c7ed6', todo: '#adb5bd' };
-const PHASE = { // 주차 상태: 지난 주 / 이번 주 / 다음 주
-  past: { head: '#ebfbee', ink: '#2b8a3e', stroke: '#b2f2bb', bar: '#2f9e44' },
-  now: { head: '#e7f5ff', ink: '#1971c2', stroke: '#1c7ed6', bar: '#1c7ed6' },
-  future: { head: '#f8f9fa', ink: '#495057', stroke: '#dee2e6', bar: '#adb5bd' },
-};
-const phaseOf = (w) => (w < TODAY.week ? 'past' : w === TODAY.week ? 'now' : 'future');
-
-const L = { x0: 60, x1: 1540, gap: 20, top: 196, bottom: 826, head: 96, itemTop: 304, row: 33, delivY: 726, delivH: 84 };
-const COLW = (L.x1 - L.x0 - L.gap * 3) / 4;
-const colX = (w) => L.x0 + (w - 1) * (COLW + L.gap);
+const COLW = (L.x1 - L.x0) / 4;
+const colX = (w) => L.x0 + (w - 1) * COLW;
+const PAD = 20;
 
 function el(tag, attrs, parent, text) {
   const e = document.createElementNS(NS, tag);
@@ -125,147 +122,105 @@ function el(tag, attrs, parent, text) {
   parent.appendChild(e);
   return e;
 }
-const icon = (name, x, y, s, color, parent) => el('use', { href: `#i-${name}`, x, y, width: s, height: s, color }, parent);
-// 폭 초과 시 글자 크기를 14px까지 줄이고, 그래도 넘치면 경고
-function fit(t, maxW, min = 14) {
+// 폭을 넘으면 15px까지 줄이고, 그래도 넘치면 경고
+function fit(t, maxW, min = 15) {
   let fs = parseFloat(getComputedStyle(t).fontSize);
   while (t.getComputedTextLength() > maxW && fs > min) { fs -= 0.5; t.style.fontSize = fs + 'px'; }
   if (t.getComputedTextLength() > maxW) console.warn('overflow:', t.textContent);
 }
 
-/* ---- 핵심 흐름 (상단 셰브론) ---- */
-(function story() {
-  const g = document.getElementById('story');
-  const y = 126, h = 38, tip = 14;
+// 상태 표시: 완료 = 초록 원과 체크, 진행 중 = 반만 칠한 노랑 원, 예정 = 빈 원
+function mark(status, cx, cy, g) {
+  if (status === 'done') {
+    el('circle', { cx, cy, r: 8.5, fill: 'var(--ok)' }, g);
+    el('path', { d: `M${cx - 4.2} ${cy + 0.2} l3 3 l5.6 -6`, fill: 'none', stroke: 'var(--paper)', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
+  } else if (status === 'doing') {
+    el('path', { d: `M${cx} ${cy - 8} A8 8 0 0 0 ${cx} ${cy + 8} Z`, fill: 'var(--caution)' }, g);
+    el('circle', { cx, cy, r: 8, fill: 'none', stroke: 'var(--ink)', 'stroke-width': 1.5 }, g);
+  } else {
+    el('circle', { cx, cy, r: 8, fill: 'none', stroke: 'var(--steel)', 'stroke-width': 1.5 }, g);
+  }
+}
+
+function render() {
+  const g = document.getElementById('sheet');
+  g.replaceChildren();
+
+  /* 흐름: 각 주차 칸 위에 글자로만 */
   for (let w = 1; w <= 4; w++) {
     const stages = STORY.filter((s) => s.week === w);
-    const segW = COLW / stages.length;
     stages.forEach((s, i) => {
-      const x = colX(w) + i * segW + (w === 1 && i === 0 ? 0 : -tip / 2) ;
-      const first = w === 1 && i === 0;
-      const last = w === 4 && i === stages.length - 1;
-      const sw = segW + (first ? -tip / 2 : 0) + (last ? tip / 2 : 0);
-      const p = PHASE[phaseOf(w)];
-      const pts = [
-        [x, y], [x + sw - tip, y], [x + sw, y + h / 2], [x + sw - tip, y + h], [x, y + h],
-        ...(first ? [] : [[x + tip, y + h / 2]]),
-      ].map((q) => q.join(',')).join(' ');
-      el('polygon', { points: pts, fill: p.head, stroke: phaseOf(w) === 'future' ? '#ced4da' : p.stroke, 'stroke-width': 1.5, 'stroke-linejoin': 'round' }, g);
-      el('text', { x: x + sw / 2 + (first ? -tip / 2 : 0), y: y + h / 2 + 6, 'text-anchor': 'middle', style: `font-size:17px;font-weight:700;fill:${p.ink}` }, g, s.label);
+      el('text', { x: colX(w) + PAD + i * (COLW / 2), y: L.story, class: 't-b' }, g, s.label);
     });
   }
-})();
 
-/* ---- 주차 컬럼 ---- */
-(function columns() {
-  const root = document.getElementById('cols');
+  /* 표 틀 */
+  el('line', { x1: L.x0, x2: L.x1, y1: L.top, y2: L.top, stroke: 'var(--ink)', 'stroke-width': 1.5 }, g);
+  el('line', { x1: L.x0, x2: L.x1, y1: L.headRule, y2: L.headRule, stroke: 'var(--rule)' }, g);
+  el('line', { x1: L.x0, x2: L.x1, y1: L.delivRule, y2: L.delivRule, stroke: 'var(--rule)' }, g);
+  el('line', { x1: L.x0, x2: L.x1, y1: L.bottom, y2: L.bottom, stroke: 'var(--ink)', 'stroke-width': 1.5 }, g);
+  for (let w = 2; w <= 4; w++) el('line', { x1: colX(w), x2: colX(w), y1: L.top, y2: L.bottom, stroke: 'var(--rule)' }, g);
+
   for (const W of WEEKS) {
-    const g = el('g', {}, root);
-    const x = colX(W.week), w = COLW, ph = phaseOf(W.week), p = PHASE[ph];
-    const now = ph === 'now';
+    const x = colX(W.week), tx = x + PAD, now = W.week === TODAY.week;
 
-    // 카드 + 헤더
-    el('rect', { x, y: L.top, width: w, height: L.bottom - L.top, rx: 18, fill: '#fff', stroke: now ? p.stroke : '#dee2e6', 'stroke-width': now ? 3 : 2 }, g);
-    const r = 18, hy = L.top, hh = L.head;
-    el('path', { d: `M${x + 1.5} ${hy + hh} V${hy + r} a${r - 1.5} ${r - 1.5} 0 0 1 ${r - 1.5} ${-r + 1.5} H${x + w - r} a${r - 1.5} ${r - 1.5} 0 0 1 ${r - 1.5} ${r - 1.5} V${hy + hh} Z`, fill: p.head }, g);
-    el('line', { x1: x + 1.5, x2: x + w - 1.5, y1: hy + hh, y2: hy + hh, stroke: now ? '#a5d8ff' : '#e9ecef', 'stroke-width': 1.5 }, g);
-    icon('calendar', x + 18, hy + 16, 30, p.ink, g);
-    el('text', { x: x + 56, y: hy + 41, class: 't-h', style: `fill:${p.ink}` }, g, `${W.week}주차`);
-    el('text', { x: x + w - 18, y: hy + 40, 'text-anchor': 'end', class: 't-s', style: 'font-size:16px' }, g, W.dates);
-    const theme = el('text', { x: x + 18, y: hy + 70, style: 'font-size:18px;font-weight:700;fill:#212529' }, g, W.theme);
-
-    // 진행률 (선택 항목 제외)
-    const req = W.items.filter((i) => i.kind !== 'optional');
-    const done = req.filter((i) => i.status === 'done').length;
-    const prog = el('text', { x: x + w - 18, y: hy + 70, 'text-anchor': 'end', class: 't-s', style: `font-weight:700;fill:${done ? p.bar : '#868e96'}` }, g, `${done}/${req.length} 완료`);
-    fit(theme, w - 36 - prog.getComputedTextLength() - 12);
-    const bx = x + 18, bw = w - 36;
-    el('rect', { x: bx, y: hy + 80, width: bw, height: 6, rx: 3, fill: '#e9ecef' }, g);
-    if (done) el('rect', { x: bx, y: hy + 80, width: (bw * done) / req.length, height: 6, rx: 3, fill: STATUS.done }, g);
-
-    // TODAY 마커
+    // 머리칸
     if (now) {
-      const tw = 132, tx = x + w - tw - 20, ty = L.top - 13;
-      el('rect', { x: tx, y: ty, width: tw, height: 26, rx: 13, fill: '#1c7ed6' }, g);
-      el('text', { x: tx + tw / 2, y: ty + 18, 'text-anchor': 'middle', style: 'fill:#fff;font-size:14px;font-weight:800;letter-spacing:.5px' }, g, `TODAY · ${TODAY.date}`);
+      el('rect', { x, y: L.top - 3, width: COLW, height: 6, fill: 'var(--caution)' }, g);
+      el('text', { x: x + COLW - PAD, y: 210, 'text-anchor': 'end', class: 't-s', style: 'fill:var(--ink);font-weight:600' }, g, `이번 주, 오늘 ${TODAY.date}`);
     }
+    const h = el('text', { x: tx, y: 210, class: 't-h' }, g, `${W.week}주차`);
+    el('text', { x: tx + h.getComputedTextLength() + 12, y: 210, class: 't-s' }, g, W.dates);
+    fit(el('text', { x: tx, y: 240, class: 't-b' }, g, W.theme), COLW - PAD * 2);
 
     // 항목
     let y = L.itemTop;
     const row = (it) => {
-      const cy = y + L.row / 2, opt = it.kind === 'optional';
-      if (opt) el('rect', { x: x + 10, y: cy - 13, width: w - 20, height: 26, rx: 8, fill: '#fff9db', stroke: '#f59f00', 'stroke-width': 1.5, 'stroke-dasharray': '6 4' }, g);
-      else if (it.status === 'doing') el('rect', { x: x + 10, y: cy - 14.5, width: w - 20, height: 29, rx: 8, fill: '#e7f5ff' }, g);
-      const sx = x + 30;
-      if (it.status === 'done') {
-        el('circle', { cx: sx, cy, r: 10, fill: STATUS.done }, g);
-        el('path', { d: `M${sx - 5} ${cy} l3.6 3.6 l6.6 -7`, fill: 'none', stroke: '#fff', 'stroke-width': 2.4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
-      } else if (it.status === 'doing') {
-        el('circle', { cx: sx, cy, r: 9, fill: '#fff', stroke: STATUS.doing, 'stroke-width': 2.4 }, g);
-        el('path', { d: `M${sx} ${cy - 5} A5 5 0 0 1 ${sx} ${cy + 5} Z`, fill: STATUS.doing }, g);
-      } else {
-        el('circle', { cx: sx, cy, r: 9, fill: '#fff', stroke: STATUS.todo, 'stroke-width': 2.2 }, g);
-      }
-      el('text', { x: x + 48, y: cy + 5, class: 't-mono', style: 'fill:#868e96' }, g, `#${it.no}`);
-      const t = el('text', { x: x + 88, y: cy + 5.5, style: `font-size:16px;fill:${it.status === 'todo' ? '#343a40' : '#212529'};${it.status === 'doing' ? 'font-weight:700' : ''}` }, g, it.title);
-      if (!opt) icon(KIND[it.kind].icon, x + w - 38, cy - 10, 20, KIND[it.kind].color, g);
-      fit(t, w - 88 - (opt ? 18 : 46));
+      const cy = y + L.row / 2;
+      mark(it.status, tx + 8, cy, g);
+      el('text', { x: tx + 64, y: cy + 5, 'text-anchor': 'end', class: 't-s' }, g, `#${it.no}`);
+      const t = el('text', { x: tx + 74, y: cy + 6, class: 't-b', style: it.status === 'doing' ? 'font-weight:600' : '' }, g, it.title);
+      fit(t, COLW - PAD - 74 - PAD);
       y += L.row;
     };
-    const base = W.items.filter((i) => i.kind !== 'optional');
+    W.items.filter((i) => i.kind !== 'optional').forEach(row);
     const opts = W.items.filter((i) => i.kind === 'optional');
-    base.forEach(row);
     if (opts.length) {
-      y += 6;
-      el('line', { x1: x + 18, x2: x + w - 18, y1: y + 10, y2: y + 10, stroke: '#ffd43b', 'stroke-width': 1.5, 'stroke-dasharray': '4 4' }, g);
-      const lab = el('text', { x: x + 26, y: y + 15, style: 'font-size:14px;font-weight:800;fill:#e67700' }, g, '선택 (가산점)');
-      const lw = lab.getComputedTextLength();
-      g.insertBefore(el('rect', { x: x + 20, y: y, width: lw + 12, height: 20, fill: '#fff' }, g), lab);
-      y += 24;
+      y += 14;
+      el('line', { x1: tx, x2: x + COLW - PAD, y1: y, y2: y, stroke: 'var(--rule)' }, g);
+      el('text', { x: tx, y: y + 24, class: 't-s' }, g, '선택(가산점)');
+      y += 32;
       opts.forEach(row);
     }
-    if (y > L.delivY - (W.badge ? 52 : 8)) console.warn('items overflow week', W.week);
+    if (y > L.badgeY - 22) console.warn('items overflow week', W.week);
 
-    // 결과 배지 / 메모
+    // 결과·메모 한 줄
     if (W.badge) {
-      const by = L.delivY - 48, res = W.badge.tone === 'result';
-      el('rect', { x: x + 14, y: by, width: w - 28, height: 36, rx: 18, fill: res ? '#ebfbee' : '#f8f9fa', stroke: res ? '#8ce99a' : '#adb5bd', 'stroke-width': 1.5, ...(res ? {} : { 'stroke-dasharray': '6 4' }) }, g);
-      icon(res ? 'check' : 'shield', x + 26, by + 6, 24, res ? '#2f9e44' : '#868e96', g);
-      const bt = el('text', { x: x + 58, y: by + 24, style: `font-size:16px;font-weight:700;fill:${res ? '#2b8a3e' : '#495057'}` }, g, W.badge.text);
-      fit(bt, w - 28 - 58);
+      const ok = W.badge.tone === 'result';
+      const b = el('text', { x: tx, y: L.badgeY, class: 't-s', style: ok ? 'fill:var(--ok);font-weight:600' : '' }, g, W.badge.text);
+      fit(b, COLW - PAD * 2, 13);
     }
 
     // 산출물
-    const dy = L.delivY;
-    el('rect', { x: x + 14, y: dy, width: w - 28, height: L.delivH, rx: 12, fill: ph === 'past' ? '#ebfbee' : '#fff', stroke: now ? '#74c0fc' : '#ced4da', 'stroke-width': 1.5 }, g);
-    icon('flag', x + 26, dy + 10, 24, now ? '#1c7ed6' : '#495057', g);
-    el('text', { x: x + 56, y: dy + 28, style: `font-size:14px;font-weight:800;fill:${now ? '#1971c2' : '#495057'}` }, g, '산출물');
+    el('text', { x: tx, y: L.delivRule + 26, class: 't-xs' }, g, '산출물');
     W.deliverable.forEach((line, i) => {
-      const t = el('text', { x: x + 28, y: dy + 54 + i * 21, style: `font-size:16px;fill:#212529;${i === 0 ? 'font-weight:700' : ''}` }, g, line);
-      fit(t, w - 28 - 28);
+      const t = el('text', { x: tx, y: L.delivRule + 52 + i * 24, class: i === 0 ? 't-b' : 't-s', style: i === 0 ? 'font-weight:600' : 'fill:var(--ink)' }, g, line);
+      fit(t, COLW - PAD * 2, 13);
     });
   }
-})();
 
-/* ---- 범례 ---- */
-(function legend() {
-  const g = el('g', { transform: 'translate(60,862)' }, document.getElementById('legend'));
-  let x = 0;
-  const lab = (s) => { const t = el('text', { x, y: 6, class: 't-s', style: 'fill:#212529' }, g, s); x += t.getComputedTextLength() + 30; };
-  el('circle', { cx: x + 10, cy: 0, r: 10, fill: STATUS.done }, g);
-  el('path', { d: `M${x + 5} 0 l3.6 3.6 l6.6 -7`, fill: 'none', stroke: '#fff', 'stroke-width': 2.4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
-  x += 28; lab('완료');
-  el('circle', { cx: x + 10, cy: 0, r: 9, fill: '#fff', stroke: STATUS.doing, 'stroke-width': 2.4 }, g);
-  el('path', { d: `M${x + 10} -5 A5 5 0 0 1 ${x + 10} 5 Z`, fill: STATUS.doing }, g);
-  x += 28; lab('진행 중');
-  el('circle', { cx: x + 10, cy: 0, r: 9, fill: '#fff', stroke: STATUS.todo, 'stroke-width': 2.2 }, g);
-  x += 28; lab('예정');
-  el('rect', { x, y: -11, width: 40, height: 22, rx: 6, fill: '#fff9db', stroke: '#f59f00', 'stroke-width': 1.5, 'stroke-dasharray': '6 4' }, g);
-  x += 50; lab('선택 (가산점)');
-  el('line', { x1: x - 10, x2: x - 10, y1: -14, y2: 14, stroke: '#dee2e6', 'stroke-width': 2 }, g);
-  x += 20;
-  for (const k of Object.values(KIND)) { icon(k.icon, x, -11, 22, k.color, g); x += 30; lab(k.label); }
-})();
+  /* 범례: 한 줄 */
+  const lg = el('g', { transform: `translate(${L.x0},${L.legend})` }, g);
+  let lx = 0;
+  const lab = (s) => { const t = el('text', { x: lx, y: 5, class: 't-s', style: 'fill:var(--ink)' }, lg, s); lx += t.getComputedTextLength() + 32; };
+  mark('done', lx + 8, 0, lg); lx += 24; lab('완료');
+  mark('doing', lx + 8, 0, lg); lx += 24; lab('진행 중');
+  mark('todo', lx + 8, 0, lg); lx += 24; lab('예정');
+}
+
+render();
+// 웹 글꼴이 늦게 오면 글자 폭을 다시 재서 그린다
+document.fonts.ready.then(render);
 </script>
 </body>
 </html>

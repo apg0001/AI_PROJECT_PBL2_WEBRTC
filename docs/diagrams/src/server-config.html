@@ -5,198 +5,176 @@
 <title>서버 구성도</title>
 <link rel="stylesheet" href="base.css">
 <style>
-  .t-r { font-size: 16px; fill: #212529; }
-  .t-lbl { font-size: 18px; font-weight: 700; fill: #212529; }
-  .t-pill { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 15px; font-weight: 700; fill: #fff; }
+  /* 계통도 선 (DESIGN.md §6) */
+  .ln-http { fill: none; stroke: var(--ink); stroke-width: 2; }
+  .ln-sig  { fill: none; stroke: var(--ink); stroke-width: 2; stroke-dasharray: 10 6; }
+  .ln-p2p  { fill: none; stroke: var(--ok); stroke-width: 8; }
+  .ln-stun { fill: none; stroke: var(--steel); stroke-width: 2.5; stroke-dasharray: 0.1 7; stroke-linecap: round; }
+  .ln-turn { fill: none; stroke: var(--caution); stroke-width: 3; stroke-dasharray: 18 8; }
+  .zone    { fill: none; stroke: var(--rule); stroke-width: 1.5; }
+  .row     { stroke: var(--rule); stroke-width: 1; }
+  .equip   { fill: var(--paper); stroke: var(--ink); stroke-width: 1.5; }
+  .equip-opt { fill: var(--paper); stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 6 4; }
+  .zone-name { font-size: 15px; font-weight: 600; fill: var(--steel); }
+  .name { font-size: 17px; font-weight: 600; }
+  .cell { font-size: 15px; }
+  .cell-b { font-size: 15px; font-weight: 600; }
+  .lbl  { font-size: 15px; fill: var(--ink); }
+  .no   { font-size: 15px; font-weight: 600; fill: var(--stop); }
+  .yes  { font-size: 15px; font-weight: 600; fill: var(--ok); }
+  .t-code.s { fill: var(--steel); }
 </style>
 </head>
 <body>
 <div id="diagram">
 <svg width="1600" height="900" viewBox="0 0 1600 900">
   <defs>
-    <marker id="a-http" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#495057"/></marker>
-    <marker id="a-signal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7048e8"/></marker>
-    <marker id="a-stun" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#868e96"/></marker>
-    <marker id="a-media" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#0ca678"/></marker>
-    <marker id="a-turn" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#f59f00"/></marker>
+    <marker id="a-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" style="fill:var(--ink)"/></marker>
+    <marker id="a-stun" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" style="fill:var(--steel)"/></marker>
   </defs>
 
   <!-- 제목 -->
-  <text x="60" y="66" class="t-title">서버 구성도 — 개발자 PC 1대로 운영하는 PoC 서버</text>
-  <text x="60" y="100" class="t-sub">Node.js 프로세스 하나가 페이지·API·시그널링을 맡고, 접속은 같은 LAN(A) 또는 ngrok 터널(B)로 연다</text>
+  <text x="60" y="66" class="t-title">PoC 서버 구성도</text>
+  <text x="60" y="100" class="t-sub">개발자 PC의 Node.js 프로세스 하나가 페이지와 연결 정보만 다루고, 접속은 같은 LAN(A) 또는 ngrok 터널(B)로 연다.</text>
 
   <!-- ================= 개발자 PC ================= -->
-  <rect x="50" y="130" width="700" height="680" rx="28" fill="#f8f9fa" stroke="#ced4da" stroke-width="2"/>
-  <use href="#i-laptop" x="70" y="140" width="44" height="44" color="#495057"/>
-  <text x="124" y="172" class="t-h">개발자 PC</text>
-  <text x="246" y="172" class="t-s">MacBook Air · macOS</text>
-  <text x="728" y="172" text-anchor="end" class="t-s">LAN IP 192.168.0.111</text>
+  <rect x="40" y="128" width="720" height="686" class="zone"/>
+  <text x="60" y="156" class="zone-name">개발자 PC</text>
+  <text x="144" y="156" class="t-s">MacBook Air, macOS, LAN IP <tspan class="t-code s">192.168.0.111</tspan></text>
 
   <!-- Node.js 프로세스 -->
-  <rect x="72" y="190" width="656" height="450" rx="18" fill="#f3f0ff" stroke="#b197fc" stroke-width="2"/>
-  <use href="#i-server" x="88" y="202" width="44" height="44" color="#7048e8"/>
-  <text x="146" y="230" class="t-h" style="fill:#5f3dc4">Node.js 프로세스</text>
-  <rect x="566" y="208" width="146" height="32" rx="16" fill="#7048e8"/>
-  <text x="639" y="229" text-anchor="middle" class="t-pill">0.0.0.0:3000</text>
-  <text x="146" y="258"><tspan class="t-mono">server/src/index.js</tspan><tspan class="t-s" dx="10">· npm start 로 실행</tspan></text>
-  <text x="146" y="280" class="t-s">HTTP 기본 · server/certs/cert.pem·key.pem 이 있으면 HTTPS 자동</text>
+  <rect x="60" y="172" width="680" height="498" rx="2" class="equip"/>
+  <text x="84" y="202" class="name">Node.js 프로세스</text>
+  <text x="232" y="202" class="t-code">0.0.0.0:3000</text>
+  <text x="84" y="228" class="t-s"><tspan class="t-code s">npm start</tspan>로 실행, 진입점 <tspan class="t-code s">server/src/index.js</tspan></text>
+  <text x="84" y="252" class="t-s">기본은 HTTP, <tspan class="t-code s">server/certs/</tspan>에 cert.pem과 key.pem이 있으면 HTTPS</text>
 
-  <!-- ① 정적 파일 서빙 -->
-  <rect x="88" y="294" width="624" height="130" rx="14" fill="#fff" stroke="#d0bfff"/>
-  <use href="#i-folder" x="102" y="306" width="30" height="30" color="#7048e8"/>
-  <text x="140" y="328" class="t-lbl">정적 파일 서빙</text>
-  <line x1="272" y1="306" x2="272" y2="412" stroke="#e5dbff"/>
-  <text x="288" y="320"><tspan class="t-mono" style="font-weight:700">/</tspan><tspan class="t-r" dx="8">→</tspan><tspan class="t-mono" dx="8" style="font-weight:700">client/</tspan></text>
-  <text x="304" y="344"><tspan class="t-mono">index.html</tspan><tspan class="t-r" dx="10">시작화면 · Room 생성 · QR</tspan></text>
-  <text x="304" y="366"><tspan class="t-mono">field.html</tspan><tspan class="t-r" dx="10">현장 ·</tspan><tspan class="t-mono" dx="8">expert.html</tspan><tspan class="t-r" dx="10">전문가</tspan></text>
-  <text x="304" y="388"><tspan class="t-mono">check.html</tspan><tspan class="t-r" dx="10">환경점검 ·</tspan><tspan class="t-mono" dx="8">js/ · css/</tspan></text>
-  <text x="288" y="412"><tspan class="t-mono" style="font-weight:700">/tools/</tspan><tspan class="t-r" dx="8">→</tspan><tspan class="t-mono" dx="8" style="font-weight:700">tools/</tspan><tspan class="t-s" dx="12">G2G 측정 도구 (예정)</tspan></text>
+  <!-- 엔드포인트 표 -->
+  <text x="84" y="288" class="t-xs">역할</text>
+  <text x="214" y="288" class="t-xs">경로</text>
+  <text x="380" y="288" class="t-xs">하는 일</text>
+  <line x1="84" y1="298" x2="716" y2="298" class="row"/>
 
-  <!-- ② HTTP API -->
-  <rect x="88" y="434" width="624" height="62" rx="14" fill="#fff" stroke="#d0bfff"/>
-  <use href="#i-code" x="102" y="450" width="30" height="30" color="#7048e8"/>
-  <text x="140" y="471" class="t-lbl">HTTP API</text>
-  <line x1="272" y1="444" x2="272" y2="486" stroke="#e5dbff"/>
-  <text x="288" y="459"><tspan class="t-mono" style="font-weight:700">/healthz</tspan><tspan class="t-r" dx="12">상태 확인</tspan></text>
-  <text x="288" y="483"><tspan class="t-mono" style="font-weight:700">/api/info</tspan><tspan class="t-r" dx="12">LAN IP 목록 → 폰용 링크·QR 생성</tspan></text>
+  <text x="84" y="322" class="cell-b">정적 파일</text>
+  <text x="84" y="346" class="t-code s" style="font-size:14px">client/</text>
+  <text x="214" y="322" class="t-code">/index.html</text><text x="380" y="322" class="cell">시작 화면, Room 생성, QR</text>
+  <text x="214" y="346" class="t-code">/field.html</text><text x="380" y="346" class="cell">현장 화면</text>
+  <text x="214" y="370" class="t-code">/expert.html</text><text x="380" y="370" class="cell">전문가 화면</text>
+  <text x="214" y="394" class="t-code">/check.html</text><text x="380" y="394" class="cell">환경 점검</text>
+  <text x="214" y="418" class="t-code">/js/ /css/</text><text x="380" y="418" class="cell">화면 스크립트와 스타일</text>
+  <text x="214" y="442" class="t-code">/tools/</text><text x="380" y="442" class="cell"><tspan class="t-code s">tools/</tspan> 폴더, G2G 측정 도구 (예정)</text>
+  <line x1="84" y1="456" x2="716" y2="456" class="row"/>
 
-  <!-- ③ WebSocket 시그널링 -->
-  <rect x="88" y="506" width="624" height="120" rx="14" fill="#fff" stroke="#d0bfff"/>
-  <use href="#i-swap" x="102" y="518" width="30" height="30" color="#7048e8"/>
-  <text x="140" y="540" class="t-lbl">WebSocket</text>
-  <text x="140" y="564" class="t-mono" style="font-weight:700">/ws</text>
-  <text x="140" y="590" class="t-s">signaling.js</text>
-  <line x1="272" y1="516" x2="272" y2="616" stroke="#e5dbff"/>
-  <text x="288" y="532" class="t-r">Room Map: room → 최대 2명 (역할 field / expert)</text>
-  <text x="288" y="556" class="t-r">offer · answer · ice 중계 (내용은 해석하지 않음)</text>
-  <text x="288" y="580" class="t-r">peer-joined / peer-left 알림 · 오류 코드 (ROOM_FULL 등)</text>
-  <text x="288" y="604" class="t-r">30초 ping/pong · 메시지 64KB 제한</text>
+  <text x="84" y="480" class="cell-b">HTTP API</text>
+  <text x="214" y="480" class="t-code">/healthz</text><text x="380" y="480" class="cell">상태 확인</text>
+  <text x="214" y="504" class="t-code">/api/info</text><text x="380" y="504" class="cell">LAN IP 목록, 폰용 링크와 QR 생성에 사용</text>
+  <line x1="84" y1="518" x2="716" y2="518" class="row"/>
 
-  <!-- 개발 도구 -->
-  <rect x="72" y="680" width="380" height="114" rx="16" fill="#fff" stroke="#ced4da"/>
-  <use href="#i-terminal" x="88" y="690" width="28" height="28" color="#495057"/>
-  <text x="124" y="711" class="t-lbl">개발 도구</text>
-  <text x="92" y="738" class="t-mono" style="font-weight:700">npm test</text>
-  <text x="250" y="738" class="t-s">서버 단위 테스트 5개</text>
-  <text x="92" y="760" class="t-mono" style="font-weight:700">npm run e2e</text>
-  <text x="250" y="760" class="t-s">Chrome 자동 연결 시험</text>
-  <text x="92" y="782" class="t-mono" style="font-weight:700">npm run diagrams</text>
-  <text x="250" y="782" class="t-s">다이어그램 PNG 생성</text>
+  <text x="84" y="542" class="cell-b">WebSocket</text>
+  <text x="84" y="566" class="cell-b">시그널링</text>
+  <text x="84" y="590" class="t-code s" style="font-size:14px">signaling.js</text>
+  <text x="214" y="542" class="t-code">/ws</text><text x="380" y="542" class="cell">Room마다 최대 2명, 역할은 field 또는 expert</text>
+  <text x="380" y="566" class="cell">offer, answer, ice를 해석 없이 상대에게 전달</text>
+  <text x="380" y="590" class="cell">peer-joined, peer-left 알림</text>
+  <text x="380" y="614" class="cell">오류 코드 (ROOM_FULL 등)</text>
+  <text x="380" y="638" class="cell">30초 ping/pong, 메시지 64KB 제한</text>
+
+  <!-- 개발 도구 (표) -->
+  <text x="60" y="714" class="name">개발 도구</text>
+  <line x1="60" y1="724" x2="440" y2="724" class="row"/>
+  <text x="60" y="748" class="t-code">npm test</text><text x="236" y="748" class="cell">서버 단위 테스트 5개</text>
+  <text x="60" y="772" class="t-code">npm run e2e</text><text x="236" y="772" class="cell">Chrome 자동 연결 시험</text>
+  <text x="60" y="796" class="t-code">npm run diagrams</text><text x="236" y="796" class="cell">다이어그램 PNG 생성</text>
 
   <!-- ngrok agent -->
-  <rect x="470" y="680" width="258" height="114" rx="16" fill="#fff" stroke="#b197fc" stroke-width="2"/>
-  <use href="#i-tunnel" x="486" y="692" width="34" height="34" color="#7048e8"/>
-  <text x="530" y="716" class="t-lbl">ngrok agent</text>
-  <text x="488" y="752" class="t-mono" style="font-weight:700">npm run tunnel</text>
-  <text x="488" y="776" class="t-mono" style="fill:#6c757d">= ngrok http 3000</text>
+  <rect x="480" y="716" width="260" height="76" rx="2" class="equip"/>
+  <text x="500" y="742" class="name">ngrok agent</text>
+  <text x="500" y="766" class="t-code">npm run tunnel</text>
+  <text x="500" y="786" class="t-code s" style="font-size:14px">ngrok http 3000</text>
 
-  <!-- ngrok agent → localhost:3000 -->
-  <line x1="590" y1="678" x2="590" y2="644" stroke="#495057" stroke-width="2.5" marker-end="url(#a-http)"/>
-  <line x1="602" y1="678" x2="602" y2="644" stroke="#7048e8" stroke-width="3" stroke-dasharray="6 5" marker-end="url(#a-signal)"/>
-  <text x="616" y="666" class="t-s">localhost:3000</text>
+  <!-- agent → localhost:3000 -->
+  <line x1="590" y1="716" x2="590" y2="670" class="ln-http"/>
+  <line x1="606" y1="716" x2="606" y2="670" class="ln-sig"/>
+  <text x="620" y="700" class="t-code s" style="font-size:14px">localhost:3000</text>
 
   <!-- ================= (A) 같은 LAN ================= -->
-  <rect x="810" y="150" width="300" height="206" rx="20" fill="#fff" stroke="#ced4da" stroke-width="2"/>
-  <circle cx="858" cy="196" r="28" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
-  <use href="#i-router" x="838" y="176" width="40" height="40" color="#495057"/>
-  <text x="900" y="192" class="t-h" style="font-size:22px">(A) 같은 LAN</text>
-  <text x="900" y="216" class="t-s">같은 Wi-Fi 공유기에 접속</text>
-  <rect x="826" y="248" width="268" height="32" rx="8" fill="#f8f9fa" stroke="#dee2e6"/>
-  <text x="960" y="269" text-anchor="middle" class="t-mono" style="font-weight:700">http://192.168.0.111:3000</text>
-  <circle cx="834" cy="304" r="5" fill="#e03131"/>
-  <text x="848" y="310" class="t-r">HTTP라서 폰 카메라 불가</text>
-  <circle cx="834" cy="332" r="5" fill="#2f9e44"/>
-  <text x="848" y="338" class="t-r">P2P 연결 시험은 가능</text>
+  <line x1="740" y1="216" x2="1232" y2="216" class="ln-http"/>
+  <line x1="740" y1="230" x2="1232" y2="230" class="ln-sig"/>
 
-  <!-- ================= (B) 외부 / 다른 네트워크 ================= -->
-  <rect x="810" y="408" width="300" height="262" rx="20" fill="#fff" stroke="#ced4da" stroke-width="2"/>
-  <circle cx="858" cy="454" r="28" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
-  <use href="#i-globe" x="838" y="434" width="40" height="40" color="#495057"/>
-  <text x="900" y="450" class="t-h" style="font-size:22px">(B) 외부 접속</text>
-  <text x="900" y="474" class="t-s">다른 네트워크 · LTE / 5G</text>
-  <text x="826" y="516" class="t-lbl">ngrok cloud edge</text>
-  <text x="988" y="516" class="t-s">HTTPS · WSS</text>
-  <rect x="826" y="530" width="268" height="32" rx="8" fill="#f8f9fa" stroke="#dee2e6"/>
-  <text x="960" y="551" text-anchor="middle" class="t-mono" style="font-weight:700">https://xxxx.ngrok-free.app</text>
-  <circle cx="834" cy="590" r="5" fill="#2f9e44"/>
-  <text x="848" y="596" class="t-r">HTTPS라서 카메라 가능</text>
-  <circle cx="834" cy="618" r="5" fill="#2f9e44"/>
-  <text x="848" y="624" class="t-r">다른 네트워크 연결 시험 (#37)</text>
-  <text x="826" y="652" class="t-s">agent ⇄ edge 터널로 3000번 포트 공개</text>
+  <text x="800" y="200" class="name">(A) 같은 LAN</text>
+  <text x="920" y="200" class="t-s">같은 Wi-Fi 공유기에 접속</text>
+  <text x="800" y="262" class="t-code">http://192.168.0.111:3000</text>
+  <line x1="800" y1="278" x2="1120" y2="278" class="row"/>
+  <text x="800" y="300" class="cell">폰 카메라</text><text x="980" y="300" class="no">불가</text><text x="1018" y="300" class="t-s">HTTP라서</text>
+  <line x1="800" y1="312" x2="1120" y2="312" class="row"/>
+  <text x="800" y="334" class="cell">P2P 연결 시험</text><text x="980" y="334" class="yes">가능</text>
+  <line x1="800" y1="346" x2="1120" y2="346" class="row"/>
 
-  <!-- ================= 클라이언트 ================= -->
-  <rect x="1160" y="130" width="390" height="412" rx="24" fill="#fff" stroke="#ced4da" stroke-width="2" stroke-dasharray="8 6"/>
-  <text x="1180" y="160" class="t-lbl">클라이언트 브라우저</text>
-  <text x="1530" y="160" text-anchor="end" class="t-s">설치 없음</text>
+  <!-- ================= (B) 외부 접속 ================= -->
+  <path d="M740 744 H772 V448 H800" class="ln-http"/>
+  <path d="M740 756 H786 V462 H800" class="ln-sig"/>
+  <line x1="1100" y1="448" x2="1226" y2="448" class="ln-http"/>
+  <line x1="1100" y1="462" x2="1226" y2="462" class="ln-sig"/>
 
-  <!-- 현장 -->
-  <rect x="1180" y="176" width="350" height="140" rx="18" fill="#fff4e6" stroke="#ffc078" stroke-width="2"/>
-  <use href="#i-phone" x="1188" y="196" width="80" height="80" color="#e8590c"/>
-  <text x="1278" y="212" class="t-h" style="fill:#d9480f">현장 작업자</text>
-  <text x="1278" y="240" class="t-b">Smartphone 브라우저</text>
-  <text x="1278" y="266" class="t-mono">field.html</text>
-  <text x="1278" y="296" class="t-s">(A) 같은 Wi-Fi · (B) LTE/5G</text>
+  <text x="800" y="406" class="name">(B) 외부 접속</text>
+  <text x="920" y="406" class="t-s">다른 네트워크, LTE, 5G</text>
+  <rect x="800" y="422" width="300" height="70" rx="2" class="equip"/>
+  <text x="820" y="448" class="name">ngrok cloud edge <tspan class="t-s" style="font-weight:400">HTTPS, WSS</tspan></text>
+  <text x="820" y="476" class="t-code" style="font-size:14px">https://xxxx.ngrok-free.app</text>
+  <line x1="800" y1="520" x2="1120" y2="520" class="row"/>
+  <text x="800" y="542" class="cell">폰 카메라</text><text x="980" y="542" class="yes">가능</text><text x="1018" y="542" class="t-s">HTTPS라서</text>
+  <line x1="800" y1="554" x2="1120" y2="554" class="row"/>
+  <text x="800" y="576" class="cell">다른 네트워크 시험</text><text x="980" y="576" class="yes">가능</text><text x="1018" y="576" class="t-s">#37</text>
+  <line x1="800" y1="588" x2="1120" y2="588" class="row"/>
+  <text x="800" y="616" class="t-s">agent와 edge 사이 터널로 3000번 포트를 공개</text>
+
+  <!-- ================= 클라이언트 브라우저 ================= -->
+  <text x="1224" y="156" class="zone-name">클라이언트 브라우저, 설치 없음</text>
+
+  <use href="#i-phone" x="1214" y="184" width="76" height="76" style="color:var(--ink)"/>
+  <text x="1304" y="208" class="t-h">현장 작업자</text>
+  <text x="1304" y="232" class="cell">스마트폰 브라우저, <tspan class="t-code">field.html</tspan></text>
+  <text x="1304" y="254" class="t-s">(A) 같은 Wi-Fi, (B) LTE나 5G</text>
+
+  <use href="#i-laptop" x="1212" y="416" width="80" height="80" style="color:var(--ink)"/>
+  <text x="1304" y="440" class="t-h">원격 전문가</text>
+  <text x="1304" y="464" class="cell">PC 브라우저, <tspan class="t-code">expert.html</tspan></text>
+  <text x="1304" y="486" class="t-s">(A) 같은 LAN, (B) 외부 망</text>
 
   <!-- P2P -->
-  <line x1="1228" y1="322" x2="1228" y2="386" stroke="#0ca678" stroke-width="6" marker-end="url(#a-media)" marker-start="url(#a-media)"/>
-  <text x="1252" y="350" style="fill:#0b7a5a;font-size:17px;font-weight:800">P2P 직접: 영상·음성·데이터</text>
-  <text x="1252" y="372" class="t-s">서버를 거치지 않음</text>
+  <line x1="1252" y1="258" x2="1252" y2="430" class="ln-p2p"/>
+  <text x="1304" y="332" class="lbl" style="font-weight:600">P2P 직접 연결: 영상, 음성, 데이터</text>
+  <text x="1304" y="356" class="t-s">서버를 거치지 않는다</text>
 
-  <!-- 전문가 -->
-  <rect x="1180" y="392" width="350" height="136" rx="18" fill="#e7f5ff" stroke="#a5d8ff" stroke-width="2"/>
-  <use href="#i-laptop" x="1188" y="414" width="80" height="80" color="#1c7ed6"/>
-  <text x="1278" y="428" class="t-h" style="fill:#1971c2">원격 전문가</text>
-  <text x="1278" y="456" class="t-b">PC 브라우저</text>
-  <text x="1278" y="482" class="t-mono">expert.html</text>
-  <text x="1278" y="510" class="t-s">(A) 같은 LAN · (B) 외부 망</text>
+  <!-- 외부 서비스 -->
+  <path d="M1236 484 V634" class="ln-stun" marker-end="url(#a-stun)"/>
+  <path d="M1268 484 V600 H1486 V638" class="ln-turn"/>
+  <text x="1304" y="548" class="t-s">브라우저가 직접 쓰고</text>
+  <text x="1304" y="570" class="t-s">서버는 관여하지 않음</text>
 
-  <!-- ================= 브라우저가 쓰는 외부 서비스 ================= -->
-  <text x="1355" y="574" text-anchor="middle" class="t-s">브라우저가 직접 사용 · 서버는 관여 안 함</text>
-  <path d="M1182 544 L1182 594" stroke="#868e96" stroke-width="2.5" stroke-dasharray="3 6" fill="none" marker-end="url(#a-stun)"/>
-  <path d="M1528 544 L1528 594" stroke="#f59f00" stroke-width="2.5" stroke-dasharray="8 6" fill="none" marker-end="url(#a-turn)"/>
+  <rect x="1212" y="638" width="196" height="96" rx="2" class="equip"/>
+  <text x="1230" y="664" class="name">Google STUN</text>
+  <text x="1230" y="690" class="t-code" style="font-size:14px">stun.l.google.com</text>
+  <text x="1230" y="714" class="t-s">포트 19302, UDP</text>
 
-  <rect x="1160" y="598" width="188" height="100" rx="16" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/>
-  <use href="#i-target" x="1172" y="608" width="34" height="34" color="#495057"/>
-  <text x="1214" y="632" class="t-lbl" style="font-size:17px">Google STUN</text>
-  <text x="1176" y="664" class="t-mono">stun.l.google.com</text>
-  <text x="1176" y="686" class="t-s">:19302 · UDP</text>
+  <rect x="1424" y="638" width="136" height="96" rx="2" class="equip-opt"/>
+  <text x="1442" y="664" class="name">TURN 호스팅</text>
+  <text x="1442" y="690" class="t-s">선택, #38</text>
+  <text x="1442" y="714" class="t-s">P2P 실패 시 중계</text>
 
-  <rect x="1362" y="598" width="188" height="100" rx="16" fill="#fff9db" stroke="#f59f00" stroke-width="2" stroke-dasharray="8 6"/>
-  <use href="#i-relay" x="1374" y="608" width="34" height="34" color="#e67700"/>
-  <text x="1416" y="632" class="t-lbl" style="font-size:17px;fill:#e67700">TURN 호스팅</text>
-  <text x="1376" y="664" class="t-s">선택 · #38</text>
-  <text x="1376" y="686" class="t-s">P2P 실패 시 중계</text>
-
-  <!-- ================= 연결선: HTTP(S) + WebSocket ================= -->
-  <!-- 서버 → (A) → 클라이언트 -->
-  <line x1="712" y1="218" x2="810" y2="218" stroke="#495057" stroke-width="2.5"/>
-  <line x1="712" y1="230" x2="810" y2="230" stroke="#7048e8" stroke-width="3" stroke-dasharray="10 7"/>
-  <line x1="1110" y1="218" x2="1158" y2="218" stroke="#495057" stroke-width="2.5" marker-end="url(#a-http)"/>
-  <line x1="1110" y1="230" x2="1158" y2="230" stroke="#7048e8" stroke-width="3" stroke-dasharray="6 5" marker-end="url(#a-signal)"/>
-  <!-- ngrok agent → (B) → 클라이언트 -->
-  <path d="M728 726 C 774 726, 764 586, 810 586" fill="none" stroke="#495057" stroke-width="2.5"/>
-  <path d="M728 738 C 786 738, 776 598, 810 598" fill="none" stroke="#7048e8" stroke-width="3" stroke-dasharray="10 7"/>
-  <line x1="1110" y1="464" x2="1158" y2="464" stroke="#495057" stroke-width="2.5" marker-end="url(#a-http)"/>
-  <line x1="1110" y1="476" x2="1158" y2="476" stroke="#7048e8" stroke-width="3" stroke-dasharray="6 5" marker-end="url(#a-signal)"/>
-
-  <!-- ================= 핵심 메시지 ================= -->
-  <rect x="810" y="722" width="740" height="88" rx="18" fill="#e6fcf5" stroke="#0ca678" stroke-width="2"/>
-  <use href="#i-shield" x="830" y="742" width="48" height="48" color="#0ca678"/>
-  <text x="896" y="758" style="font-size:21px;font-weight:800;fill:#087f5b">서버는 페이지와 연결 정보만 다룬다</text>
-  <text x="896" y="790" class="t-b">영상·음성·데이터는 브라우저끼리 P2P로 직접 흐른다</text>
-
-  <!-- 범례 -->
-  <g transform="translate(60,852)">
-    <line x1="0" y1="0" x2="46" y2="0" stroke="#495057" stroke-width="2.5"/>
-    <text x="56" y="6" class="t-s" style="fill:#212529">HTTP(S) 페이지·API</text>
-    <line x1="270" y1="0" x2="316" y2="0" stroke="#7048e8" stroke-width="3" stroke-dasharray="10 7"/>
-    <text x="326" y="6" class="t-s" style="fill:#212529">WebSocket 시그널링 (WS/WSS)</text>
-    <line x1="600" y1="0" x2="646" y2="0" stroke="#868e96" stroke-width="2.5" stroke-dasharray="3 6"/>
-    <text x="656" y="6" class="t-s" style="fill:#212529">STUN 질의 (UDP)</text>
-    <line x1="850" y1="0" x2="896" y2="0" stroke="#0ca678" stroke-width="6"/>
-    <text x="906" y="6" class="t-s" style="fill:#212529">P2P 미디어·데이터</text>
-    <line x1="1110" y1="0" x2="1156" y2="0" stroke="#f59f00" stroke-width="2.5" stroke-dasharray="8 6"/>
-    <text x="1166" y="6" class="t-s" style="fill:#212529">TURN Relay (선택)</text>
+  <!-- ===== 범례 ===== -->
+  <line x1="60" y1="836" x2="1540" y2="836" style="stroke:var(--rule);stroke-width:1"/>
+  <g transform="translate(60,870)">
+    <line x1="0" y1="-5" x2="48" y2="-5" class="ln-http"/>
+    <text x="62" y="0" class="lbl">HTTP(S): 페이지와 API</text>
+    <line x1="270" y1="-5" x2="318" y2="-5" class="ln-sig"/>
+    <text x="332" y="0" class="lbl">WebSocket 시그널링 (WS, WSS)</text>
+    <line x1="590" y1="-5" x2="638" y2="-5" class="ln-p2p"/>
+    <text x="652" y="0" class="lbl">P2P 영상, 음성, 데이터</text>
+    <line x1="880" y1="-5" x2="928" y2="-5" class="ln-stun"/>
+    <text x="942" y="0" class="lbl">STUN 질의 (UDP)</text>
+    <line x1="1130" y1="-5" x2="1178" y2="-5" class="ln-turn"/>
+    <text x="1192" y="0" class="lbl">TURN 중계 (선택)</text>
   </g>
 </svg>
 </div>

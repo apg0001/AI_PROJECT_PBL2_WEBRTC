@@ -1,28 +1,29 @@
-/* 다이어그램 공통 스타일 — 1600×900(16:9), 밝은 배경 고정 (보고서·슬라이드용) */
+/* 다이어그램 공통 스타일 - 기준: docs/DESIGN.md (1600×900, 밝은 배경 고정)
+   색과 글꼴은 아래 토큰만 쓴다. 다이어그램 HTML 안에 색 값을 직접 쓰지 말고 var(--…)를 쓴다. */
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600&display=swap");
+
 :root {
-  --ink: #212529;
-  --muted: #6c757d;
-  --line: #dee2e6;
-  --field: #e8590c;      /* 현장 */
-  --field-bg: #fff4e6;
-  --expert: #1c7ed6;     /* 전문가 */
-  --expert-bg: #e7f5ff;
-  --signal: #7048e8;     /* 시그널링 */
-  --signal-bg: #f3f0ff;
-  --media: #0ca678;      /* P2P 미디어·데이터 */
-  --stun: #868e96;
-  --turn: #f59f00;
-  --done: #2f9e44;
-  --todo: #adb5bd;
+  --paper: #ffffff;   /* 배경 */
+  --ink: #22272b;     /* 본문 글자, 주요 선, 시그널링 점선 */
+  --steel: #5f6b76;   /* 보조 글자, STUN 질의 선 */
+  --rule: #d5dadf;    /* 표의 칸 선, 영역 경계 */
+  --caution: #f5c400; /* 주의·대기, TURN 중계(선택) */
+  --ok: #1b7a47;      /* 연결됨, 영상·데이터 경로 */
+  --stop: #b42318;    /* 실패 */
+  --font: "IBM Plex Sans KR", "Apple SD Gothic Neo", sans-serif;
+  --mono: "SF Mono", Menlo, monospace; /* 실제 주소·코드 값에만 */
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; background: #fff; }
-body { font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif; color: var(--ink); }
-#diagram { width: 1600px; height: 900px; position: relative; background: #fff; overflow: hidden; }
-svg text { font-family: inherit; }
-.t-title { font-size: 34px; font-weight: 800; fill: var(--ink); }
-.t-sub { font-size: 18px; fill: var(--muted); }
-.t-h { font-size: 24px; font-weight: 800; }
-.t-b { font-size: 18px; fill: var(--ink); }
-.t-s { font-size: 15px; fill: var(--muted); }
-.t-mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 15px; fill: var(--ink); }
+html, body { margin: 0; background: var(--paper); }
+body { font-family: var(--font); color: var(--ink); font-variant-numeric: tabular-nums; }
+#diagram { width: 1600px; height: 900px; position: relative; background: var(--paper); overflow: hidden; }
+svg text { font-family: var(--font); fill: var(--ink); }
+
+/* 크기 단계: 13 · 15 · 17 · 20 · 24 · 30 · 38 */
+.t-title { font-size: 30px; font-weight: 600; }
+.t-sub { font-size: 17px; fill: var(--steel); }
+.t-h { font-size: 20px; font-weight: 600; }
+.t-b { font-size: 17px; }
+.t-s { font-size: 15px; fill: var(--steel); }
+.t-xs { font-size: 13px; fill: var(--steel); }
+.t-code { font-family: var(--mono); font-size: 15px; }
