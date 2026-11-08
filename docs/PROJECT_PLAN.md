@@ -16,10 +16,10 @@
 | 구분 | 내용 |
 |---|---|
 | **Core (필수)** | 1 Requirement · 2 Architecture · 3 Connection Sequence · 4 1:1 연결 · 5 Media · 6 DataChannel · 7 품질 측정 1개 이상 · 8 기업 확장문제(Think) 3개 이상 |
-| **추가 범위 (팀 결정)** | **Glass-to-Glass(G2G) 지연 측정 도구**: 카메라로 ms 타임스탬프 화면을 찍어 수신 화면까지의 종단 지연을 측정 |
-| **제외 / 축소** | **서로 다른 네트워크(NAT 너머) 실측 연결 시험은 제외**한다. 대신 동일 LAN에서 ICE Candidate 종류를 관찰하고, NAT/STUN/TURN 필요조건을 문서로 분석한다. 네트워크 품질 비교는 동일 LAN에서 대역폭 제한(throttling)으로 수행한다. |
+| **추가 범위 (팀 결정)** | **Glass-to-Glass(G2G) 지연 측정 도구**: 카메라로 ms 타임스탬프 화면을 찍어 수신 화면까지의 종단 지연을 측정<br>**다른 네트워크 간 연결 시험**(#37): 폰 LTE/5G ↔ PC Wi-Fi 등 서로 다른 NAT 뒤에서 STUN만으로 P2P가 되는지 실측. 시그널링은 ngrok 터널로 공개 |
+| **축소** | 품질 비교의 기본은 동일 LAN + 대역폭 제한(throttling)으로 하고, 실제 Wi-Fi↔LTE 조건은 가능한 범위에서 추가한다. 다른 네트워크 연결이 실패하면 실패 단계와 원인을 증거로 설명한다(과제 명세 §23). |
 | **하지 않는 것** | 상용 수준 UI, 모바일 App, 복잡한 Backend, TURN 자체 구축, SFU 구축, 다중 사용자 구현 |
-| **Optional (+5점 이내)** | F Dashboard(#32) → C Adaptive Control(#33) → D Reconnection(#34) 순으로, 여유가 있을 때 진행 |
+| **Optional (+5점 이내)** | A 호스팅 TURN 적용·Direct vs Relay 비교(#38) → F Dashboard(#32) → C Adaptive Control(#33) → D Reconnection(#34) 순으로, 여유가 있을 때 진행 |
 
 ## 3. 일정 — 4주 (2026-11-09 ~ 12-06)
 
@@ -34,7 +34,7 @@
 | 4주차 | 11/30 – 12/06 | 최종 정리 (버퍼) | 최종 제출물 8종, Final Presentation(12분 + Q&A 8분) | #30 |
 
 ### 1주차 — 설계 및 연결
-- #1 프로젝트 계획·협업 규칙·저장소 구조
+- #1 프로젝트 계획·협업 규칙·저장소 구조 · #36 범위 변경(다른 네트워크 연결 포함)
 - #2 개발 환경 (Node.js, 모바일 HTTPS)
 - #3 Requirement · #4 Architecture · #5 Connection Sequence · #6 기술 결정 v1 · #7 PoC·시험계획 · #8 역할분담
 - #9 Signaling Server · #10 1:1 RTCPeerConnection · #11 연결 과정 가시화
@@ -42,7 +42,8 @@
 
 ### 2주차 — Media/Data 및 측정 도구
 - #13 Smartphone ↔ PC 동일 LAN 연결 검증, Connection Time
-- #14 NAT/STUN/TURN 필요조건 분석 (실측 제외)
+- #37 **다른 네트워크 간 연결 시험 (Wi-Fi ↔ LTE/5G)**
+- #14 NAT/STUN/TURN 필요조건 분석 (#37 결과 해석)
 - #15 Video/Audio · #16 DataChannel 프로토콜 · #17 채팅·Pointer
 - #18 getStats 수집 · #19 **Glass-to-Glass 지연 측정 도구**
 - #20 발표자료
@@ -52,7 +53,7 @@
 - #24 Reliability (상태 표시, 장애 시나리오) · #25 실패 사례
 - #26 Think ≥ 3 · #27 Scalability
 - #28 발표자료 (Intermediate Check + Integration Report)
-- (Optional) #32 Stats Dashboard
+- (Optional) #38 TURN 적용·Direct vs Relay 비교 · #32 Stats Dashboard
 
 ### 4주차 — 최종 정리 (버퍼)
 - #29 최종 제출물 8종 · #30 최종 발표·리허설 · #31 개인 Contribution Summary
@@ -106,9 +107,9 @@
 | 항목 | 초안 | 이유 |
 |---|---|---|
 | Signaling | Node.js + `ws` WebSocket, Room ID 기반 | 양방향 push가 필요하고 구현이 가장 단순함. Socket.IO 대비 의존성이 적음 |
-| 정적 서빙 | 시그널링 서버가 `client/`를 HTTPS로 함께 서빙 | 모바일의 `getUserMedia`는 Secure Context(HTTPS)가 필요함. 동일 LAN에서 mkcert 인증서 또는 터널(cloudflared) 사용 |
+| 정적 서빙 | 시그널링 서버가 `client/`를 HTTPS로 함께 서빙 | 모바일의 `getUserMedia`는 Secure Context(HTTPS)가 필요함. **ngrok 터널**로 HTTPS와 외부 접속을 함께 해결(시그널링·정적 파일만 터널을 지나고 Media는 P2P). 동일 LAN 전용으로 mkcert 보조 |
 | STUN | Google 공용 STUN (`stun:stun.l.google.com:19302`) | 과제 가정: 공용 서버 사용 |
-| TURN | 구축하지 않고 필요조건만 분석 | 과제 기본 범위. 다른 네트워크 실측은 제외 |
+| TURN | 자체 구축 안 함. P2P 실패 시 호스팅 TURN 적용 검토(#38) | 과제 기본 범위는 필요조건 분석. 자체 구축은 범위 밖 |
 | Media | MediaStream Video(후면 카메라) + Audio 양방향 | 원격지원의 기본 |
 | Data | DataChannel 2개: `control`(reliable, ordered) / `pointer`(unordered, maxRetransmits=0) | 작업지시는 반드시 도착해야 하고, Pointer는 최신 값만 의미 있음 |
 | Client | Vanilla JS, 빌드 없음 | PoC 범위. 프레임워크 학습 비용 제거 |
