@@ -25,7 +25,9 @@
 - [x] #46 1인 진행 반영, 주차별 보고서 규칙 (#8 역할분담은 종료)
 - [x] #9 Signaling Server (`server/src/signaling.js`, 테스트 5개)
 - [x] #10 1:1 연결 (`client/`: field·expert 화면, Room 생성·QR) — Chrome 2개 E2E 통과
-- [ ] #11 연결 과정 가시화 (Candidate 표, 상태 전이 시각, 로그 내보내기)
+- [x] #11 연결 과정 가시화 (Candidate 표, 상태 전이 시각, 로그 JSON 내보내기)
+- [x] #51 과제 설명 PDF를 `docs/reference/`로 정리
+- [ ] 보고서용 그림: 시스템 아키텍처, 서버 구성도, 구현 계획 (아이콘 포함)
 - [ ] PC ↔ iPhone 같은 Wi-Fi 연결 직접 확인 (`http://192.168.0.111:3000` → QR)
 - [ ] #12 1주차 발표자료
 
