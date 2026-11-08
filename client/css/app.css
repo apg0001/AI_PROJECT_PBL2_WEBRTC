@@ -36,3 +36,12 @@ table.kv td:first-child { color: var(--muted); width: 45%; }
 .log .cat-data .c { color: var(--ok); }
 a.big { display: block; padding: 12px; margin: 8px 0; border: 1px solid var(--line); border-radius: 8px; color: inherit; text-decoration: none; }
 .qr svg { width: 200px; height: 200px; background: #fff; padding: 8px; border-radius: 8px; }
+table.grid { border-collapse: collapse; width: 100%; font-size: .78rem; font-family: ui-monospace, monospace; }
+table.grid th, table.grid td { border-bottom: 1px solid var(--line); padding: 3px 6px; text-align: left; word-break: break-all; }
+table.grid th { color: var(--muted); font-weight: 600; }
+table.grid tr.muted td { color: var(--muted); }
+tr.state-connected td, tr.state-completed td { color: var(--ok); }
+tr.state-disconnected td { color: var(--warn); }
+tr.state-failed td, tr.state-closed td { color: var(--err); }
+tr.ctype-srflx td:nth-child(3) { color: var(--busy); font-weight: 600; }
+tr.ctype-relay td:nth-child(3) { color: var(--warn); font-weight: 600; }

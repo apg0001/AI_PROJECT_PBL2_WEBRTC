@@ -45,6 +45,21 @@ try {
   console.log('  field :', (await result(f)).join(' | '));
   console.log('  expert:', (await result(e)).join(' | '));
 
+  // #11 연결 과정 가시화
+  const nCands = await e.$$eval('#cands tbody tr', (r) => r.length);
+  check('ICE Candidate 표', nCands > 0, `${nCands}행, ${await e.$eval('#candSummary', (x) => x.textContent)}`);
+  const states = await e.$eval('#states', (t) => t.textContent);
+  check('상태 전이 표에 connected 기록', states.includes('connected'));
+  const dl = await e.evaluate(() => {
+    let name = null;
+    const orig = HTMLAnchorElement.prototype.click;
+    HTMLAnchorElement.prototype.click = function () { name = this.download; };
+    document.getElementById('export').click();
+    HTMLAnchorElement.prototype.click = orig;
+    return name;
+  });
+  check('로그 내보내기 파일 생성', /^events_expert_.*\.json$/.test(dl ?? ''), dl);
+
   await e.click('#ping');
   await e.waitForFunction(() => document.getElementById('log').textContent.includes('DataChannel 왕복'), { timeout: 5000 });
   check('DataChannel ping/pong', true);
