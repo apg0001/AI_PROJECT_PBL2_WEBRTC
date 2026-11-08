@@ -88,7 +88,8 @@ export function attachSignaling(server, { log = () => {}, heartbeatMs = 30_000 }
       else error(ws, 'BAD_MESSAGE', `알 수 없는 type: ${msg?.type}`);
     });
     ws.on('close', () => leave(ws, 'close'));
-    log(`ws open ${ws.id} from ${req.socket.remoteAddress}`);
+    // 실험 기록용: 어떤 기기·브라우저가 접속했는지 남긴다
+    log(`ws open ${ws.id} from ${req.socket.remoteAddress} ua="${(req.headers['user-agent'] ?? '').slice(0, 160)}"`);
   });
 
   // 조용히 끊긴 연결(화면 꺼짐, 네트워크 전환) 감지

@@ -37,6 +37,7 @@
 | 11/09 | #51 | 과제 설명 PDF를 `docs/reference/`로 이동, #11 PR에서 빠진 문서 갱신 반영 | 루트 정리 |
 | 11/09 | #53 | 보고서용 그림 4종: 시스템 아키텍처, 서버 구성도, 구현 계획(4주 로드맵), 클라이언트 모듈 구조. 직접 그린 아이콘 세트, `npm run diagrams`로 PNG 렌더링 | 아래 '그림' |
 | 11/09 | #13 | iPhone(Chrome) ↔ Mac(Chrome) 같은 Wi-Fi 연결 10회 시험. PC 쪽 자동 측정 스크립트(`server/e2e/measure-connection.mjs`) 추가. 재연결 시 결과 표가 남는 버그 수정 | 9/9 P2P 직접 연결, Connection Time 중앙값 50.5 ms(40~102, 8회), ICE RTT 중앙값 9 ms, DataChannel 왕복 중앙값 21.8 ms. 10회째는 폰 앱 전환으로 중단. `experiments/2026-11-09_T1-iphone-pc-lan/` |
+| 11/09 | #13 | iPad ↔ Mac 같은 Wi-Fi 연결 10회 시험, 서버가 접속 기기의 User-Agent를 기록하도록 수정 | 10/10 P2P 직접 연결, Connection Time 중앙값 46 ms(39~172, 9회), ICE RTT 중앙값 9 ms, DataChannel 왕복 중앙값 39.3 ms. `experiments/2026-11-09_T1-ipad-pc-lan/` |
 
 ## 그림
 

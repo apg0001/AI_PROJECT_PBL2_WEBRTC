@@ -1,0 +1,11 @@
+run,role,connectionMs,iceRttMs,dataChannelRttMs,pathType,localPath,remotePath,candidates
+1,"Offerer (먼저 입장)","",3,8.1,"P2P Direct","host udp (mDNS로 숨김):55874","prflx udp (mDNS로 숨김):53920","local: host 1, srflx 1 / remote: host 1"
+2,"Answerer (나중 입장)",172,6,39.3,"P2P Direct","prflx udp (mDNS로 숨김):51382","host udp (mDNS로 숨김):52920","local: host 1 / remote: host 1, srflx 1"
+3,"Answerer (나중 입장)",42,14,29.3,"P2P Direct","prflx udp (mDNS로 숨김):56190","host udp (mDNS로 숨김):53067","local: host 1 / remote: host 1"
+4,"Answerer (나중 입장)",41,9,10.3,"P2P Direct","prflx udp (mDNS로 숨김):56961","host udp (mDNS로 숨김):59993","local: host 1 / remote: host 1"
+5,"Answerer (나중 입장)",126,9,41.5,"P2P Direct","prflx udp (mDNS로 숨김):59548","host udp (mDNS로 숨김):49866","local: host 1 / remote: host 1, srflx 1"
+6,"Answerer (나중 입장)",44,6,42,"P2P Direct","prflx udp (mDNS로 숨김):54609","host udp (mDNS로 숨김):63470","local: host 1 / remote: host 1"
+7,"Answerer (나중 입장)",46,9,58.1,"P2P Direct","prflx udp (mDNS로 숨김):57748","host udp (mDNS로 숨김):51712","local: host 1 / remote: host 1"
+8,"Answerer (나중 입장)",88,13,8.2,"P2P Direct","prflx udp (mDNS로 숨김):63528","host udp (mDNS로 숨김):58912","local: host 1 / remote: host 1"
+9,"Answerer (나중 입장)",46,10,39.2,"P2P Direct","prflx udp (mDNS로 숨김):56896","host udp (mDNS로 숨김):63874","local: host 1 / remote: host 1"
+10,"Answerer (나중 입장)",39,7,64.2,"P2P Direct","prflx udp (mDNS로 숨김):52976","host udp (mDNS로 숨김):52730","local: host 1 / remote: host 1"
