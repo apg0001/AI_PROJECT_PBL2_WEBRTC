@@ -102,17 +102,9 @@
     └── week1/ … week4/
 ```
 
-### 주요 기술 결정 (초안 — 1주차 #6에서 확정)
+### 주요 기술 결정
 
-| 항목 | 초안 | 이유 |
-|---|---|---|
-| Signaling | Node.js + `ws` WebSocket, Room ID 기반 | 양방향 push가 필요하고 구현이 가장 단순함. Socket.IO 대비 의존성이 적음 |
-| 정적 서빙 | 시그널링 서버가 `client/`를 HTTPS로 함께 서빙 | 모바일의 `getUserMedia`는 Secure Context(HTTPS)가 필요함. **ngrok 터널**로 HTTPS와 외부 접속을 함께 해결(시그널링·정적 파일만 터널을 지나고 Media는 P2P). 동일 LAN 전용으로 mkcert 보조 |
-| STUN | Google 공용 STUN (`stun:stun.l.google.com:19302`) | 과제 가정: 공용 서버 사용 |
-| TURN | 자체 구축 안 함. P2P 실패 시 호스팅 TURN 적용 검토(#38) | 과제 기본 범위는 필요조건 분석. 자체 구축은 범위 밖 |
-| Media | MediaStream Video(후면 카메라) + Audio 양방향 | 원격지원의 기본 |
-| Data | DataChannel 2개: `control`(reliable, ordered) / `pointer`(unordered, maxRetransmits=0) | 작업지시는 반드시 도착해야 하고, Pointer는 최신 값만 의미 있음 |
-| Client | Vanilla JS, 빌드 없음 | PoC 범위. 프레임워크 학습 비용 제거 |
+확정본은 [04-tech-decisions.md](04-tech-decisions.md)에 있다 (TD-01 ~ TD-12).
 
 ### G2G 지연 측정 방식 (초안)
 

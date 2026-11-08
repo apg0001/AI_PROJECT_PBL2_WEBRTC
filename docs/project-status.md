@@ -19,7 +19,8 @@
 - [x] #3 Requirement 정의 (`docs/01-requirements.md`)
 - [x] #4 Architecture (`docs/02-architecture.md`)
 - [x] #5 Connection Sequence·Signaling 메시지 스펙 (`docs/03-connection-sequence.md`)
-- [ ] #6 기술 결정 · #7 시험계획
+- [x] #6 기술 결정 TD-01~12 (`docs/04-tech-decisions.md`)
+- [ ] #7 PoC·시험계획
 - [ ] #8 역할분담 (팀원 정보 필요)
 - [ ] #9 ~ #11 Signaling Server, 1:1 연결, 연결 과정 가시화
 - [ ] #12 1주차 발표자료
