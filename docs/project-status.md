@@ -4,6 +4,7 @@
 
 ## 현재 상태 (2026-11-09, 1주차)
 
+- System Design v1.0 문서 완료: 01 Requirement, 02 Architecture, 03 Connection Sequence, 04 Technology Decision, 05 시험계획
 - 4주 일정 계획 수립, GitHub Issue #1~#34 및 주차별 Milestone 생성
 - Git 컨벤션(`CONTRIBUTING.md`), Issue·PR 템플릿, 저장소 디렉터리 골격 추가
 - 범위 결정
@@ -20,7 +21,7 @@
 - [x] #4 Architecture (`docs/02-architecture.md`)
 - [x] #5 Connection Sequence·Signaling 메시지 스펙 (`docs/03-connection-sequence.md`)
 - [x] #6 기술 결정 TD-01~12 (`docs/04-tech-decisions.md`)
-- [ ] #7 PoC·시험계획
+- [x] #7 PoC·시험계획 T1~T5 (`docs/05-test-plan.md`)
 - [ ] #8 역할분담 (팀원 정보 필요)
 - [ ] #9 ~ #11 Signaling Server, 1:1 연결, 연결 과정 가시화
 - [ ] #12 1주차 발표자료
@@ -39,4 +40,5 @@
 
 - 이동통신망(CGNAT, Symmetric NAT 가능성)에서는 STUN만으로 P2P가 실패할 수 있다. 실패도 증거와 함께 결과로 남긴다(#37).
 - ngrok 무료 플랜은 실행할 때마다 URL이 바뀐다. 시험 때 URL을 공유하는 절차가 필요하다.
+- Chrome DevTools 네트워크 제한은 WebRTC에 적용되지 않는다. 품질 실험은 Network Link Conditioner 등 OS 수준 제한이 필요하다(#21).
 - 수업 요일을 모르므로 Milestone 마감일은 각 주 일요일로 임시 설정했다.
