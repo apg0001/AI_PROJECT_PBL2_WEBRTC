@@ -4,14 +4,68 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>원격 현장지원 PoC</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 16px; line-height: 1.5; }
-    a { display: block; margin: 8px 0; }
-  </style>
+  <link rel="stylesheet" href="css/app.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 </head>
 <body>
-  <h1>원격 현장지원 PoC</h1>
-  <a href="check.html">환경 점검 (HTTPS · 카메라 권한)</a>
-  <p>현장 / 전문가 화면은 #9 ~ #11에서 추가됩니다.</p>
+  <main>
+    <h1>원격 현장지원 PoC</h1>
+    <p class="meta">Room을 만들고 현장(폰)과 전문가(PC)가 같은 Room에 들어갑니다.</p>
+
+    <h2>1. Room</h2>
+    <p>Room <code id="room"></code> <button id="newRoom">새 Room</button></p>
+
+    <h2>2. 현장 작업자 (폰)</h2>
+    <div class="qr" id="qr"></div>
+    <a class="big" id="fieldLink" target="_blank"></a>
+
+    <h2>3. 원격 전문가 (PC)</h2>
+    <a class="big" id="expertLink" target="_blank"></a>
+
+    <h2>기타</h2>
+    <a class="big" href="check.html">환경 점검 (HTTPS · 카메라 권한)</a>
+    <p class="meta" id="note"></p>
+  </main>
+  <script type="module">
+    const $ = (id) => document.getElementById(id);
+
+    function randomRoom() {
+      const b = crypto.getRandomValues(new Uint8Array(8));
+      return [...b].map((x) => x.toString(36).padStart(2, '0')).join('').slice(0, 12);
+    }
+
+    // PC에서 localhost로 열었으면 폰이 접속할 수 있도록 LAN 주소로 바꾼다
+    async function phoneOrigin() {
+      if (!['localhost', '127.0.0.1'].includes(location.hostname)) return location.origin;
+      try {
+        const { lan, port } = await (await fetch('/api/info')).json();
+        const ip = lan.find((a) => /^(192\.168|10\.|172\.(1[6-9]|2\d|3[01]))/.test(a)) ?? lan[0];
+        if (ip) return `${location.protocol}//${ip}:${port}`;
+      } catch {}
+      return location.origin;
+    }
+
+    async function render(room) {
+      history.replaceState(null, '', `?room=${room}`);
+      $('room').textContent = room;
+      const origin = await phoneOrigin();
+      const field = `${origin}/field.html?room=${room}`;
+      const expert = `${location.origin}/expert.html?room=${room}`;
+      $('fieldLink').href = $('fieldLink').textContent = field;
+      $('expertLink').href = $('expertLink').textContent = expert;
+      if (window.qrcode) {
+        const qr = qrcode(0, 'M');
+        qr.addData(field);
+        qr.make();
+        $('qr').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2 });
+      }
+      $('note').textContent = location.protocol === 'http:'
+        ? 'HTTP 접속: 같은 LAN 연결은 되지만 폰 카메라는 쓸 수 없습니다. 카메라·다른 네트워크 시험은 ngrok(https) 주소로 여세요.'
+        : '';
+    }
+
+    $('newRoom').onclick = () => render(randomRoom());
+    render(new URLSearchParams(location.search).get('room') ?? randomRoom());
+  </script>
 </body>
 </html>

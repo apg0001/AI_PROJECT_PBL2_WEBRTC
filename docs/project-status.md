@@ -24,7 +24,9 @@
 - [x] #7 PoC·시험계획 T1~T5 (`docs/05-test-plan.md`)
 - [x] #46 1인 진행 반영, 주차별 보고서 규칙 (#8 역할분담은 종료)
 - [x] #9 Signaling Server (`server/src/signaling.js`, 테스트 5개)
-- [ ] #10 1:1 연결 · #11 연결 과정 가시화
+- [x] #10 1:1 연결 (`client/`: field·expert 화면, Room 생성·QR) — Chrome 2개 E2E 통과
+- [ ] #11 연결 과정 가시화 (Candidate 표, 상태 전이 시각, 로그 내보내기)
+- [ ] PC ↔ iPhone 같은 Wi-Fi 연결 직접 확인 (`http://192.168.0.111:3000` → QR)
 - [ ] #12 1주차 발표자료
 
 ## 결정 기록

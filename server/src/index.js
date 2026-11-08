@@ -45,6 +45,12 @@ async function serveStatic(req, res) {
     res.end(JSON.stringify({ ok: true, time: Date.now() }));
     return;
   }
+  if (pathname === '/api/info') {
+    // 시작 화면이 폰용 링크(LAN 주소)를 만들 때 쓴다
+    res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+    res.end(JSON.stringify({ lan: lanAddresses(), port: PORT }));
+    return;
+  }
 
   const [prefix, dir] = MOUNTS.find(([p]) => pathname.startsWith(p));
   let rel = decodeURIComponent(pathname.slice(prefix.length));
