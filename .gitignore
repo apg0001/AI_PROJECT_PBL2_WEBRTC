@@ -8,3 +8,5 @@ node_modules/
 /*.pdf
 docs/reference/*.pdf
 server/certs/
+docs/reference/templates/
+/*.pptx

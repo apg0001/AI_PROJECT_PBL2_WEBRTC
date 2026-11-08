@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>시스템 아키텍처</title>
+<link rel="stylesheet" href="base.css">
+</head>
+<body>
+<div id="diagram">
+<svg width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <marker id="a-signal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7048e8"/></marker>
+    <marker id="a-stun" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#868e96"/></marker>
+    <marker id="a-media" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#0ca678"/></marker>
+    <marker id="a-turn" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#f59f00"/></marker>
+  </defs>
+
+  <!-- 제목 -->
+  <text x="60" y="66" class="t-title">시스템 아키텍처 — WebRTC 원격 현장지원 PoC</text>
+  <text x="60" y="100" class="t-sub">연결 정보는 시그널링 서버를 거치고, 영상·음성·데이터는 두 브라우저 사이를 P2P로 직접 흐른다</text>
+
+  <!-- 인터넷 영역 -->
+  <rect x="470" y="300" width="660" height="500" rx="48" fill="#f8f9fa" stroke="#ced4da" stroke-width="2" stroke-dasharray="8 8"/>
+  <use href="#i-globe" x="494" y="392" width="34" height="34" color="#868e96"/>
+  <text x="536" y="418" class="t-b" fill="#868e96" style="fill:#868e96;font-weight:700">인터넷</text>
+
+  <!-- 현장 영역 -->
+  <rect x="50" y="150" width="330" height="650" rx="28" fill="#fff4e6" stroke="#ffc078" stroke-width="2"/>
+  <use href="#i-phone" x="155" y="190" width="120" height="120" color="#e8590c"/>
+  <text x="215" y="350" text-anchor="middle" class="t-h" fill="#d9480f" style="fill:#d9480f">현장 작업자</text>
+  <text x="215" y="378" text-anchor="middle" class="t-s">Smartphone 브라우저 (설치 없음)</text>
+  <g>
+    <rect x="85" y="408" width="260" height="44" rx="22" fill="#fff" stroke="#ffd8a8"/>
+    <use href="#i-camera" x="102" y="417" width="26" height="26" color="#e8590c"/>
+    <text x="140" y="437" class="t-b">후면 카메라 영상 송출</text>
+    <rect x="85" y="462" width="260" height="44" rx="22" fill="#fff" stroke="#ffd8a8"/>
+    <use href="#i-mic" x="102" y="471" width="26" height="26" color="#e8590c"/>
+    <text x="140" y="491" class="t-b">음성 대화</text>
+    <rect x="85" y="516" width="260" height="44" rx="22" fill="#fff" stroke="#ffd8a8"/>
+    <use href="#i-pointer" x="102" y="525" width="26" height="26" color="#e8590c"/>
+    <text x="140" y="545" class="t-b">포인터·작업 지시 수신</text>
+  </g>
+  <use href="#i-wifi" x="95" y="600" width="30" height="30" color="#868e96"/>
+  <use href="#i-cell" x="130" y="602" width="26" height="26" color="#868e96"/>
+  <text x="166" y="622" class="t-b">Wi-Fi / LTE / 5G</text>
+  <text x="95" y="652" class="t-s">사설 IP 192.168.x.x · 통신사 CGNAT</text>
+
+  <!-- 전문가 영역 -->
+  <rect x="1220" y="150" width="330" height="650" rx="28" fill="#e7f5ff" stroke="#a5d8ff" stroke-width="2"/>
+  <use href="#i-laptop" x="1325" y="190" width="120" height="120" color="#1c7ed6"/>
+  <text x="1385" y="350" text-anchor="middle" class="t-h" style="fill:#1971c2">원격 전문가</text>
+  <text x="1385" y="378" text-anchor="middle" class="t-s">PC / Tablet 브라우저</text>
+  <g>
+    <rect x="1255" y="408" width="260" height="44" rx="22" fill="#fff" stroke="#a5d8ff"/>
+    <use href="#i-camera" x="1272" y="417" width="26" height="26" color="#1c7ed6"/>
+    <text x="1310" y="437" class="t-b">현장 영상 확인</text>
+    <rect x="1255" y="462" width="260" height="44" rx="22" fill="#fff" stroke="#a5d8ff"/>
+    <use href="#i-chat" x="1272" y="471" width="26" height="26" color="#1c7ed6"/>
+    <text x="1310" y="491" class="t-b">음성·텍스트 지시</text>
+    <rect x="1255" y="516" width="260" height="44" rx="22" fill="#fff" stroke="#a5d8ff"/>
+    <use href="#i-chart" x="1272" y="525" width="26" height="26" color="#1c7ed6"/>
+    <text x="1310" y="545" class="t-b">품질 지표 수집</text>
+  </g>
+  <use href="#i-wifi" x="1265" y="600" width="30" height="30" color="#868e96"/>
+  <text x="1305" y="622" class="t-b">회사 / 가정 망</text>
+  <text x="1265" y="652" class="t-s">사설 IP · 공유기 NAT</text>
+
+  <!-- NAT -->
+  <g>
+    <circle cx="425" cy="560" r="40" fill="#fff" stroke="#adb5bd" stroke-width="2"/>
+    <use href="#i-router" x="401" y="536" width="48" height="48" color="#495057"/>
+    <text x="425" y="625" text-anchor="middle" class="t-b" style="font-weight:700">NAT</text>
+    <circle cx="1175" cy="560" r="40" fill="#fff" stroke="#adb5bd" stroke-width="2"/>
+    <use href="#i-router" x="1151" y="536" width="48" height="48" color="#495057"/>
+    <text x="1175" y="625" text-anchor="middle" class="t-b" style="font-weight:700">NAT</text>
+  </g>
+
+  <!-- 시그널링 서버 (개발자 PC) -->
+  <rect x="590" y="130" width="420" height="140" rx="20" fill="#f3f0ff" stroke="#b197fc" stroke-width="2"/>
+  <use href="#i-server" x="612" y="158" width="84" height="84" color="#7048e8"/>
+  <text x="712" y="178" class="t-h" style="fill:#5f3dc4">Signaling Server</text>
+  <text x="712" y="206" class="t-b">Node.js · WebSocket <tspan class="t-mono">/ws</tspan></text>
+  <text x="712" y="232" class="t-b">Room 관리 · SDP / ICE 중계</text>
+  <text x="712" y="256" class="t-s">개발자 PC · npm start</text>
+
+  <!-- ngrok -->
+  <line x1="800" y1="270" x2="800" y2="330" stroke="#7048e8" stroke-width="3"/>
+  <rect x="640" y="330" width="320" height="56" rx="28" fill="#fff" stroke="#b197fc" stroke-width="2"/>
+  <use href="#i-tunnel" x="660" y="341" width="34" height="34" color="#7048e8"/>
+  <text x="704" y="364" class="t-b" style="font-weight:700">ngrok 터널</text>
+  <text x="808" y="364" class="t-s">공개 HTTPS / WSS</text>
+
+  <!-- ① 시그널링 경로 -->
+  <path d="M380 250 C 520 250, 560 358, 640 358" fill="none" stroke="#7048e8" stroke-width="3" stroke-dasharray="10 7" marker-end="url(#a-signal)" marker-start="url(#a-signal)"/>
+  <path d="M1220 250 C 1080 250, 1040 358, 960 358" fill="none" stroke="#7048e8" stroke-width="3" stroke-dasharray="10 7" marker-end="url(#a-signal)" marker-start="url(#a-signal)"/>
+  <rect x="404" y="196" width="168" height="34" rx="17" fill="#7048e8"/>
+  <text x="488" y="219" text-anchor="middle" style="fill:#fff;font-size:16px;font-weight:700">① 시그널링</text>
+  <rect x="1028" y="196" width="168" height="34" rx="17" fill="#7048e8"/>
+  <text x="1112" y="219" text-anchor="middle" style="fill:#fff;font-size:16px;font-weight:700">① 시그널링</text>
+
+  <!-- STUN -->
+  <rect x="690" y="430" width="220" height="96" rx="18" fill="#fff" stroke="#adb5bd" stroke-width="2"/>
+  <use href="#i-target" x="706" y="452" width="52" height="52" color="#495057"/>
+  <text x="770" y="466" class="t-h" style="font-size:22px">STUN</text>
+  <text x="770" y="490" class="t-s">공용 · Google</text>
+  <text x="770" y="511" class="t-s">내 공인 주소 확인</text>
+  <path d="M462 548 C 560 520, 600 490, 690 478" fill="none" stroke="#868e96" stroke-width="2.5" stroke-dasharray="3 6" marker-end="url(#a-stun)"/>
+  <path d="M1138 548 C 1040 520, 1000 490, 910 478" fill="none" stroke="#868e96" stroke-width="2.5" stroke-dasharray="3 6" marker-end="url(#a-stun)"/>
+  <text x="560" y="500" text-anchor="middle" class="t-s" style="fill:#495057;font-weight:700">② srflx 주소</text>
+  <text x="1040" y="500" text-anchor="middle" class="t-s" style="fill:#495057;font-weight:700">② srflx 주소</text>
+
+  <!-- TURN (선택) -->
+  <rect x="690" y="560" width="220" height="86" rx="18" fill="#fff9db" stroke="#f59f00" stroke-width="2" stroke-dasharray="8 6"/>
+  <use href="#i-relay" x="706" y="578" width="50" height="50" color="#e67700"/>
+  <text x="770" y="595" class="t-h" style="font-size:22px;fill:#e67700">TURN</text>
+  <text x="770" y="619" class="t-s">P2P 실패 시 Relay</text>
+  <text x="770" y="637" class="t-s">(선택 · #38)</text>
+  <path d="M465 580 C 560 600, 610 604, 690 604" fill="none" stroke="#f59f00" stroke-width="2.5" stroke-dasharray="8 6" marker-end="url(#a-turn)"/>
+  <path d="M1135 580 C 1040 600, 990 604, 910 604" fill="none" stroke="#f59f00" stroke-width="2.5" stroke-dasharray="8 6" marker-end="url(#a-turn)"/>
+
+  <!-- ③ P2P 미디어·데이터 -->
+  <path d="M384 728 L 1216 728" stroke="#0ca678" stroke-width="10" marker-end="url(#a-media)" marker-start="url(#a-media)"/>
+  <rect x="590" y="680" width="420" height="34" rx="17" fill="#0ca678"/>
+  <text x="800" y="703" text-anchor="middle" style="fill:#fff;font-size:17px;font-weight:800">③ WebRTC P2P 직접 연결 · DTLS 암호화</text>
+  <use href="#i-camera" x="560" y="744" width="26" height="26" color="#0ca678"/>
+  <text x="594" y="764" class="t-b">Video·Audio (SRTP)</text>
+  <use href="#i-chat" x="790" y="744" width="26" height="26" color="#0ca678"/>
+  <text x="824" y="764" class="t-b">DataChannel control · pointer (SCTP)</text>
+
+  <!-- 범례 -->
+  <g transform="translate(60,846)">
+    <line x1="0" y1="0" x2="46" y2="0" stroke="#7048e8" stroke-width="3" stroke-dasharray="10 7"/>
+    <text x="56" y="6" class="t-s" style="fill:#212529">시그널링: 연결 정보(SDP·ICE)만</text>
+    <line x1="330" y1="0" x2="376" y2="0" stroke="#868e96" stroke-width="2.5" stroke-dasharray="3 6"/>
+    <text x="386" y="6" class="t-s" style="fill:#212529">STUN: NAT 바깥 주소 확인</text>
+    <line x1="630" y1="0" x2="676" y2="0" stroke="#0ca678" stroke-width="8"/>
+    <text x="686" y="6" class="t-s" style="fill:#212529">미디어·데이터: 서버를 거치지 않음</text>
+    <line x1="960" y1="0" x2="1006" y2="0" stroke="#f59f00" stroke-width="2.5" stroke-dasharray="8 6"/>
+    <text x="1016" y="6" class="t-s" style="fill:#212529">TURN Relay: Symmetric NAT·UDP 차단 시</text>
+  </g>
+</svg>
+</div>
+<script src="icons.js"></script>
+</body>
+</html>

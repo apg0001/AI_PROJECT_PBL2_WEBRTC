@@ -8,6 +8,7 @@
     "dev": "npm --prefix server run dev",
     "test": "npm --prefix server test",
     "tunnel": "ngrok http 3000",
-    "e2e": "npm --prefix server run e2e"
+    "e2e": "npm --prefix server run e2e",
+    "diagrams": "npm --prefix server run diagrams --"
   }
 }
