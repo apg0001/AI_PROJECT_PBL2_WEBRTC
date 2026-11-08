@@ -23,7 +23,8 @@
 - [x] #6 기술 결정 TD-01~12 (`docs/04-tech-decisions.md`)
 - [x] #7 PoC·시험계획 T1~T5 (`docs/05-test-plan.md`)
 - [ ] #8 역할분담 (팀원 정보 필요)
-- [ ] #9 ~ #11 Signaling Server, 1:1 연결, 연결 과정 가시화
+- [x] #9 Signaling Server (`server/src/signaling.js`, 테스트 5개)
+- [ ] #10 1:1 연결 · #11 연결 과정 가시화
 - [ ] #12 1주차 발표자료
 
 ## 결정 기록

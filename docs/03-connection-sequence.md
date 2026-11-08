@@ -112,6 +112,7 @@ sequenceDiagram
 | `ROLE_TAKEN` | 같은 역할이 이미 있음 | 역할 확인 안내 |
 | `NOT_IN_ROOM` | join 전에 offer/answer/ice 전송 | 버그. 로그에 남김 |
 | `NO_PEER` | 상대 없이 offer/answer/ice 전송 | 무시하고 로그에 남김 |
+| `ALREADY_JOINED` | 이미 Room에 있는데 다시 `join` | 버그. 로그에 남김 |
 | `BAD_MESSAGE` | JSON 파싱 실패, 필드 누락 | 버그. 로그에 남김 |
 
 ### 연결 유지

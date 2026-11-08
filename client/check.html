@@ -35,6 +35,10 @@
     row('Origin', location.origin);
 
     document.getElementById('cam').onclick = async () => {
+      if (!navigator.mediaDevices) {
+        row('카메라 사용 불가', 'HTTPS가 아니어서 브라우저가 카메라 API를 막았습니다. ngrok 주소(https://…)로 접속하세요.', false);
+        return;
+      }
       try {
         const s = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
