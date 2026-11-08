@@ -17,7 +17,8 @@
 - [x] #36 범위 변경
 - [x] #2 개발 환경 세팅 (Node 정적 서버, `check.html`, ngrok 터널 스크립트)
 - [x] #3 Requirement 정의 (`docs/01-requirements.md`)
-- [ ] #4 Architecture · #5 Connection Sequence · #6 기술 결정 · #7 시험계획
+- [x] #4 Architecture (`docs/02-architecture.md`)
+- [ ] #5 Connection Sequence · #6 기술 결정 · #7 시험계획
 - [ ] #8 역할분담 (팀원 정보 필요)
 - [ ] #9 ~ #11 Signaling Server, 1:1 연결, 연결 과정 가시화
 - [ ] #12 1주차 발표자료
