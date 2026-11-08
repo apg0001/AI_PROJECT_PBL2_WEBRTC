@@ -1,0 +1,11 @@
+run,role,connectionMs,iceRttMs,dataChannelRttMs,pathType,localPath,remotePath,candidates
+1,"Offerer (먼저 입장)","",3,72.1,"P2P Direct","host udp (mDNS로 숨김):55948","prflx udp (mDNS로 숨김):63139","local: host 1, srflx 1 / remote: host 1"
+2,"Answerer (나중 입장)",73,8,8.6,"P2P Direct","prflx udp (mDNS로 숨김):60660","host udp (mDNS로 숨김):51940","local: host 1 / remote: host 1"
+3,"Answerer (나중 입장)",40,7,76.7,"P2P Direct","prflx udp (mDNS로 숨김):50401","host udp (mDNS로 숨김):58951","local: host 1 / remote: host 1"
+4,"Answerer (나중 입장)",44,9,55.8,"P2P Direct","prflx udp (mDNS로 숨김):65327","host udp (mDNS로 숨김):58259","local: host 1 / remote: host 1"
+5,"Answerer (나중 입장)",47,8,7.1,"P2P Direct","prflx udp (mDNS로 숨김):51732","host udp (mDNS로 숨김):61853","local: host 1 / remote: host 1"
+6,"Answerer (나중 입장)",54,11,8.5,"P2P Direct","prflx udp (mDNS로 숨김):63389","host udp (mDNS로 숨김):55629","local: host 1 / remote: host 1"
+7,"Answerer (나중 입장)",45,13,30.9,"P2P Direct","prflx udp (mDNS로 숨김):55410","host udp (mDNS로 숨김):63158","local: host 1 / remote: host 1"
+8,"Answerer (나중 입장)",102,15,12.7,"P2P Direct","prflx udp (mDNS로 숨김):54579","host udp (mDNS로 숨김):64384","local: host 1 / remote: host 1"
+9,"Answerer (나중 입장)",66,16,"","P2P Direct","prflx udp (mDNS로 숨김):55801","host udp (mDNS로 숨김):63170","local: host 1 / remote: host 1, srflx 1"
+10,"","","","","중단","","","폰 페이지 종료(앱 전환) - server.log 17:55:26 leave field (close)"

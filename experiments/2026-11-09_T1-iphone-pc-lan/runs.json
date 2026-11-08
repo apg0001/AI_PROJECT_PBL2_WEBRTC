@@ -1,0 +1,112 @@
+[
+ {
+  "run": 1,
+  "role": "Offerer (먼저 입장)",
+  "connectionMs": null,
+  "localPath": "host udp (mDNS로 숨김):55948",
+  "remotePath": "prflx udp (mDNS로 숨김):63139",
+  "pathType": "P2P Direct",
+  "iceRttMs": 3,
+  "dataChannelRttMs": 72.1,
+  "candidates": "local: host 1, srflx 1 / remote: host 1"
+ },
+ {
+  "run": 2,
+  "role": "Answerer (나중 입장)",
+  "connectionMs": 73,
+  "localPath": "prflx udp (mDNS로 숨김):60660",
+  "remotePath": "host udp (mDNS로 숨김):51940",
+  "pathType": "P2P Direct",
+  "iceRttMs": 8,
+  "dataChannelRttMs": 8.6,
+  "candidates": "local: host 1 / remote: host 1"
+ },
+ {
+  "run": 3,
+  "role": "Answerer (나중 입장)",
+  "connectionMs": 40,
+  "localPath": "prflx udp (mDNS로 숨김):50401",
+  "remotePath": "host udp (mDNS로 숨김):58951",
+  "pathType": "P2P Direct",
+  "iceRttMs": 7,
+  "dataChannelRttMs": 76.7,
+  "candidates": "local: host 1 / remote: host 1"
+ },
+ {
+  "run": 4,
+  "role": "Answerer (나중 입장)",
+  "connectionMs": 44,
+  "localPath": "prflx udp (mDNS로 숨김):65327",
+  "remotePath": "host udp (mDNS로 숨김):58259",
+  "pathType": "P2P Direct",
+  "iceRttMs": 9,
+  "dataChannelRttMs": 55.8,
+  "candidates": "local: host 1 / remote: host 1"
+ },
+ {
+  "run": 5,
+  "role": "Answerer (나중 입장)",
+  "connectionMs": 47,
+  "localPath": "prflx udp (mDNS로 숨김):51732",
+  "remotePath": "host udp (mDNS로 숨김):61853",
+  "pathType": "P2P Direct",
+  "iceRttMs": 8,
+  "dataChannelRttMs": 7.1,
+  "candidates": "local: host 1 / remote: host 1"
+ },
+ {
+  "run": 6,
+  "role": "Answerer (나중 입장)",
+  "connectionMs": 54,
+  "localPath": "prflx udp (mDNS로 숨김):63389",
+  "remotePath": "host udp (mDNS로 숨김):55629",
+  "pathType": "P2P Direct",
+  "iceRttMs": 11,
+  "dataChannelRttMs": 8.5,
+  "candidates": "local: host 1 / remote: host 1"
+ },
+ {
+  "run": 7,
+  "role": "Answerer (나중 입장)",
+  "connectionMs": 45,
+  "localPath": "prflx udp (mDNS로 숨김):55410",
+  "remotePath": "host udp (mDNS로 숨김):63158",
+  "pathType": "P2P Direct",
+  "iceRttMs": 13,
+  "dataChannelRttMs": 30.9,
+  "candidates": "local: host 1 / remote: host 1"
+ },
+ {
+  "run": 8,
+  "role": "Answerer (나중 입장)",
+  "connectionMs": 102,
+  "localPath": "prflx udp (mDNS로 숨김):54579",
+  "remotePath": "host udp (mDNS로 숨김):64384",
+  "pathType": "P2P Direct",
+  "iceRttMs": 15,
+  "dataChannelRttMs": 12.7,
+  "candidates": "local: host 1 / remote: host 1"
+ },
+ {
+  "run": 9,
+  "role": "Answerer (나중 입장)",
+  "connectionMs": 66,
+  "localPath": "prflx udp (mDNS로 숨김):55801",
+  "remotePath": "host udp (mDNS로 숨김):63170",
+  "pathType": "P2P Direct",
+  "iceRttMs": 16,
+  "dataChannelRttMs": null,
+  "candidates": "local: host 1 / remote: host 1, srflx 1"
+ },
+ {
+  "run": 10,
+  "role": "",
+  "connectionMs": null,
+  "localPath": "",
+  "remotePath": "",
+  "pathType": "중단",
+  "iceRttMs": null,
+  "dataChannelRttMs": null,
+  "candidates": "폰 페이지 종료(앱 전환) - server.log 17:55:26 leave field (close)"
+ }
+]
