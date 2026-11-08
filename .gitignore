@@ -4,6 +4,7 @@ node_modules/
 *.key
 *.crt
 .env
-# 강의 원본 PDF는 저장소에 올리지 않는다
+# 강의 원본 PDF는 저장소에 올리지 않는다 (공개 저장소)
 /*.pdf
+docs/reference/*.pdf
 server/certs/
