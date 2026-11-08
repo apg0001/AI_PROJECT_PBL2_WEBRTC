@@ -43,5 +43,6 @@ Milestone은 주차, Label은 영역(`signaling`, `connectivity`, `media-data`, 
 ## 문서 갱신
 
 - 모든 PR은 `docs/project-status.md`의 진행 상태와 다음 작업을 갱신한다.
+- 모든 PR은 그 주의 `weekly/weekN/report.md` 작업 기록에 한 줄 이상 추가한다 (날짜, 이슈·PR, 한 일, 결과·근거).
 - 설계가 구현과 달라지면 같은 PR에서 `docs/0X-*.md`를 고친다.
 - 실험 원자료는 `experiments/YYYY-MM-DD_<실험명>/`에 저장하고, 결과 문서에서 경로를 링크한다.
