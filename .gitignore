@@ -6,3 +6,4 @@ node_modules/
 .env
 # 강의 원본 PDF는 저장소에 올리지 않는다
 /*.pdf
+server/certs/

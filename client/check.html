@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>환경 점검</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 16px; line-height: 1.5; }
+    table { border-collapse: collapse; width: 100%; }
+    td { border-bottom: 1px solid #ddd; padding: 4px 6px; vertical-align: top; word-break: break-all; }
+    .ok { color: #0a7d32; } .bad { color: #c62828; }
+    video { width: 100%; max-width: 480px; background: #000; margin-top: 12px; }
+    button { font-size: 16px; padding: 8px 12px; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <h1>환경 점검</h1>
+  <table id="t"></table>
+  <button id="cam">후면 카메라 + 마이크 시험</button>
+  <video id="v" autoplay playsinline muted></video>
+  <script>
+    const t = document.getElementById('t');
+    function row(name, value, ok) {
+      const tr = t.insertRow();
+      tr.insertCell().textContent = name;
+      const c = tr.insertCell();
+      c.textContent = String(value);
+      if (ok !== undefined) c.className = ok ? 'ok' : 'bad';
+    }
+    row('Secure Context (HTTPS)', window.isSecureContext, window.isSecureContext);
+    row('navigator.mediaDevices', !!navigator.mediaDevices, !!navigator.mediaDevices);
+    row('RTCPeerConnection', typeof RTCPeerConnection === 'function', typeof RTCPeerConnection === 'function');
+    row('BarcodeDetector (G2G용)', 'BarcodeDetector' in window);
+    row('User Agent', navigator.userAgent);
+    row('Origin', location.origin);
+
+    document.getElementById('cam').onclick = async () => {
+      try {
+        const s = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: true,
+        });
+        document.getElementById('v').srcObject = s;
+        const vs = s.getVideoTracks()[0].getSettings();
+        row('카메라', `${vs.width}x${vs.height} @ ${vs.frameRate ?? '?'}fps, facing=${vs.facingMode ?? '?'}`, true);
+        row('마이크', s.getAudioTracks()[0]?.label || '(label 없음)', s.getAudioTracks().length > 0);
+      } catch (e) {
+        row('getUserMedia 실패', `${e.name}: ${e.message}`, false);
+      }
+    };
+  </script>
+</body>
+</html>

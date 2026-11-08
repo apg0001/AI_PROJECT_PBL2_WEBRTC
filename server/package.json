@@ -1,0 +1,19 @@
+{
+  "name": "pbl2-webrtc-signaling",
+  "version": "0.1.0",
+  "private": true,
+  "description": "WebRTC 원격 현장지원 PoC — Signaling Server + 정적 파일 서빙",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "tunnel": "ngrok http 3000"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "ws": "^8.22.2"
+  }
+}

@@ -20,4 +20,26 @@ WebRTC 기반 실시간 원격 현장 지원 시스템. 설치 없이 웹 브라
 
 ## 실행
 
-#2(개발 환경 세팅)에서 작성한다.
+요구사항: Node.js 20 이상, (모바일·외부 네트워크 시험 시) ngrok
+
+```bash
+cd server
+npm install
+npm start            # http://localhost:3000
+```
+
+PC 브라우저는 `http://localhost:3000` 에서 바로 카메라를 쓸 수 있다(localhost는 Secure Context).
+**스마트폰은 HTTPS가 필요하다.** 다른 터미널에서 터널을 연다.
+
+```bash
+cd server
+npm run tunnel       # ngrok http 3000 → https://xxxx.ngrok-free.app
+```
+
+- 출력된 `https://…ngrok-free.app` 주소를 폰에서 연다. 처음 한 번 ngrok 경고 페이지에서 **Visit Site**를 누른다.
+- `check.html`에서 Secure Context, 카메라·마이크 권한을 확인한다.
+- 터널은 시그널링·정적 파일만 지난다. 영상·음성·DataChannel은 WebRTC P2P로 직접 흐른다.
+- 폰이 LTE/5G여도 같은 주소로 접속되므로 다른 네트워크 간 연결 시험(#37)에 그대로 쓴다.
+- ngrok 무료 플랜은 실행할 때마다 주소가 바뀐다.
+
+(선택) 동일 LAN 전용 HTTPS: `server/certs/cert.pem`, `server/certs/key.pem`(mkcert 등으로 생성)을 두면 서버가 HTTPS로 뜬다.
