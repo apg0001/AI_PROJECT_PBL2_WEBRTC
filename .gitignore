@@ -1,0 +1,8 @@
+node_modules/
+.DS_Store
+*.pem
+*.key
+*.crt
+.env
+# 강의 원본 PDF는 저장소에 올리지 않는다
+/*.pdf
