@@ -1,5 +1,9 @@
 # 사용: python3 build_deck.py <템플릿.pptx> <출력.pptx> <이미지 폴더>
-# 이미지 폴더: arch-crop.png(아키텍처 그림에서 제목·범례를 잘라낸 것), router.png, stopwatch.png
+# 이미지 폴더: arch-crop.png(아키텍처 그림에서 제목·범례를 잘라낸 것), router.png, stopwatch.png,
+#   ic-{phone,swap,server,globe,flask}.png(docs/diagrams/src/icons.js 아이콘),
+#   start-pc.png, field.png, expert.png(docs/screens 캡처를 위쪽만 자름),
+#   iphone-result.png, iphone-eventlog.png(experiments/..._T1-iphone-pc-lan/screenshots 아래쪽 브라우저 막대 제거),
+#   serverlog.png(같은 시험 server.log 6~17번째 줄을 터미널 모양으로 렌더링, 초록 # 설명만 덧붙임)
 # 템플릿: docs/reference/templates/랩미팅_261014.pptx (저장소에 없음). 규칙은 메모리의 발표자료 규칙과 docs/DESIGN.md §6
 # 1주차 발표자료 생성: 템플릿(랩미팅_261014.pptx)의 표지 + 본문 레이아웃 사용
 import copy, sys
@@ -77,6 +81,14 @@ def text(slide, x, y, w, h, paras, size=16, color=INK, bold=False, bullet=False,
     return tb
 
 
+def pic(slide, path, x, y, w=None, h=None, border=True):
+    p = slide.shapes.add_picture(path, Inches(x), Inches(y), width=Inches(w) if w else None, height=Inches(h) if h else None)
+    if border:
+        p.line.color.rgb = RGBColor(0xA9, 0xB3, 0xBC)
+        p.line.width = Pt(0.75)
+    return p
+
+
 def conclusion(slide, x, y, w, msg):
     return text(slide, x, y, w, 0.42, [[(msg, {'bold': True, 'color': ACCENT})]], size=16, name='결론')
 
@@ -129,7 +141,7 @@ for sh in cover.shapes:
         for r in sh.text_frame.paragraphs[0].runs[1:]:
             r.text = ''
 set_notes(cover, '1주차 진행 점검을 시작하겠습니다. 웹 브라우저만으로 현장 작업자와 원격 전문가를 실시간으로 연결하는 시스템입니다. '
-          '시스템 구조, 이번 주에 실제로 연결한 결과, 가장 어렵다고 예상하는 문제, 남은 계획 순서로 말씀드리겠습니다.')
+          '시스템 구조와 사용한 기술, 실제 화면과 연결 기록, 측정 결과, 가장 어렵다고 예상하는 문제, 남은 계획 순서로 말씀드리겠습니다.')
 
 # ---------- 2. 시스템 구조 ----------
 s = new_slide('[시스템 구조] 영상은 서버를 거치지 않고 직접 간다')
@@ -149,12 +161,74 @@ set_notes(s, '전체 구조입니다. 현장 작업자는 스마트폰 브라우
           '각 브라우저는 STUN 서버에 물어서 공유기 바깥에서 보이는 자기 주소를 알아냅니다. 회색 점선입니다.\n'
           '그다음 영상, 음성, 채팅과 포인터 같은 데이터는 가운데 굵은 초록 선처럼 서버를 거치지 않고 브라우저끼리 직접 주고받습니다.\n'
           '그래서 서버는 가볍지만, 두 단말이 서로 다른 공유기 뒤에 있으면 직접 연결이 막힐 수 있습니다. 그때는 아래쪽 노란 점선처럼 TURN 서버가 영상을 대신 전달해야 합니다.\n'
-          '개발용 서버는 제 노트북에서 돌리고, ngrok으로 인터넷 주소를 붙여서 LTE에 있는 폰도 접속할 수 있게 했습니다.')
+          '개발용 서버는 제 노트북에서 돌립니다. ngrok으로 인터넷 주소를 붙이면 LTE에 있는 폰도 접속할 수 있는데, 이번 주에는 설정까지만 했고 같은 와이파이에서만 시험했습니다.')
 
-# ---------- 3. 연결 구현 결과 ----------
+# ---------- 3. 기술 스택 ----------
+s = new_slide('[기술 스택] 앱 설치 없이 브라우저와 작은 서버로 구성')
+STACK = [
+    ('ic-phone.png', '화면 (폰, PC)', 'HTML, CSS, JavaScript (빌드 도구 없음)', '앱 설치 없이 주소만 열면 된다'),
+    ('ic-swap.png', '실시간 연결', 'WebRTC (RTCPeerConnection, RTCDataChannel)', '브라우저 기본 기능, 기기끼리 직접 전달'),
+    ('ic-server.png', '시그널링 서버', 'Node.js 25, ws 8 (WebSocket), 서버 코드 212줄', '연결 정보만 전달해서 작고 가볍다'),
+    ('ic-globe.png', '주소 찾기, 외부 접속', 'Google 공용 STUN, ngrok (설정만 함)', '무료다. ngrok은 https 주소를 준다'),
+    ('ic-flask.png', '시험과 측정', 'node:test, puppeteer-core와 Chrome', '사람 손 없이 같은 조건으로 반복한다'),
+]
+ROW_H = 0.66
+table(s, 0.9, 1.3, 11.6, [0.8, 2.2, 4.85, 3.75],
+      [['', '구분', '사용 기술', '고른 이유']] + [['', a, b, c] for _, a, b, c in STACK],
+      size=14, row_h=ROW_H, align=['C', 'L', 'L', 'L'])
+for i, (icon, *_rest) in enumerate(STACK):
+    s.shapes.add_picture(f'{IMG}/{icon}', Inches(0.9 + 0.17), Inches(1.3 + ROW_H * (i + 1) + 0.07), height=Inches(ROW_H - 0.14))
+text(s, 0.9, 5.3, 11.6, 0.3, ['자동 시험: 단위 시험 5개, Chrome 두 창으로 연결하는 시험 13항목 모두 통과. 서버 코드 = server/src의 두 파일'], size=12, color=MUTED)
+conclusion(s, 0.9, 5.6, 11.6, '브라우저 기본 기능을 쓰고, 직접 만든 서버는 연결 정보를 전달하는 212줄뿐이다')
+set_notes(s, '어떤 기술로 만들었는지입니다.\n'
+          '화면은 HTML, CSS, 자바스크립트만 썼고 빌드 도구도 없습니다. 폰이든 PC든 주소만 열면 됩니다.\n'
+          '실시간 연결은 브라우저에 들어 있는 WebRTC 기능을 그대로 씁니다. 연결 객체와 데이터 통로 두 가지를 이번 주에 썼습니다.\n'
+          '서버는 Node.js와 ws라는 웹소켓 라이브러리 하나로 만들었고, 서버 코드는 두 파일 합쳐 212줄입니다. 연결 정보만 전달하니까 이 정도로 충분합니다.\n'
+          '바깥 주소를 알아내는 STUN은 구글 공용 서버를 쓰고, 외부 접속용 ngrok은 설정까지 해 두었습니다. 폰 카메라는 https 주소에서만 켜지는데 ngrok이 https 주소를 줍니다.\n'
+          '시험은 Chrome을 자동으로 띄워 두 창을 연결하는 방식이라, 사람 손 없이 같은 조건으로 몇 번이든 반복할 수 있습니다. 단위 시험 5개와 연결 시험 13항목이 모두 통과합니다.')
+
+# ---------- 4. 실행 화면 ----------
+s = new_slide('[실행 화면] PC에서 Room을 열고 폰은 QR로 들어온다')
+H = 3.3
+pic(s, f'{IMG}/start-pc.png', 0.75, 1.35, w=4.2)
+text(s, 0.75, 3.5, 4.2, 0.35, [[('1. 시작 화면 (PC)', {'bold': True}), (': Room 번호와 폰용 QR', {})]], size=14)
+text(s, 0.75, 3.9, 4.2, 0.8, ['Room = 두 사람이 만나는 방 번호', '폰 카메라로 QR을 찍어 들어온다'], size=14, color=MUTED, bullet=True)
+text(s, 0.75, 4.72, 4.2, 0.65, ['캡처: PC 한 대에서 Chrome 두 창을 자동으로 연결한 현재 화면. 영상 영역은 아직 없다'], size=12, color=MUTED)
+pic(s, f'{IMG}/field.png', 5.15, 1.35, h=H)
+text(s, 5.15, 4.72, 2.6, 0.35, [[('2. 현장 화면 (폰)', {'bold': True})]], size=14)
+text(s, 5.15, 5.05, 2.6, 0.35, ['연결 상태만 크게'], size=14, color=MUTED)
+pic(s, f'{IMG}/expert.png', 7.92, 1.35, h=H)
+text(s, 7.92, 4.72, 4.69, 0.35, [[('3. 전문가 화면 (PC)', {'bold': True})]], size=14)
+text(s, 7.92, 5.05, 4.69, 0.35, ['연결 시간, 경로, 주소, 상태 변화 기록'], size=14, color=MUTED)
+conclusion(s, 0.9, 5.55, 11.6, '현장 작업자는 상태 하나만 보고, 연결의 근거는 전문가 화면에서 본다')
+set_notes(s, '실제로 쓰는 화면입니다.\n'
+          '먼저 PC에서 시작 화면을 열면 방 번호가 정해지고, 폰으로 찍을 QR이 나옵니다. 현장 작업자는 폰 카메라로 이 QR을 찍기만 하면 현장 화면이 열립니다.\n'
+          '가운데가 폰의 현장 화면입니다. 장갑을 낀 작업자가 보는 화면이라 연결 상태 하나만 크게 보여 주고, 자세한 정보는 접어 두었습니다. 연결되면 초록, 실패하면 빨강으로 바뀝니다.\n'
+          '오른쪽은 PC의 전문가 화면입니다. 연결에 걸린 시간, 서버를 거쳤는지 직접 연결인지, 서로의 주소, 왕복 지연, 그리고 연결 상태가 바뀐 기록을 시간 순서로 보여 줍니다.\n'
+          '이 캡처는 PC 한 대에서 크롬 두 창을 자동으로 연결해서 찍은 현재 화면이고, 영상 영역은 아직 붙이지 않았습니다.')
+
+# ---------- 5. 연결 로그 ----------
+s = new_slide('[연결 로그] 실제 iPhone 화면과 서버 기록으로 확인')
+H = 3.55
+pic(s, f'{IMG}/iphone-result.png', 0.75, 1.3, h=H)
+text(s, 0.65, 4.88, 2.1, 0.35, [[('iPhone 결과', {'bold': True})]], size=14)
+pic(s, f'{IMG}/iphone-eventlog.png', 2.78, 1.3, h=H)
+text(s, 2.68, 4.88, 2.1, 0.35, [[('iPhone 이벤트 기록', {'bold': True})]], size=14)
+pic(s, f'{IMG}/serverlog.png', 4.95, 1.3, w=7.65)
+text(s, 4.95, 4.4, 7.65, 1.0, [
+    [('시그널링 서버 기록', {'bold': True}), (': iPhone(192.168.0.104)이 들어오고 offer, answer, ice가 0.064초 만에 오간 뒤 서버 기록이 끝난다', {})],
+    '초록 # 설명은 발표용으로 덧붙임. iPhone 화면은 시험 당시 화면(디자인 정리 전)',
+], size=14, color=MUTED)
+conclusion(s, 0.9, 5.55, 11.6, '서버는 처음 0.06초만 연결 정보를 전달했고, 그 뒤는 기기끼리 직접 주고받았다')
+set_notes(s, '실제 기기로 시험할 때 남은 기록입니다. 2026년 11월 9일 새벽, 같은 와이파이에서 아이폰과 PC를 연결한 시험입니다.\n'
+          '왼쪽은 아이폰 화면입니다. 첫 번째는 결과 화면으로, 연결됨과 경로가 P2P 다이렉트, 즉 서버를 거치지 않는 직접 연결로 나옵니다. 두 번째는 이벤트 기록으로, 연결 상태가 checking에서 connected로 바뀌고 데이터 통로가 열린 순서가 시간과 함께 남아 있습니다.\n'
+          '오른쪽은 같은 시험의 시그널링 서버 기록입니다. PC가 먼저 방에 들어가 있고, 192.168.0.104 주소의 아이폰이 들어옵니다. 그다음 연결 제안인 offer, 응답인 answer, 주소 후보인 ice가 0.064초 동안 오가고 나면 서버 기록은 거기서 끝납니다. 3초 뒤의 줄은 다음 회차를 위해 PC가 나간 기록입니다.\n'
+          '즉 서버는 처음 연결 정보만 전달하고, 그 뒤 데이터는 기기끼리 직접 주고받는다는 것을 실제 기록으로 확인했습니다. 초록색 설명은 발표를 위해 제가 덧붙인 것이고, 아이폰 화면은 디자인을 정리하기 전에 찍은 것입니다.')
+
+# ---------- 6. 측정 결과 ----------
 from pptx.chart.data import CategoryChartData
 from pptx.enum.chart import XL_CHART_TYPE, XL_LEGEND_POSITION
-s = new_slide('[연결 구현] iPhone·iPad와 PC 직접 연결 성공')
+s = new_slide('[측정 결과] iPhone·iPad와 PC 직접 연결 성공')
 table(s, 0.9, 1.3, 6.3, [3.1, 1.6, 1.6], [
     ['지표', 'iPhone', 'iPad'],
     ['연결 성공 ↑', '9 / 9', '10 / 10'],
@@ -199,7 +273,7 @@ set_notes(s, '이번 주에 시그널링 서버와 연결 코드를 만들고, �
           '그리고 아이폰에서 http 주소로 열면 카메라 기능 자체가 막혀서, 카메라를 쓰는 시험은 https 주소로 해야 합니다.\n'
           '아직 영상과 음성 없이 데이터 통로만 연결한 결과이고, 와이파이 한 곳에서 한 번 시험한 값입니다.')
 
-# ---------- 4. 예상 난제 ----------
+# ---------- 7. 예상 난제 ----------
 s = new_slide('[예상 난제] 다른 네트워크에서도 직접 연결이 될까')
 cards = [
     (0.9, 'router.png', '① 다른 네트워크 사이의 직접 연결', [
@@ -229,7 +303,7 @@ set_notes(s, '가장 어렵다고 예상하는 문제는 두 가지입니다.\n'
           '실제로는 카메라 촬영, 압축, 전송, 수신 대기, 화면 표시까지 다 더해진 시간이 전문가에게 보입니다. 그래서 카메라 렌즈에서 상대 화면까지의 지연을 밀리초 단위로 직접 재는 도구가 필요합니다.\n'
           '결국 이 과제의 핵심은 연결이 되는지, 되면 대화할 만큼 빠른지를 증거로 보여 주는 것이라고 생각합니다.')
 
-# ---------- 5. 남은 계획 ----------
+# ---------- 8. 남은 계획 ----------
 s = new_slide('[남은 계획] 4주 일정과 2주차 할 일')
 table(s, 0.9, 1.3, 11.6, [1.2, 1.8, 5.8, 2.8], [
     ['주차', '기간', '주요 작업', '과목 제출물'],

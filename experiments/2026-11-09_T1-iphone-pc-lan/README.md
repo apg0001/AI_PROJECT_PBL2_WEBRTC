@@ -25,7 +25,7 @@
 | DataChannel 왕복 ↓ | 중앙값 **21.8 ms** (7.1~76.7) | 1~8회 (9회째 응답 없음) |
 | 선택 경로 | host(mDNS) ↔ prflx, 전부 P2P Direct | |
 
-원자료: `runs.csv`, `runs.json`, `server.log`, `measure.log`, `expert-run1.png`, `screenshots/`(폰 화면).
+원자료: `runs.csv`, `runs.json`, `server.log`, `measure.log`, `expert-run1.png`, `screenshots/`(폰 화면), `serverlog-capture.png`(server.log 6~17번째 줄을 발표용으로 렌더링, 초록 # 설명만 덧붙임).
 
 - 1회째는 폰이 나중에 들어와서 PC가 Offerer였다. PC 쪽에서는 Connection Time(join 기준)이 나오지 않아 비어 있다. 폰 화면의 192 ms가 그 회차 값이다.
 - **10회째 중단:** PC가 다시 입장한 직후(17:55:24Z) 폰의 WebSocket이 닫혔다(17:55:26Z `leave field (close)`). 폰 화면 캡처를 위해 앱을 전환해 iOS가 페이지를 멈춘 것으로 본다. 시스템 결함이 아니라 시험 중 조작이다. 9회째 DataChannel 응답이 없었던 것도 같은 시점이다.
