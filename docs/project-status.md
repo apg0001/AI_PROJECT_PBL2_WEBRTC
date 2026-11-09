@@ -30,8 +30,8 @@
 - [x] #53 보고서용 그림 4종 (`docs/diagrams/`: 시스템 아키텍처, 서버 구성도, 구현 계획 로드맵, 클라이언트 모듈 구조)
 - [x] #58 디자인 정리: Anthropic `frontend-design` 기준으로 `docs/DESIGN.md` 작성, 웹 화면 5개·다이어그램 4종·발표자료 r2 다시 만듦
 - [x] #12 1주차 발표자료 `weekly/week1/PBL2_1주차_261109.r1.pptx` (템플릿 사용, 5장)
+- [x] #60 1주차 발표자료 r3: [기술 스택], [실행 화면], [연결 로그](실제 iPhone 캡처와 서버 기록) 3장 추가, 8장 (`weekly/week1/PBL2_1주차_261109.r3.pptx`)
 - [x] #13 iPhone ↔ PC 같은 Wi-Fi 연결 시험: 9/9 P2P 직접 연결, Connection Time 중앙값 50.5 ms (`experiments/2026-11-09_T1-iphone-pc-lan/`). iPad도 10/10, 중앙값 46 ms (`experiments/2026-11-09_T1-ipad-pc-lan/`)
-- [ ] #12 1주차 발표자료
 
 ## 결정 기록
 
