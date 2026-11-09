@@ -13,7 +13,7 @@ WebRTC 기반 실시간 원격 현장 지원 시스템. 설치 없이 웹 브라
 | 경로 | 내용 |
 |---|---|
 | `docs/` | 설계·분석 문서 (최종 제출물 원본) |
-| `server/` | Signaling Server (Node.js + WebSocket) |
+| `server/` | Signaling Server (Python aiohttp, `app.py`·`signaling.py`) + Node 도구(E2E, 화면 캡처, 그림) |
 | `client/` | 브라우저 클라이언트 (현장 / 전문가) |
 | `tools/g2g-latency/` | Glass-to-Glass 지연 측정 도구 |
 | `experiments/` | 실험 원자료 |
@@ -21,12 +21,19 @@ WebRTC 기반 실시간 원격 현장 지원 시스템. 설치 없이 웹 브라
 
 ## 실행
 
-요구사항: Node.js 20 이상, (모바일·외부 네트워크 시험 시) ngrok
+요구사항: Python 3.10 이상 + aiohttp(서버), Node.js 20 이상(자동 시험·그림 도구만), (모바일·외부 네트워크 시험 시) ngrok
 
 ```bash
-cd server
-npm install
-npm start            # http://localhost:3000
+python3 -m pip install -r server/requirements.txt   # aiohttp
+python3 server/app.py                               # http://localhost:3000 (npm start도 같음)
+```
+
+시험:
+
+```bash
+npm install          # E2E용 puppeteer-core (처음 한 번)
+npm test             # 서버 단위 시험 (Python unittest)
+npm run e2e          # Chrome 2~3개로 연결·영상 자동 시험
 ```
 
 PC 브라우저는 `http://localhost:3000` 에서 바로 카메라를 쓸 수 있다(localhost는 Secure Context).

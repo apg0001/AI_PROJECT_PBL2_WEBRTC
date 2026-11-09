@@ -5,7 +5,7 @@
 | 그림 | 원본 | 내용 |
 |---|---|---|
 | ![](system-architecture.png) | `src/system-architecture.html` | 시스템 아키텍처: 현장과 전문가, NAT, 시그널링 서버, ngrok, STUN, TURN, P2P 경로 |
-| ![](server-config.png) | `src/server-config.html` | 서버 구성도: 개발자 PC의 Node 프로세스, 엔드포인트, 같은 LAN과 ngrok 접속 경로 |
+| ![](server-config.png) | `src/server-config.html` | 서버 구성도: 개발자 PC의 Python aiohttp 프로세스, 엔드포인트, 같은 LAN과 ngrok 접속 경로 |
 | ![](client-modules.png) | `src/client-modules.html` | 클라이언트 모듈과 브라우저 API |
 | ![](implementation-plan.png) | `src/implementation-plan.html` | 4주 구현 계획. 데이터(`status`, `TODAY`)만 고치면 다시 그려진다 |
 

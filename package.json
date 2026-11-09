@@ -5,10 +5,10 @@
   "scripts": {
     "postinstall": "npm --prefix server install",
     "start": "npm --prefix server start",
-    "dev": "npm --prefix server run dev",
     "test": "npm --prefix server test",
     "tunnel": "ngrok http 3000",
     "e2e": "npm --prefix server run e2e",
-    "diagrams": "npm --prefix server run diagrams --"
+    "diagrams": "npm --prefix server run diagrams --",
+    "setup": "python3 -m pip install -r server/requirements.txt"
   }
 }

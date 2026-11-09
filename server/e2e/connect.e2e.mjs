@@ -10,10 +10,14 @@ const PORT = Number(process.env.E2E_PORT ?? 3123);
 const BASE = `http://localhost:${PORT}`;
 const CHROME = process.env.CHROME ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
-const server = spawn('node', ['server/src/index.js'], { cwd: REPO, env: { ...process.env, PORT: String(PORT) } });
+const server = spawn(process.env.PYTHON ?? 'python3', ['-u', 'server/app.py'], { cwd: REPO, env: { ...process.env, PORT: String(PORT) } });
 const serverLog = [];
 server.stdout.on('data', (d) => serverLog.push(d.toString()));
-await new Promise((r) => setTimeout(r, 800));
+// 서버가 뜰 때까지 /healthz를 확인한다 (최대 10초)
+for (let i = 0; i < 100; i++) {
+  if (await fetch(`http://localhost:${PORT}/healthz`).then((r) => r.ok, () => false)) break;
+  await new Promise((r) => setTimeout(r, 100));
+}
 
 // 가짜 카메라·마이크와 권한 자동 허용. 화면 공유는 탭 캡처를 자동 선택한다.
 const MEDIA_ARGS = [

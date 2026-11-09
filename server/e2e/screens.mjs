@@ -14,8 +14,12 @@ const CHROME = process.env.CHROME ?? '/Applications/Google Chrome.app/Contents/M
 const BASE = `http://localhost:${PORT}`;
 
 await mkdir(OUT, { recursive: true });
-const server = spawn('node', ['server/src/index.js'], { cwd: REPO, env: { ...process.env, PORT: String(PORT) } });
-await new Promise((r) => setTimeout(r, 800));
+const server = spawn(process.env.PYTHON ?? 'python3', ['-u', 'server/app.py'], { cwd: REPO, env: { ...process.env, PORT: String(PORT) } });
+// 서버가 뜰 때까지 /healthz를 확인한다 (최대 10초)
+for (let i = 0; i < 100; i++) {
+  if (await fetch(`http://localhost:${PORT}/healthz`).then((r) => r.ok, () => false)) break;
+  await new Promise((r) => setTimeout(r, 100));
+}
 const MEDIA_ARGS = ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', '--auto-select-desktop-capture-source=Entire screen'];
 const launch = () => puppeteer.launch({ executablePath: CHROME, headless: true, args: MEDIA_ARGS });
 const [b1, b2] = await Promise.all([launch(), launch()]);

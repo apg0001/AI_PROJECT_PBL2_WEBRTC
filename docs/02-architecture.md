@@ -26,7 +26,7 @@ flowchart LR
   end
 
   subgraph DEV["개발자 PC"]
-    SS["Signaling Server (Node.js)<br/>정적 파일 서빙 + WebSocket<br/>Room 관리 · SDP/ICE 중계"]
+    SS["Signaling Server (Python aiohttp)<br/>정적 파일 서빙 + WebSocket<br/>Room 관리 · SDP/ICE 중계"]
   end
 
   FB -->|"① HTTPS 페이지 · WSS 시그널링"| NG
@@ -93,7 +93,7 @@ flowchart TB
 
 | 대상 | 위치 | 비고 |
 |---|---|---|
-| Signaling Server + 정적 파일 | 개발자 PC (`npm start`) | 단일 프로세스, Room은 메모리에 보관 |
+| Signaling Server + 정적 파일 | 개발자 PC (`python3 server/app.py`) | Python aiohttp 단일 프로세스, Room은 메모리에 보관 |
 | 외부 노출 | ngrok (`npm run tunnel`) | 무료 플랜은 실행할 때마다 URL이 바뀜 |
 | STUN | Google 공용 STUN | 비용 없음, SLA 없음 |
 | TURN | 없음 → 필요 시 호스팅 TURN (#38) | 자체 구축 안 함 |
