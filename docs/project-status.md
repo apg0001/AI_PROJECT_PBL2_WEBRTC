@@ -32,6 +32,7 @@
 - [x] #12 1주차 발표자료 `weekly/week1/PBL2_1주차_261109.r1.pptx` (템플릿 사용, 5장)
 - [x] #15 영상 전달 (2주차 작업을 앞당김): iPhone 후면 카메라 > PC, 854×480 15fps 459kbps H.264, 직접 연결(srflx). 마이크·화질 A/B는 자동 시험만 통과
 - [ ] #62 전문가 화면 공유: 구현과 자동 시험 완료, 실제 폰 표시 확인 남음
+- [x] #64 1주차 발표자료 r4: [영상 전달] 장 추가, 9장 (`weekly/week1/PBL2_1주차_261109.r4.pptx`)
 - [x] #60 1주차 발표자료 r3: [기술 스택], [실행 화면], [연결 로그](실제 iPhone 캡처와 서버 기록) 3장 추가, 8장 (`weekly/week1/PBL2_1주차_261109.r3.pptx`)
 - [x] #13 iPhone ↔ PC 같은 Wi-Fi 연결 시험: 9/9 P2P 직접 연결, Connection Time 중앙값 50.5 ms (`experiments/2026-11-09_T1-iphone-pc-lan/`). iPad도 10/10, 중앙값 46 ms (`experiments/2026-11-09_T1-ipad-pc-lan/`)
 
