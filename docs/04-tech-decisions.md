@@ -8,8 +8,8 @@
 | ID | 항목 | 선택 | 핵심 이유 |
 |---|---|---|---|
 | TD-01 | 실시간 통신 기술 | WebRTC | 브라우저 내장, 설치 불필요, Video·Audio·Data를 P2P로 전송 |
-| TD-02 | Signaling 전송 | WebSocket (`ws`) | 서버 → 클라이언트 push가 필요, 의존성 최소 |
-| TD-03 | Signaling 서버 런타임 | Node.js 단일 프로세스, Room은 메모리 | PoC 규모에서 가장 단순 |
+| TD-02 | Signaling 전송 | WebSocket (aiohttp 내장) | 서버 → 클라이언트 push가 필요, 의존성 최소 |
+| TD-03 | Signaling 서버 런타임 | ~~Node.js~~ → Python aiohttp 단일 프로세스, Room은 메모리 | PoC 규모에서 가장 단순. 멘토 권고로 Python 전환 (#66) |
 | TD-04 | Room 식별 | 추측하기 어려운 Room ID (URL에 포함) | 링크 공유만으로 입장 |
 | TD-05 | Offer 역할 | Room에 먼저 있던 쪽 | glare 방지 |
 | TD-06 | 외부 노출·HTTPS | ngrok 터널 | 모바일 Secure Context + 다른 네트워크 접속을 한 번에 해결 |
@@ -32,22 +32,27 @@
 | 대안을 고르지 않은 이유 | HLS/DASH는 수 초 지연으로 대화형 지원에 맞지 않는다. WebSocket은 TCP라 패킷 손실 시 뒤 프레임까지 막힌다(Head-of-line blocking). RTSP는 브라우저가 기본 지원하지 않는다 |
 | 단점 | NAT 환경에 따라 P2P가 실패할 수 있다. 시그널링은 직접 만들어야 한다 |
 
-### TD-02 Signaling 전송: WebSocket (`ws` 라이브러리)
+### TD-02 Signaling 전송: WebSocket (aiohttp 내장)
 
 | | 내용 |
 |---|---|
 | 대안 | Socket.IO, HTTP long polling, Firebase 등 BaaS |
-| 선택 이유 | 상대 입장·Offer·ICE Candidate를 서버가 즉시 밀어줘야 한다. `ws`는 의존성이 하나뿐이고 브라우저 표준 `WebSocket`과 바로 통한다 |
+| 선택 이유 | 상대 입장·Offer·ICE Candidate를 서버가 즉시 밀어줘야 한다. 표준 WebSocket이라 브라우저의 `WebSocket`과 바로 통하고, aiohttp에 들어 있어 따로 설치할 것이 없다. 연결 확인(30초 ping, pong이 없으면 끊음)도 aiohttp의 `heartbeat` 옵션으로 처리한다 |
 | 단점 | 재연결·Room 브로드캐스트를 직접 구현해야 한다 (Socket.IO는 기본 제공). 프록시가 WebSocket을 막는 환경은 고려하지 않는다 |
+| 번복 이력 | 1주차에는 Node.js `ws` 라이브러리였다. TD-03 전환(#66)과 함께 aiohttp 내장 WebSocket으로 바꿨다. 메시지 형식은 그대로다 |
 
-### TD-03 Signaling 서버: Node.js 단일 프로세스, 메모리 Room
+### TD-03 Signaling 서버: Python aiohttp 단일 프로세스, 메모리 Room
 
 | | 내용 |
 |---|---|
-| 대안 | Redis로 Room 상태 공유, 서버 여러 대 |
-| 선택 이유 | 1:1 PoC에서 동시 Room이 몇 개뿐이다. 메시지 몇 개를 중계하는 작업이라 부하가 거의 없다 |
+| 대안 | Redis로 Room 상태 공유, 서버 여러 대. 런타임은 Node.js(1주차), FastAPI, Flask-SocketIO |
+| 선택 이유 | 1:1 PoC에서 동시 Room이 몇 개뿐이다. 메시지 몇 개를 중계하는 작업이라 부하가 거의 없다. aiohttp 하나로 정적 파일, `/healthz`, `/api/info`, WebSocket을 모두 처리한다(의존성 1개) |
+| Python으로 바꾼 이유 | 프로젝트 멘토 권고(2주차, #66). 인공지능 과목이라 서버 언어를 Python으로 맞추고, 나중에 서버가 영상을 받는 확장(aiortc)을 검토할 때 같은 aiohttp 위에 붙일 수 있다 |
+| 바꾸지 않은 것 | 메시지 형식(03 §3), 엔드포인트, 포트 3000, HTTPS 인증서 처리, 브라우저 코드. 영상은 계속 브라우저끼리 직접(P2P) 가고 서버는 연결 정보만 전달한다 |
+| 확인 | 서버 단위 시험 8개(기존 5개 이전 + 정적 파일 3개) 통과, 브라우저 코드 변경 없이 Chrome E2E 20개 항목 통과 |
 | 단점 | 서버가 재시작되면 Room 정보가 사라진다. 수평 확장 불가. 상용화 시 Room 상태를 외부 저장소로 옮겨야 한다 (#27) |
 | 참고 | 시그널링 서버가 죽어도 이미 연결된 P2P 통화는 유지된다 |
+| 번복 이력 | 1주차는 Node.js(`server/src/index.js`, `signaling.js`)였다. #66에서 `server/app.py`, `server/signaling.py`로 바꿨다 |
 
 ### TD-04 Room 식별: 추측하기 어려운 Room ID
 

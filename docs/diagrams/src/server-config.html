@@ -35,18 +35,18 @@
 
   <!-- 제목 -->
   <text x="60" y="66" class="t-title">PoC 서버 구성도</text>
-  <text x="60" y="100" class="t-sub">개발자 PC의 Node.js 프로세스 하나가 페이지와 연결 정보만 다루고, 접속은 같은 LAN(A) 또는 ngrok 터널(B)로 연다.</text>
+  <text x="60" y="100" class="t-sub">개발자 PC의 Python aiohttp 프로세스 하나가 페이지와 연결 정보만 다루고, 접속은 같은 LAN(A) 또는 ngrok 터널(B)로 연다.</text>
 
   <!-- ================= 개발자 PC ================= -->
   <rect x="40" y="128" width="720" height="686" class="zone"/>
   <text x="60" y="156" class="zone-name">개발자 PC</text>
   <text x="144" y="156" class="t-s">MacBook Air, macOS, LAN IP <tspan class="t-code s">192.168.0.111</tspan></text>
 
-  <!-- Node.js 프로세스 -->
+  <!-- Python aiohttp 프로세스 -->
   <rect x="60" y="172" width="680" height="498" rx="2" class="equip"/>
-  <text x="84" y="202" class="name">Node.js 프로세스</text>
-  <text x="232" y="202" class="t-code">0.0.0.0:3000</text>
-  <text x="84" y="228" class="t-s"><tspan class="t-code s">npm start</tspan>로 실행, 진입점 <tspan class="t-code s">server/src/index.js</tspan></text>
+  <text x="84" y="202" class="name">Python aiohttp 프로세스</text>
+  <text x="300" y="202" class="t-code">0.0.0.0:3000</text>
+  <text x="84" y="228" class="t-s"><tspan class="t-code s">python3 server/app.py</tspan>로 실행 (<tspan class="t-code s">npm start</tspan>도 같음)</text>
   <text x="84" y="252" class="t-s">기본은 HTTP, <tspan class="t-code s">server/certs/</tspan>에 cert.pem과 key.pem이 있으면 HTTPS</text>
 
   <!-- 엔드포인트 표 -->
@@ -72,7 +72,7 @@
 
   <text x="84" y="542" class="cell-b">WebSocket</text>
   <text x="84" y="566" class="cell-b">시그널링</text>
-  <text x="84" y="590" class="t-code s" style="font-size:14px">signaling.js</text>
+  <text x="84" y="590" class="t-code s" style="font-size:14px">signaling.py</text>
   <text x="214" y="542" class="t-code">/ws</text><text x="380" y="542" class="cell">Room마다 최대 2명, 역할은 field 또는 expert</text>
   <text x="380" y="566" class="cell">offer, answer, ice를 해석 없이 상대에게 전달</text>
   <text x="380" y="590" class="cell">peer-joined, peer-left 알림</text>
@@ -82,8 +82,8 @@
   <!-- 개발 도구 (표) -->
   <text x="60" y="714" class="name">개발 도구</text>
   <line x1="60" y1="724" x2="440" y2="724" class="row"/>
-  <text x="60" y="748" class="t-code">npm test</text><text x="236" y="748" class="cell">서버 단위 테스트 5개</text>
-  <text x="60" y="772" class="t-code">npm run e2e</text><text x="236" y="772" class="cell">Chrome 자동 연결 시험</text>
+  <text x="60" y="748" class="t-code">npm test</text><text x="236" y="748" class="cell">서버 단위 시험 8개 (Python)</text>
+  <text x="60" y="772" class="t-code">npm run e2e</text><text x="236" y="772" class="cell">Chrome 자동 시험 20항목 (Node)</text>
   <text x="60" y="796" class="t-code">npm run diagrams</text><text x="236" y="796" class="cell">다이어그램 PNG 생성</text>
 
   <!-- ngrok agent -->

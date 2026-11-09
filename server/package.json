@@ -1,25 +1,20 @@
 {
-  "name": "pbl2-webrtc-signaling",
+  "name": "pbl2-webrtc-tools",
   "version": "0.1.0",
   "private": true,
-  "description": "WebRTC 원격 현장지원 PoC — Signaling Server + 정적 파일 서빙",
-  "type": "module",
-  "main": "src/index.js",
+  "description": "Python Signaling Server(app.py)의 실행 단축 명령 + Node 도구(E2E, 화면 캡처, 다이어그램)",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "node --watch src/index.js",
+    "start": "python3 app.py",
+    "test": "python3 -m unittest discover -s tests -t .",
     "tunnel": "ngrok http 3000",
-    "test": "node --test",
     "e2e": "node e2e/connect.e2e.mjs",
     "diagrams": "node scripts/render-diagrams.mjs"
   },
   "engines": {
     "node": ">=20"
   },
-  "dependencies": {
-    "ws": "^8.22.2"
-  },
   "devDependencies": {
     "puppeteer-core": "^24.43.1"
-  }
+  },
+  "type": "module"
 }

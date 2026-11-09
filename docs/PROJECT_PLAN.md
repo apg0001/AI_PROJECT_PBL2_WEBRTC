@@ -81,11 +81,12 @@
 │   ├── 07-failure-analysis.md   # 제출물 6
 │   ├── 08-enterprise-think.md   # 제출물 7 (Think ≥ 3)
 │   └── diagrams/                # Mermaid / 이미지 원본
-├── server/                      # Signaling Server (Node.js + ws)
-│   ├── package.json
-│   └── src/
-│       ├── index.js             # HTTPS + 정적 파일 + WebSocket
-│       └── rooms.js             # Room / Session 관리
+├── server/                      # Signaling Server (Python aiohttp)
+│   ├── app.py                   # HTTPS + 정적 파일 + WebSocket 진입점
+│   ├── signaling.py             # Room 관리, SDP/ICE 중계
+│   ├── requirements.txt
+│   ├── tests/                   # 서버 단위 시험 (unittest)
+│   └── e2e/, scripts/           # Node 도구: Chrome 자동 시험, 화면 캡처, 그림 렌더링
 ├── client/                      # 브라우저 클라이언트 (Vanilla JS ES Modules, 빌드 없음)
 │   ├── index.html               # 역할·Room 선택
 │   ├── field.html               # 현장 작업자 (모바일, 후면 카메라, Pointer 표시)

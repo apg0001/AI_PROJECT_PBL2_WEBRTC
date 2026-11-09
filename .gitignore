@@ -10,3 +10,4 @@ docs/reference/*.pdf
 server/certs/
 docs/reference/templates/
 /*.pptx
+__pycache__/
