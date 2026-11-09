@@ -127,3 +127,45 @@ body.expert main { max-width: 1280px; }
 .start .link { display: block; word-break: break-all; margin-top: 8px; font-family: var(--mono); font-size: 13px; }
 .qr svg { width: 180px; height: 180px; display: block; margin-top: 8px; }
 .note { margin-top: 32px; padding-top: 12px; border-top: 1px solid var(--rule); color: var(--steel); font-size: 15px; }
+
+/* 영상 무대 (#15, #62) - 영상이 주인공이라 테두리 선 하나만 두고 꾸미지 않는다 */
+.stage {
+  position: relative;
+  margin-top: 16px;
+  background: var(--hover);
+  border: 1px solid var(--rule);
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+body.field .stage { aspect-ratio: 3 / 4; max-height: 62vh; width: 100%; }
+body.field .stage.sharing { aspect-ratio: 4 / 3; } /* PC 화면 공유는 가로가 길다 */
+.stage video { display: block; width: 100%; height: 100%; object-fit: contain; background: var(--ink); }
+.stage video[hidden] { display: none; }
+.stage video.mirror { transform: scaleX(-1); }
+.stage .pip {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 30%;
+  height: auto;
+  aspect-ratio: auto;
+  border: 2px solid var(--paper);
+}
+.stage-note {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 16px;
+  text-align: center;
+  color: var(--steel);
+}
+.stage-note[hidden] { display: none; }
+.inbound { margin: 8px 0 0; font-size: 15px; color: var(--steel); }
+button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+button[aria-pressed="true"]:hover { background: var(--steel); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+.select { display: inline-flex; align-items: center; gap: 8px; font-size: 15px; }
+.select select { font: inherit; font-size: 15px; min-height: 44px; padding: 0 8px; border: 1.5px solid var(--ink); border-radius: 2px; background: var(--paper); color: var(--ink); }

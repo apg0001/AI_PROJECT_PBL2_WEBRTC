@@ -7,7 +7,7 @@
 const ROLE_NAME = { field: '현장 작업자', expert: '원격 전문가' };
 const STATE_KINDS = ['signalingState', 'iceGatheringState', 'iceConnectionState', 'connectionState'];
 const STATUS_CLASS = { ok: 'ok', error: 'error' }; // 그 밖(대기, 진행, 불안정)은 주의(노랑)
-const CATEGORY = { signaling: '시그널링', state: '상태', ice: '후보', data: '데이터', status: '화면', error: '오류' };
+const CATEGORY = { signaling: '시그널링', state: '상태', ice: '후보', data: '데이터', media: '영상', status: '화면', error: '오류' };
 const DIRECTION = { local: '내 쪽', remote: '상대 쪽' };
 
 const TERMS =
@@ -34,10 +34,28 @@ export function createUi({ role, room }) {
     <table id="cands"><thead><tr><th>시각</th><th>쪽</th><th>종류</th><th>방식</th><th>주소</th></tr></thead><tbody></tbody></table>`;
   const logBlock = `<details id="logBox"><summary>연결 기록</summary><ol id="log" class="log"></ol></details>`;
 
+  // 영상 무대: 큰 화면 하나와 오른쪽 아래 작은 화면 하나
+  //  - 현장: 큰 화면 = 전문가 화면 공유(있을 때) 또는 내 카메라, 작은 화면 = 공유 중일 때 내 카메라
+  //  - 전문가: 큰 화면 = 현장 카메라, 작은 화면 = 내가 공유 중인 화면
+  const stage = `
+    <div class="stage" id="stage">
+      <video id="vMain" playsinline autoplay muted></video>
+      <video id="vPip" class="pip" playsinline autoplay muted hidden></video>
+      <p class="stage-note" id="stageNote"></p>
+    </div>
+    <audio id="remoteAudio" autoplay></audio>`;
+
   if (role === 'field') {
     app.innerHTML = `
       ${head}
       <div id="status" class="tag" role="status" aria-live="polite">준비</div>
+      ${stage}
+      <p class="muted small" id="mediaNote"></p>
+      <div class="actions">
+        <button id="cam" aria-pressed="false">카메라 켜기</button>
+        <button id="flip" disabled>전면 카메라로</button>
+        <button id="mic" aria-pressed="false">마이크 켜기</button>
+      </div>
       <div class="actions">
         <button id="ping">연결 확인</button>
         <button id="leave">나가기</button>
@@ -54,6 +72,19 @@ export function createUi({ role, room }) {
       <div class="columns">
         <section>
           <div id="status" class="state-line" role="status" aria-live="polite">준비</div>
+          ${stage}
+          <p class="inbound" id="inbound">받는 영상 없음</p>
+          <p class="muted small" id="mediaNote"></p>
+          <div class="actions">
+            <button id="screen" aria-pressed="false">화면 공유</button>
+            <button id="mic" aria-pressed="false">마이크 켜기</button>
+            <label class="select">현장 화질
+              <select id="profile">
+                <option value="B">저화질 480p 15fps</option>
+                <option value="A">고화질 1080p 30fps</option>
+              </select>
+            </label>
+          </div>
           ${resultTable}
           <div class="actions">
             <button id="ping">연결 확인</button>
@@ -146,9 +177,125 @@ export function createUi({ role, room }) {
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   };
 
+  // ---- 영상 ----
+  const remote = { audio: null, camera: null, screen: null };
+  const remoteOn = { camera: false, screen: false };
+  const local = { camera: null, screen: null };
+  const show = (video, track) => {
+    const want = track ?? null;
+    const cur = video.srcObject?.getTracks()[0] ?? null;
+    if (cur !== want) video.srcObject = want ? new MediaStream([want]) : null;
+    video.hidden = !want;
+    if (want) video.play().catch(() => {});
+  };
+
+  function renderStage() {
+    let main = null;
+    let pip = null;
+    let note = '';
+    if (role === 'field') {
+      if (remoteOn.screen && remote.screen) {
+        main = remote.screen;
+        pip = local.camera;
+      } else {
+        main = local.camera;
+        note = local.camera ? '' : '카메라가 꺼져 있습니다. 켜면 전문가에게 보입니다';
+      }
+    } else {
+      main = remoteOn.camera ? remote.camera : null;
+      pip = local.screen;
+      note = main ? '' : '현장 카메라가 꺼져 있습니다';
+    }
+    show($('vMain'), main);
+    show($('vPip'), pip);
+    $('vMain').classList.toggle('mirror', role === 'field' && main === local.camera && local.facing === 'user');
+    $('stage').classList.toggle('sharing', role === 'field' && main === remote.screen && !!main);
+    $('stageNote').textContent = note;
+    $('stageNote').hidden = !note;
+  }
+  renderStage();
+
+  function pressed(id, on, label) {
+    const b = $(id);
+    if (!b) return;
+    b.setAttribute('aria-pressed', String(on));
+    if (label) b.textContent = label;
+  }
+
   return {
     log,
     record,
+
+    // ---- 영상 ----
+    setLocal(slot, track, { facing } = {}) {
+      local[slot] = track;
+      if (facing) local.facing = facing;
+      if (slot === 'camera') {
+        pressed('cam', !!track, track ? '카메라 끄기' : '카메라 켜기');
+        if ($('flip')) {
+          $('flip').disabled = !track;
+          $('flip').textContent = local.facing === 'user' ? '후면 카메라로' : '전면 카메라로';
+        }
+      }
+      if (slot === 'screen') pressed('screen', !!track, track ? '화면 공유 중지' : '화면 공유');
+      if (slot === 'audio') pressed('mic', !!track, track ? '마이크 끄기' : '마이크 켜기');
+      renderStage();
+    },
+    setRemoteTrack(slot, track) {
+      remote[slot] = track;
+      if (slot === 'audio') {
+        const a = $('remoteAudio');
+        a.srcObject = new MediaStream([track]);
+        a.play().catch(() => {});
+      }
+      renderStage();
+    },
+    setRemoteOn(slot, on) {
+      if (!(slot in remoteOn)) return;
+      remoteOn[slot] = on;
+      if (!on && role === 'expert' && slot === 'camera') $('inbound').textContent = '받는 영상 없음';
+      renderStage();
+    },
+    resetRemote() {
+      remoteOn.camera = remoteOn.screen = false;
+      remote.audio = remote.camera = remote.screen = null;
+      if ($('inbound')) $('inbound').textContent = '받는 영상 없음';
+      renderStage();
+    },
+    // 현장 카메라 수신 품질 (전문가 화면)
+    showInbound(v) {
+      const el = $('inbound');
+      if (!el) return;
+      if (!v || !v.width) {
+        el.textContent = remoteOn.camera ? '받는 영상: 첫 화면을 기다리는 중' : '받는 영상 없음';
+        return;
+      }
+      const parts = [`${v.width}×${v.height}`];
+      if (v.fps != null) parts.push(`${Math.round(v.fps)} fps`);
+      if (v.kbps != null) parts.push(`${v.kbps.toLocaleString()} kbps`);
+      if (v.codec) parts.push(v.codec);
+      el.textContent = `받는 영상: ${parts.join(', ')}`;
+      record.result['받는 영상'] = el.textContent;
+    },
+    setMediaNote(text) {
+      $('mediaNote').textContent = text ?? '';
+    },
+    disable(id, why) {
+      const b = $(id);
+      if (!b) return;
+      b.disabled = true;
+      if (why) b.title = why;
+    },
+    // 소리가 자동 재생되지 않은 경우를 위해, 아무 버튼이나 누르면 다시 재생한다
+    resumeAudio() {
+      const a = $('remoteAudio');
+      if (a.srcObject && a.paused) a.play().catch(() => {});
+    },
+    onCamera(cb) { $('cam') && ($('cam').onclick = cb); },
+    onFlip(cb) { $('flip') && ($('flip').onclick = cb); },
+    onMic(cb) { $('mic').onclick = cb; },
+    onScreen(cb) { $('screen') && ($('screen').onclick = cb); },
+    onProfile(cb) { $('profile') && ($('profile').onchange = () => cb($('profile').value)); },
 
     // kind: ok | error | wait | busy | warn
     setStatus(kind, text) {
