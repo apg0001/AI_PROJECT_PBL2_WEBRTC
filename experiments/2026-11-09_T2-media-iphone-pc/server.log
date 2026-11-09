@@ -1,0 +1,25 @@
+2026-11-09T02:08:30.689Z listening on http://localhost:3000
+2026-11-09T02:08:30.690Z   LAN: http://192.168.0.111:3000
+2026-11-09T02:08:30.690Z   LAN: http://100.112.165.48:3000
+2026-11-09T02:08:30.690Z   LAN: http://210.94.172.67:3000
+2026-11-09T02:08:30.690Z   같은 LAN 연결은 위 LAN 주소로 접속. 폰 카메라·다른 네트워크 시험은 HTTPS 필요 → `npm run tunnel`
+2026-11-09T02:15:42.874Z ws open 33f292ad from 127.0.0.1 ua="Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1"
+2026-11-09T02:15:42.947Z [1s0f0z0v222v] join field 33f292ad (1/2)
+2026-11-09T02:15:50.402Z ws open ce5e201c from 127.0.0.1 ua="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+2026-11-09T02:15:50.470Z [1s0f0z0v222v] join expert ce5e201c (2/2)
+2026-11-09T02:15:50.609Z [1s0f0z0v222v] offer field → expert
+2026-11-09T02:15:50.622Z [1s0f0z0v222v] ice field → expert
+2026-11-09T02:15:50.622Z [1s0f0z0v222v] ice field → expert
+2026-11-09T02:15:50.622Z [1s0f0z0v222v] ice field → expert
+2026-11-09T02:15:50.622Z [1s0f0z0v222v] ice field → expert
+2026-11-09T02:15:50.665Z [1s0f0z0v222v] ice field → expert
+2026-11-09T02:15:50.666Z [1s0f0z0v222v] ice field → expert
+2026-11-09T02:15:50.667Z [1s0f0z0v222v] ice field → expert
+2026-11-09T02:15:50.668Z [1s0f0z0v222v] ice field → expert
+2026-11-09T02:15:50.717Z [1s0f0z0v222v] answer expert → field
+2026-11-09T02:15:50.717Z [1s0f0z0v222v] ice expert → field
+2026-11-09T02:15:50.724Z [1s0f0z0v222v] ice field → expert
+2026-11-09T02:15:50.752Z [1s0f0z0v222v] ice expert → field
+2026-11-09T02:15:50.867Z [1s0f0z0v222v] ice expert → field
+2026-11-09T02:17:24.834Z [1s0f0z0v222v] leave field 33f292ad (close)
+2026-11-09T02:18:04.672Z [1s0f0z0v222v] leave expert ce5e201c (leave)

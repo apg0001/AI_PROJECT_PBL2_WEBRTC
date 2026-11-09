@@ -15,7 +15,16 @@ const serverLog = [];
 server.stdout.on('data', (d) => serverLog.push(d.toString()));
 await new Promise((r) => setTimeout(r, 800));
 
-const launch = () => puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--no-first-run'] });
+// 가짜 카메라·마이크와 권한 자동 허용. 화면 공유는 탭 캡처를 자동 선택한다.
+const MEDIA_ARGS = [
+  '--use-fake-ui-for-media-stream',
+  '--use-fake-device-for-media-stream',
+  '--auto-accept-this-tab-capture',
+  '--auto-select-desktop-capture-source=Entire screen',
+  '--autoplay-policy=no-user-gesture-required',
+];
+const launch = () => puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--no-first-run', ...MEDIA_ARGS] });
+const videoSize = (p) => p.$eval('#vMain', (v) => (v.hidden ? 0 : v.videoWidth));
 const [b1, b2, b3] = await Promise.all([launch(), launch(), launch()]);
 const status = (p) => p.$eval('#status', (e) => e.textContent);
 const result = (p) => p.$$eval('#result tr', (rows) => rows.map((r) => `${r.cells[0].textContent}: ${r.cells[1].textContent}`));
@@ -64,6 +73,45 @@ try {
   await e.waitForFunction(() => document.getElementById('log').textContent.includes('데이터 통로 왕복'), { timeout: 5000 });
   check('DataChannel ping/pong', true);
 
+  // #15 현장 카메라 > 전문가
+  await f.click('#cam');
+  await e.waitForFunction(() => {
+    const v = document.getElementById('vMain');
+    return !v.hidden && v.videoWidth > 0;
+  }, { timeout: 15000 });
+  check('현장 카메라 > 전문가 화면에 영상', true, `${await videoSize(e)}px 폭`);
+  await e.waitForFunction(() => document.getElementById('inbound').textContent.includes('fps'), { timeout: 8000 });
+  check('전문가 화면에 받는 영상 품질 표시', true, await e.$eval('#inbound', (x) => x.textContent));
+
+  // 화질 변경 요청 > 현장이 카메라를 다시 맞춤
+  await e.select('#profile', 'A');
+  await f.waitForFunction(() => document.getElementById('log').textContent.includes('화질 변경'), { timeout: 8000 });
+  check('전문가 화질 선택 > 현장 반영', true);
+
+  // #15 마이크 (양방향 음성 통로)
+  await f.click('#mic');
+  await f.waitForFunction(() => document.getElementById('mic').getAttribute('aria-pressed') === 'true', { timeout: 8000 });
+  // 소리 패킷이 실제로 오면 받는 쪽 트랙의 muted가 풀린다
+  await e.waitForFunction(() => {
+    const t = document.getElementById('remoteAudio').srcObject?.getAudioTracks()[0];
+    return t && !t.muted;
+  }, { timeout: 8000 });
+  check('현장 마이크 > 전문가에게 소리 도착', true);
+
+  // #62 전문가 화면 공유 > 현장
+  await e.click('#screen');
+  const shared = await f
+    .waitForFunction(() => document.getElementById('stage').classList.contains('sharing') && document.getElementById('vMain').videoWidth > 0, { timeout: 15000 })
+    .then(() => true)
+    .catch(() => false);
+  const screenErr = await e.$eval('#mediaNote', (x) => x.textContent);
+  check('전문가 화면 공유 > 현장 큰 화면', shared, shared ? `${await videoSize(f)}px 폭, 내 카메라는 작은 화면` : screenErr);
+  if (shared) {
+    await e.click('#screen');
+    await f.waitForFunction(() => !document.getElementById('stage').classList.contains('sharing'), { timeout: 8000 });
+    check('화면 공유 중지 > 현장은 내 카메라로 복귀', true);
+  }
+
   await e.click('#leave');
   await waitStatus(f, '상대가 나갔습니다', 5000);
   check('나가기 → 상대에게 peer-left', true);
@@ -71,6 +119,8 @@ try {
   await e.goto(`${BASE}/expert.html?room=${room}`);
   await Promise.all([waitStatus(f, '연결됨'), waitStatus(e, '연결됨')]);
   check('재입장 후 재연결', true);
+  await e.waitForFunction(() => document.getElementById('vMain').videoWidth > 0, { timeout: 15000 });
+  check('재연결 후 켜 두었던 카메라가 다시 보임 (재협상 없이)', true);
 
   const x = await b3.newPage();
   await x.goto(`${BASE}/expert.html?room=${room}`);

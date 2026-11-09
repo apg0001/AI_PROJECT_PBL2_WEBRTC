@@ -8,5 +8,7 @@
 | `field-waiting.png` | 현장 화면, 전문가를 기다리는 중 (노란 점검 태그) |
 | `field-connected.png` | 현장 화면, 연결됨 (초록 점검 태그) |
 | `expert-connected.png` | 전문가 화면, 연결 정보와 상태 변화, 연결 후보, 연결 기록 |
+| `expert-video.png` | 전문가 화면, 현장 카메라 수신과 받는 영상 품질(해상도, fps, kbps, 코덱). 카메라는 Chrome 가짜 장치(초록 시험 패턴) |
+| `field-sharing.png` | 현장 화면, 전문가 화면 공유가 크게, 내 카메라는 오른쪽 아래 작은 화면. 공유 화면도 가짜 장치 |
 
 다시 캡처: `cd server && node e2e/screens.mjs ../docs/screens`

@@ -1,4 +1,5 @@
-// 화면 캡처: 시작 화면(PC·폰), 연결된 현장 화면(폰 크기), 전문가 화면(PC 크기)
+// 화면 캡처: 시작 화면(PC·폰), 연결된 현장 화면(폰 크기), 전문가 화면(PC 크기),
+//   영상 화면(현장 카메라 > 전문가, 전문가 화면 공유 > 현장). 카메라는 Chrome 가짜 장치(시험 패턴)다.
 // 실행: node e2e/screens.mjs <출력 폴더>   (설치된 Chrome 사용)
 import puppeteer from 'puppeteer-core';
 import { spawn } from 'node:child_process';
@@ -15,7 +16,8 @@ const BASE = `http://localhost:${PORT}`;
 await mkdir(OUT, { recursive: true });
 const server = spawn('node', ['server/src/index.js'], { cwd: REPO, env: { ...process.env, PORT: String(PORT) } });
 await new Promise((r) => setTimeout(r, 800));
-const launch = () => puppeteer.launch({ executablePath: CHROME, headless: true });
+const MEDIA_ARGS = ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', '--auto-select-desktop-capture-source=Entire screen'];
+const launch = () => puppeteer.launch({ executablePath: CHROME, headless: true, args: MEDIA_ARGS });
 const [b1, b2] = await Promise.all([launch(), launch()]);
 const shot = async (page, name) => {
   await page.evaluate(() => document.fonts.ready);
@@ -49,6 +51,17 @@ try {
   await e.evaluate(() => (document.getElementById('logBox').open = true));
   await shot(f, 'field-connected.png');
   await shot(e, 'expert-connected.png');
+
+  // 영상: 현장 카메라를 켜고, 전문가가 화면을 공유한다
+  await e.evaluate(() => (document.getElementById('logBox').open = false));
+  await f.click('#cam');
+  await e.waitForFunction(() => document.getElementById('inbound').textContent.includes('fps'), { timeout: 15000 });
+  await new Promise((r) => setTimeout(r, 3000));
+  await shot(e, 'expert-video.png');
+  await e.click('#screen');
+  await f.waitForFunction(() => document.getElementById('stage').classList.contains('sharing') && document.getElementById('vMain').videoWidth > 0, { timeout: 15000 });
+  await new Promise((r) => setTimeout(r, 1500));
+  await shot(f, 'field-sharing.png');
 } finally {
   await Promise.all([b1.close(), b2.close()]);
   server.kill();
