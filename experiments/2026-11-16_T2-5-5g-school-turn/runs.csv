@@ -1,0 +1,11 @@
+run,role,connectionMs,iceRttMs,dataChannelRttMs,pathType,localPath,remotePath,candidates
+1,"나중 입장 (제안에 응답)",967,25,32,"TURN 서버 중계","srflx udp 210.94.220.229:55141","relay udp 158.247.200.82:47352","(내 쪽: host 1개, relay 6개, srflx 1개 / 상대 쪽: host 32개, relay 24개, srflx 23개)"
+2,"나중 입장 (제안에 응답)",584,29,33.2,"TURN 서버 중계","srflx udp 210.94.220.229:56980","relay udp 158.247.200.82:51675","(내 쪽: host 1개, srflx 1개, relay 6개 / 상대 쪽: host 32개, srflx 6개, relay 7개)"
+3,"나중 입장 (제안에 응답)",381,31,31,"TURN 서버 중계","srflx udp 210.94.220.229:49578","relay udp 158.247.200.82:44595","(내 쪽: host 1개, srflx 1개, relay 6개 / 상대 쪽: host 8개, srflx 4개, relay 16개)"
+4,"나중 입장 (제안에 응답)",323,44,41.5,"TURN 서버 중계","srflx udp 210.94.220.229:64382","relay udp 158.247.200.82:20557","(내 쪽: host 1개, srflx 1개, relay 6개 / 상대 쪽: host 8개, srflx 4개, relay 16개)"
+5,"나중 입장 (제안에 응답)",356,24,32.7,"TURN 서버 중계","srflx udp 210.94.220.229:59052","relay udp 158.247.200.82:26994","(내 쪽: host 1개, srflx 1개, relay 6개 / 상대 쪽: host 8개, srflx 3개, relay 16개)"
+6,"나중 입장 (제안에 응답)",611,34,33.5,"TURN 서버 중계","srflx udp 210.94.220.229:59860","relay udp 158.247.200.82:47169","(내 쪽: host 1개, srflx 1개, relay 6개 / 상대 쪽: host 32개, srflx 9개, relay 7개)"
+7,"나중 입장 (제안에 응답)",566,32,29.6,"TURN 서버 중계","srflx udp 210.94.220.229:53468","relay udp 158.247.200.82:27252","(내 쪽: host 1개, srflx 1개, relay 6개 / 상대 쪽: host 32개, srflx 4개, relay 7개)"
+8,"나중 입장 (제안에 응답)",571,36,38,"TURN 서버 중계","srflx udp 210.94.220.229:58709","relay udp 158.247.200.82:28869","(내 쪽: host 1개, srflx 1개, relay 6개 / 상대 쪽: host 32개, srflx 4개, relay 7개)"
+9,"나중 입장 (제안에 응답)",665,29,30.6,"TURN 서버 중계","srflx udp 210.94.220.229:50619","relay udp 158.247.200.82:25674","(내 쪽: host 1개, srflx 1개, relay 6개 / 상대 쪽: host 32개, srflx 10개, relay 7개)"
+10,"나중 입장 (제안에 응답)",566,34,29.6,"TURN 서버 중계","srflx udp 210.94.220.229:52070","relay udp 158.247.200.82:36787","(내 쪽: host 1개, srflx 1개, relay 6개 / 상대 쪽: host 32개, srflx 6개, relay 7개)"

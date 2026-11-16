@@ -55,6 +55,14 @@
 | T2-4 | 집 Wi-Fi | 학교 Wi-Fi | 서로 다른 고정망 | 5회 |
 | T2-5 | (T2 중 실패 조합) | 〃 | 호스팅 TURN 적용 시 성공 여부 (#38, 선택) | 5회 |
 
+결과 (2026-11-16, `experiments/`):
+
+| ID | 조건 | 결과 |
+|---|---|---|
+| T2-2 | KT LTE ↔ 학교 유선(공인 IP), STUN만 | 0 / 10 |
+| T2-2b | KT 5G ↔ 학교 Wi-Fi, STUN만 (T2-5의 대조군) | 0 / 5 |
+| T2-5 | KT 5G ↔ 학교 Wi-Fi, Metered TURN | 10 / 10, 모두 중계. Connection Time 중앙값 568.5 ms, RTT 31.5 ms |
+
 실패하면 다음을 남긴다: 수집된 Candidate 목록(srflx가 있었는가), `iceConnectionState` 전이와 시각, 실패까지 걸린 시간. 이 근거로 원인(UDP 차단, Symmetric NAT 등)을 추정한다(#14).
 
 ### T3. 네트워크 조건별 품질 (#21)

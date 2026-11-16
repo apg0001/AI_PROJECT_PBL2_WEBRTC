@@ -17,8 +17,8 @@
 - [x] #16 DataChannel 메시지 프로토콜: 봉투 `{type, seq, ts, payload}`, 종류 9개, 작업 지시 2단계 확인(ack), 재연결 후 미확인 지시 재전송, 늦게 온 포인터 버리기 (`client/js/datachannel.js`, 03 §6). E2E 24항목 통과
 - [x] #17 대화(양방향), 작업 지시(현장 확인 버튼, 전문가 표에 도착·확인 상태), 포인터(전문가가 영상을 누르면 현장 카메라 화면의 같은 위치에 노란 고리, 3초 뒤 흐려짐), 장비 상태(더미). E2E 28항목 통과, 위치 오차 0.003. 실제 폰 확인 남음
 - [x] #18 통신 품질 1초 기록과 CSV(30열): 경로, RTT, 받는 영상(해상도, fps, kbps, 손실률, 지터, 지터 버퍼, 디코딩, 정지), 보내는 영상(화질을 낮춘 이유), 음성. 화면 표, CSV 저장, 그래프 스크립트(`tools/stats/plot_stats.py`), PC 수집 스크립트(`server/e2e/collect-stats.mjs`). E2E 32항목 통과
-- [ ] #37 다른 네트워크: KT LTE 폰 ↔ 학교망 PC(유선 공인 IP) STUN만으로 **0/10 실패** (`experiments/2026-11-16_T2-2-lte-school/`). TURN 적용 후 재시험 남음
-- [ ] #38 호스팅 TURN: 코드 준비 완료(`/api/ice`, Cloudflare 짧은 유효기간 접속 정보, `?relay=1`, `?turn=0`). Cloudflare 계정·키 설정과 실측 남음
+- [x] #37 다른 네트워크: KT 폰 ↔ 학교망 PC. STUN만 **0/10**(PC 유선, `T2-2-lte-school`), **0/5**(PC Wi-Fi, `T2-2b-5g-school-stun`) > TURN 적용 **10/10**(`T2-5-5g-school-turn`, 중앙값 568.5 ms). 트러블슈팅 7건은 2주차 보고서
+- [ ] #38 호스팅 TURN: Cloudflare는 결제 수단 등록 요구 > **Metered Open Relay**(매달 20 GB 무료)로 연결 확인. Direct vs Relay 품질 비교(영상 bitrate, RTT, G2G) 남음
 - [x] #72 서버 실행 Python 문제: 터미널의 `python3`(Homebrew 3.13)에 aiohttp가 없어 `npm start` 실패 > `server/.venv` 가상환경(`npm run setup`)과 실행 스크립트 `server/run.sh`
 - [x] #19 Glass-to-Glass 지연 측정 도구 (`tools/g2g-latency/`): 시계 페이지(ms QR), 전문가 화면 '종단 지연 측정'(중앙값, p95, 받기 전/받은 뒤, CSV), 시험 모드 `?fake=clock`. E2E에서 8초 표본 108개, 내부 지연 중앙값 49 ms. 실제 폰 측정(100개 이상)과 사진 수동 검증 남음
 
@@ -61,11 +61,12 @@
 | 2026-11-09 | HTTPS·외부 접속은 ngrok 터널 | 이미 설치·설정되어 있고 모바일 Secure Context와 외부 시그널링 접속을 함께 해결 |
 | 2026-11-09 | 시그널링 서버를 Node.js에서 Python aiohttp로 전환 (TD-02, TD-03, #66) | 멘토 권고. 인공지능 과목이라 서버 언어를 Python으로 맞춤. 영상은 계속 P2P, 서버가 영상을 받는 구조(aiortc)는 범위 밖 |
 | 2026-11-09 | G2G 지연 측정 도구 추가 | getStats RTT로는 사용자가 체감하는 종단 지연을 알 수 없음 |
+| 2026-11-16 | 호스팅 TURN은 Metered Open Relay (TD-07, #38) | Cloudflare TURN은 가입 시 결제 수단 등록 요구. 라즈베리파이 자체 TURN은 공인 IP·포트 포워딩·인증서가 필요하고 범위 밖이라 보류 |
 
 ## 미해결 위험
 
 - 연결 시점에 srflx 후보가 거의 수집되지 않았다(9회 중 7회 host만). 다른 네트워크 연결(#37)에 결정적이므로 #14에서 원인을 확인한다.
-- 이동통신망(CGNAT, Symmetric NAT 가능성)에서는 STUN만으로 P2P가 실패할 수 있다. 실패도 증거와 함께 결과로 남긴다(#37).
+- ~~이동통신망에서는 STUN만으로 P2P가 실패할 수 있다~~ > 실제로 실패했고(KT ↔ 학교망 0/15) TURN으로 해결(10/10, #37). 남은 위험: Metered 무료 한도 매달 20 GB, 접속 정보가 고정이라 새면 대시보드에서 다시 만들어야 함.
 - ngrok 무료 플랜은 실행할 때마다 URL이 바뀐다. 시험 때 URL을 공유하는 절차가 필요하다.
 - Chrome DevTools 네트워크 제한은 WebRTC에 적용되지 않는다. 품질 실험은 Network Link Conditioner 등 OS 수준 제한이 필요하다(#21).
 - 수업 요일을 모르므로 Milestone 마감일은 각 주 일요일로 임시 설정했다.
