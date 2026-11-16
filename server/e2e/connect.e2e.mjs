@@ -35,6 +35,7 @@ const result = (p) => p.$$eval('#result tr', (rows) => rows.map((r) => `${r.cell
 const waitStatus = (p, text, timeout = 15000) =>
   p.waitForFunction((t) => document.getElementById('status')?.textContent.includes(t), { timeout }, text);
 const errors = [];
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let ok = true;
 const check = (name, cond, extra = '') => {
   console.log(`${cond ? 'PASS' : 'FAIL'} ${name} ${extra}`);
@@ -76,6 +77,52 @@ try {
   await e.click('#ping');
   await e.waitForFunction(() => document.getElementById('log').textContent.includes('데이터 통로 왕복'), { timeout: 5000 });
   check('DataChannel ping/pong', true);
+
+  // #16 메시지 형식 검사 (봉투, 채널 구분, 좌표 범위)
+  const dec = await e.evaluate(async () => {
+    const { decode, encode } = await import('/js/datachannel.js');
+    const ok = (raw, ch) => !!decode(raw, ch).msg;
+    return [
+      ok(encode('chat', 0, { text: '안녕' }), 'control'),
+      !ok('not json', 'control'),
+      !ok(encode('nope', 0, {}), 'control'),
+      !ok(encode('pointer', 0, { x: 0.5, y: 0.5 }), 'control'), // 채널이 다름
+      !ok(encode('pointer', 0, { x: 1.5, y: 0.5 }), 'pointer'), // 범위 밖
+      !ok(JSON.stringify({ type: 'chat', payload: { text: 'x' } }), 'control'), // seq 없음
+      ok(encode('pointer', 3, { x: 0.25, y: 1 }), 'pointer'),
+    ];
+  });
+  check('메시지 형식 검사 7가지', dec.every(Boolean), JSON.stringify(dec));
+
+  // #16 작업 지시 > 현장 도착 확인(ack) 왕복
+  const gotInstr = f.evaluate(
+    () => new Promise((res) => window.pbl.link.on('instruction', (m) => res(m.text))),
+  );
+  await sleep(100); // 받는 쪽 구독이 먼저 걸리도록
+  const ackMs = await e.evaluate(
+    () =>
+      new Promise((res) => {
+        window.pbl.link.on('instruction-status', (it) => it.receivedMs != null && res(it.receivedMs));
+        window.pbl.link.instruct('3번 밸브를 잠그세요');
+      }),
+  );
+  check('작업 지시 도착 + 도착 확인(ack)', (await gotInstr) === '3번 밸브를 잠그세요', `왕복 ${ackMs} ms`);
+
+  // #16 포인터는 순서 없는 채널로 가고, 늦게 온 번호는 버린다
+  const ptr = f.evaluate(
+    () =>
+      new Promise((res) => {
+        const got = [];
+        window.pbl.link.on('pointer', (p) => got.push(p.seq));
+        setTimeout(() => res({ got, stale: window.pbl.link.counts.pointerStale }), 600);
+      }),
+  ).catch(() => null);
+  await sleep(100);
+  await e.evaluate(() => {
+    for (let i = 0; i < 5; i++) window.pbl.link.send('pointer', { x: i / 5, y: 0.5 });
+  });
+  const ptrRes = await ptr;
+  check('포인터 5개 도착 (unreliable 채널)', ptrRes?.got.length === 5, JSON.stringify(ptrRes));
 
   // #15 현장 카메라 > 전문가
   await f.click('#cam');
@@ -125,6 +172,17 @@ try {
   check('재입장 후 재연결', true);
   await e.waitForFunction(() => document.getElementById('vMain').videoWidth > 0, { timeout: 15000 });
   check('재연결 후 켜 두었던 카메라가 다시 보임 (재협상 없이)', true);
+
+  // #16 현장이 없는 동안 보낸 지시는 대기했다가 다시 연결되면 간다
+  await f.click('#leave');
+  await waitStatus(e, '상대가 나갔습니다', 5000);
+  const queued = await e.evaluate(() => window.pbl.link.instruct('재연결 후 지시').sent);
+  await f.goto(`${BASE}/field.html?room=${room}`);
+  await Promise.all([waitStatus(f, '연결됨'), waitStatus(e, '연결됨')]);
+  const resent = await e
+    .waitForFunction(() => [...window.pbl.link.pending.values()].some((i) => i.text === '재연결 후 지시' && i.receivedMs != null), { timeout: 8000 })
+    .then(() => true, () => false);
+  check('연결이 없을 때 보낸 지시 > 재연결 후 자동 재전송', !queued && resent, `처음 전송 ${queued}, 재전송 ${await e.evaluate(() => window.pbl.link.counts.resent)}회`);
 
   const x = await b3.newPage();
   await x.goto(`${BASE}/expert.html?room=${room}`);

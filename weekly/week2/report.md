@@ -14,17 +14,19 @@
 
 | 구분 | 이슈 |
 |---|---|
-| 완료 | #66 시그널링 서버 aiohttp 전환 |
+| 완료 | #66 시그널링 서버 aiohttp 전환 · #16 DataChannel 프로토콜 |
 | 진행 중 | #62 전문가 화면 공유 (실제 폰 표시 확인 남음) |
-| 남음 | #37 · #14 · #16 · #17 · #18 · #19 · #20 |
+| 남음 | #37 · #14 · #17 · #18 · #19 · #20 |
 
 ## 작업 기록
 
 | 날짜 | 이슈 · PR | 한 일 | 결과 · 근거 |
 |---|---|---|---|
 | 11/09 | #66 | 멘토 권고로 시그널링 서버를 Node.js(`ws`)에서 Python aiohttp로 전환. `server/app.py`(정적 파일, `/healthz`, `/api/info`, HTTPS 인증서), `server/signaling.py`(Room, 중계, 오류 코드, 30초 heartbeat, 64KB 제한). 단위 시험을 Python unittest로 옮기고 정적 파일 시험 3개 추가. E2E·화면 캡처 스크립트가 Python 서버를 띄우도록 변경 | 단위 시험 8/8 통과(`npm test`). 브라우저 코드 변경 없이 Chrome E2E 20/20 통과(`npm run e2e`). 경로 조작(`/%2e%2e/`) 403, LAN 주소 순서가 Node 때와 같음(Wi-Fi 먼저). 기술 결정 TD-02·TD-03에 번복 이력, 서버 구성도·아키텍처 그림 다시 그림 |
+| 11/16 | #16 | DataChannel 메시지 프로토콜 `client/js/datachannel.js`: 봉투 `{type, seq, ts, payload}`, 종류 9개(chat, instruction, ack, device-status, media, profile, ping, pong, pointer), 받을 때 형식 검사. 작업 지시는 자동 도착 확인(`received`)과 작업자 확인(`done`) 2단계. 연결이 끊긴 동안의 지시는 재연결 후 다시 보내고 `id`로 중복을 거름. 포인터는 늦게 온 번호를 버림. 기존 화면 제어 메시지(media, profile, ping)도 같은 봉투로 옮김 | E2E 24/24 통과(새 항목 4개: 형식 검사 7가지, 지시 도착 확인 왕복 1 ms, 포인터 5개 도착, 재연결 후 재전송 1회). 스펙: 03 §6, TD-09 |
 
 ## 발표자료에 넣을 것
 
 - 서버를 Python aiohttp로 바꾼 이유(멘토 권고, 과목 언어 통일)와 바꾸지 않은 것(메시지 형식, P2P 구조). 근거: 단위 시험 8개, E2E 20항목
+- DataChannel 두 채널의 차이(순서·재전송)와 작업 지시 확인 흐름 그림 (03 §6)
 - 기술 스택 장의 "Node.js + ws" 줄을 "Python aiohttp"로 고친다

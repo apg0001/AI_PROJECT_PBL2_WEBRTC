@@ -1,6 +1,6 @@
 // RTCPeerConnection 한 개(1:1 세션)를 감싼다.
 // - Offer/Answer, Trickle ICE, 원격 Candidate 대기열
-// - DataChannel은 negotiated:true로 양쪽이 같은 id를 만든다 (docs/03 §1, docs/04 TD-09)
+// - DataChannel은 negotiated:true로 양쪽이 같은 id를 만든다 (docs/03 §1, docs/04 TD-09). 메시지 형식은 datachannel.js
 // - 측정 시점 t0~t7 기록 (docs/03 §5)
 // - 미디어(#15, #62): 연결할 때 송수신 통로(transceiver) 3개를 미리 만든다.
 //   순서 = MEDIA_SLOTS. 켜고 끌 때는 replaceTrack만 하므로 다시 협상(offer/answer)하지 않는다.
@@ -67,7 +67,7 @@ export class PeerSession extends EventTarget {
       this.#emit('control-open', {});
     };
     this.control.onclose = () => this.#emit('control-close', {});
-    this.control.onmessage = (e) => this.#emit('control-message', JSON.parse(e.data));
+    // 메시지 읽기와 보내기는 DataLink(datachannel.js)가 맡는다
   }
 
   // Room에 먼저 있던 쪽이 호출한다
@@ -146,12 +146,6 @@ export class PeerSession extends EventTarget {
     this.slots = {};
     MEDIA_SLOTS.forEach(({ slot }, i) => (this.slots[slot] = list[i]));
     for (const [slot, track] of Object.entries(this.localTracks)) if (track) await this.setTrack(slot, track);
-  }
-
-  sendControl(msg) {
-    if (this.control.readyState !== 'open') return false;
-    this.control.send(JSON.stringify(msg));
-    return true;
   }
 
   // 실제로 선택된 경로 (host / srflx / relay)

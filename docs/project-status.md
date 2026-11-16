@@ -14,6 +14,7 @@
 ## 2주차 작업
 
 - [x] #66 시그널링 서버를 Python aiohttp로 전환 (멘토 권고): `server/app.py`, `server/signaling.py`. 메시지 형식·브라우저 코드 그대로, 단위 시험 8개·E2E 20항목 통과. 1주차 발표자료(제출 완료)는 고치지 않고 2주차 발표자료부터 반영
+- [x] #16 DataChannel 메시지 프로토콜: 봉투 `{type, seq, ts, payload}`, 종류 9개, 작업 지시 2단계 확인(ack), 재연결 후 미확인 지시 재전송, 늦게 온 포인터 버리기 (`client/js/datachannel.js`, 03 §6). E2E 24항목 통과
 
 ## 다음 작업 (1주차)
 
