@@ -134,6 +134,29 @@ try {
   await e.waitForFunction(() => document.getElementById('inbound').textContent.includes('fps'), { timeout: 8000 });
   check('전문가 화면에 받는 영상 품질 표시', true, await e.$eval('#inbound', (x) => x.textContent));
 
+  // #18 통신 품질: 1초마다 기록, 화면 표와 CSV
+  await sleep(3000);
+  const q = await e.evaluate(() => {
+    const csv = window.pbl.stats.toCsv().trim().split('\n');
+    const head = csv[0].split(',');
+    const rows = csv.slice(1).map((l) => Object.fromEntries(l.split(',').map((v, i) => [head[i], v])));
+    const video = rows.filter((r) => r.in_w && r.in_kbps && r.in_fps);
+    return { cols: head.length, rows: rows.length, video: video.length, last: video.at(-1), table: document.getElementById('quality').textContent };
+  });
+  check('통신 품질 1초 기록 (CSV)', q.video >= 2 && q.last.rtt_ms !== '' && q.last.in_loss_pct !== '', `${q.cols}열, ${q.rows}줄 중 영상 ${q.video}줄. 마지막: ${q.last?.in_w}×${q.last?.in_h} ${q.last?.in_fps}fps ${q.last?.in_kbps}kbps 손실 ${q.last?.in_loss_pct}% 지터 ${q.last?.in_jitter_ms}ms RTT ${q.last?.rtt_ms}ms`);
+  check('통신 품질 표 표시', q.table.includes('왕복 지연') && q.table.includes('받는 영상'));
+  const fq = await f.evaluate(() => window.pbl.stats.rows.at(-1));
+  check('현장: 보내는 영상과 화질을 낮춘 이유 기록', !!fq?.out_w && !!fq?.out_limit, `${fq?.out_w}×${fq?.out_h} ${fq?.out_kbps}kbps, 이유 ${fq?.out_limit}`);
+  const csvName = await e.evaluate(() => {
+    let name = null;
+    const orig = HTMLAnchorElement.prototype.click;
+    HTMLAnchorElement.prototype.click = function () { name = this.download; };
+    document.getElementById('exportCsv').click();
+    HTMLAnchorElement.prototype.click = orig;
+    return name;
+  });
+  check('품질 기록 CSV 파일 저장', /^stats_expert_.*\.csv$/.test(csvName ?? ''), csvName);
+
   // #17 대화 (양방향)
   await e.type('#chatText', '들리세요?');
   await e.click('#chatForm button');

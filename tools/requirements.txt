@@ -1,0 +1,2 @@
+# 측정 도구 (그래프). 서버는 server/requirements.txt
+matplotlib>=3.7

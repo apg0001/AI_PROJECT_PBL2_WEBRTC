@@ -6,6 +6,7 @@ import { PeerSession, DEFAULT_ICE_SERVERS } from './peer.js';
 import { createUi } from './ui.js';
 import { PROFILES, mediaSupport, getCamera, getMic, getScreen, mediaErrorText } from './media.js';
 import { DataLink } from './datachannel.js';
+import { StatsRecorder } from './stats.js';
 
 const SLOT_NAME = { audio: '마이크', camera: '카메라', screen: '화면 공유' };
 
@@ -90,11 +91,25 @@ export async function startApp({ role }) {
     if (mine.camera) await tryGet('camera', () => (mine.camera.stop(), getCamera({ facingMode: facing, profile })));
   }
 
-  // 받는 영상 품질 (1초마다)
+  // 통신 품질 (#18): 1초마다 getStats를 한 줄로 기록한다. 끊긴 동안(disconnected, failed)도 기록한다
+  const stats = new StatsRecorder(role);
+  window.pbl.stats = stats;
+  let sampling = false;
   setInterval(async () => {
-    if (role !== 'expert' || session?.pc.connectionState !== 'connected') return;
-    ui.showInbound(await session.inboundVideo('camera'));
+    if (sampling || !session) return;
+    sampling = true;
+    try {
+      const r = await stats.sample(session);
+      if (!r) return;
+      ui.showQuality(r, stats.rows.length);
+      if (role === 'expert') ui.showInbound(r.in_w ? { width: r.in_w, height: r.in_h, fps: r.in_fps, kbps: r.in_kbps, codec: r.in_codec } : null);
+    } catch (err) {
+      ui.log('error', `품질 수집: ${err.message}`);
+    } finally {
+      sampling = false;
+    }
   }, 1000);
+  ui.onExportCsv(() => stats.toCsv());
 
   signaling.on('message', ({ direction, msg }) => ui.logSignal(direction, msg));
   signaling.on('close', ({ code }) => {
