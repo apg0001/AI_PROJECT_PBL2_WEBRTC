@@ -25,6 +25,9 @@ export function createUi({ role, room }) {
       <span class="room">Room <code>${escapeHtml(room ?? '없음')}</code></span>
     </header>`;
   const resultTable = `<h2>연결 정보</h2><table class="kv" id="result"></table>`;
+  const qualityTable = `
+    <h2>통신 품질 <span class="muted small" id="qualityNote">(1초마다)</span></h2>
+    <table class="kv" id="quality"><tr><td class="muted">연결되면 표시합니다</td></tr></table>`;
   const statesTable = `
     <h2>상태 변화</h2>
     <table id="states"><thead><tr><th>시각</th><th>항목</th><th>값</th></tr></thead><tbody></tbody></table>`;
@@ -74,8 +77,8 @@ export function createUi({ role, room }) {
       </div>
       <details>
         <summary>연결 정보 자세히</summary>
-        ${resultTable}${statesTable}${candsTable}
-        <div class="actions"><button id="export">기록 저장 (JSON)</button></div>
+        ${qualityTable}${resultTable}${statesTable}${candsTable}
+        <div class="actions"><button id="export">기록 저장 (JSON)</button><button id="exportCsv">품질 기록 저장 (CSV)</button></div>
       </details>
       ${logBlock}`;
   } else {
@@ -110,10 +113,11 @@ export function createUi({ role, room }) {
           <div class="actions">
             <button id="ping">연결 확인</button>
             <button id="export">기록 저장 (JSON)</button>
+            <button id="exportCsv">품질 기록 저장 (CSV)</button>
             <button id="leave">나가기</button>
           </div>
         </section>
-        <section>${statesTable}${candsTable}</section>
+        <section>${qualityTable}${statesTable}${candsTable}</section>
       </div>
       ${logBlock}`;
   }
@@ -529,6 +533,51 @@ export function createUi({ role, room }) {
       setRow('내 쪽 주소', fmt(p.local));
       setRow('상대 쪽 주소', fmt(p.remote));
       if (p.rttMs != null) setRow('왕복 지연 (RTT)', `${p.rttMs} ms`);
+    },
+
+    // ---- 통신 품질 (#18) ----
+    showQuality(r, count) {
+      const rows = [];
+      const join = (...xs) => xs.filter((x) => x != null && x !== '').join(', ');
+      const ms = (v) => (v != null ? `${v} ms` : null);
+      rows.push(['연결 상태', r.conn]);
+      if (r.path) rows.push(['경로 (내 쪽/상대 쪽)', r.path]);
+      if (r.rtt_ms != null) rows.push(['왕복 지연 (RTT)', `${r.rtt_ms} ms`]);
+      if (r.avail_out_kbps != null) rows.push(['보낼 수 있는 대역폭 추정', `${r.avail_out_kbps.toLocaleString()} kbps`]);
+      const label = { camera: '현장 카메라', screen: '화면 공유' };
+      if (r.in_w) {
+        rows.push([`받는 영상 (${label[r.in_slot]})`, join(`${r.in_w}×${r.in_h}`, r.in_fps != null && `${r.in_fps} fps`, r.in_kbps != null && `${r.in_kbps.toLocaleString()} kbps`, r.in_codec)]);
+        rows.push(['손실 / 지터', join(r.in_loss_pct != null && `${r.in_loss_pct}% (${r.in_lost}개)`, ms(r.in_jitter_ms))]);
+        rows.push(['지터 버퍼 / 디코딩', join(ms(r.in_jb_ms), r.in_decode_ms != null && `프레임당 ${r.in_decode_ms} ms`)]);
+        if (r.in_freezes != null) rows.push(['영상 정지 (누적)', `${r.in_freezes}회, ${r.in_freeze_s ?? 0}초`]);
+      }
+      if (r.out_w) {
+        const why = { none: '없음', bandwidth: '대역폭 부족', cpu: 'CPU 부족', other: '기타' };
+        rows.push([`보내는 영상 (${label[r.out_slot]})`, join(`${r.out_w}×${r.out_h}`, r.out_fps != null && `${r.out_fps} fps`, r.out_kbps != null && `${r.out_kbps.toLocaleString()} kbps`)]);
+        rows.push(['화질을 낮춘 이유', why[r.out_limit] ?? r.out_limit ?? '-']);
+      }
+      if (r.aud_jitter_ms != null) rows.push(['받는 음성 손실 / 지터', join(r.aud_loss_pct != null && `${r.aud_loss_pct}%`, ms(r.aud_jitter_ms))]);
+      const t = $('quality');
+      t.innerHTML = '';
+      for (const [k, v] of rows) {
+        const tr = t.insertRow();
+        const th = document.createElement('th');
+        th.scope = 'row';
+        th.textContent = k;
+        tr.append(th);
+        tr.insertCell().textContent = v ?? '-';
+      }
+      $('qualityNote').textContent = `(1초마다, 기록 ${count}줄)`;
+    },
+    onExportCsv(cb) {
+      $('exportCsv').onclick = () => {
+        const blob = new Blob([cb()], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `stats_${role}_${room}_${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      };
     },
 
     onPing(cb) {

@@ -128,6 +128,8 @@
 | 대안 | `chrome://webrtc-internals` 덤프만 사용 |
 | 선택 이유 | 표준 API라 Safari·Chrome에서 같은 코드로 수집한다. 실험 조건별 원자료를 CSV로 남겨 그래프와 재분석이 가능하다. 상용 서비스의 Telemetry(Think 7)와 같은 방식이다 |
 | 단점 | 브라우저마다 지원하는 필드가 다르다 (예: Safari의 일부 필드 누락). 1초 평균이라 순간 정지를 놓칠 수 있다 → `freezeCount` 보완 |
+| 구현 (#18) | `client/js/stats.js`. 경로·RTT(`candidate-pair`), 받는 영상(`inbound-rtp`: 해상도, fps, 비트레이트, 손실률, 지터, 지터 버퍼, 디코딩 시간, 정지), 보내는 영상(`outbound-rtp`: 비트레이트, 화질을 낮춘 이유), 받는 음성을 30열로 기록. 누적 값은 1초 차이로 바꾼다. 열 목록은 [05 §5](05-test-plan.md#statscsv-열-18) |
+| 차이 계산 주의 | 통로의 트랙이 바뀌면(화면 공유 다시 시작 등) 누적 값이 처음부터 다시 쌓이므로, 값이 줄면 그 1초는 비워 둔다 |
 
 ### TD-12 종단 지연 측정: Glass-to-Glass
 

@@ -119,29 +119,6 @@ export class PeerSession extends EventTarget {
     if (track && this.maxBitrate[slot]) await setMaxBitrate(sender, this.maxBitrate[slot]);
   }
 
-  // 받는 영상의 해상도, 초당 프레임, 비트레이트 (1초 간격으로 부르면 kbps가 나온다)
-  async inboundVideo(slot) {
-    const rx = this.slots?.[slot]?.receiver;
-    if (!rx) return null;
-    const stats = await rx.getStats();
-    let v = null;
-    stats.forEach((s) => s.type === 'inbound-rtp' && s.kind === 'video' && (v = s));
-    if (!v) return null;
-    const prev = this.#prevInbound[slot];
-    this.#prevInbound[slot] = { bytes: v.bytesReceived, ts: v.timestamp };
-    const kbps = prev && v.timestamp > prev.ts ? ((v.bytesReceived - prev.bytes) * 8) / (v.timestamp - prev.ts) : null;
-    return {
-      width: v.frameWidth ?? null,
-      height: v.frameHeight ?? null,
-      fps: v.framesPerSecond ?? null,
-      kbps: kbps != null ? Math.round(kbps) : null,
-      framesDecoded: v.framesDecoded ?? 0,
-      codec: stats.get(v.codecId)?.mimeType?.split('/')[1] ?? null,
-    };
-  }
-
-  #prevInbound = {};
-
   async #bindSlots(list) {
     this.slots = {};
     MEDIA_SLOTS.forEach(({ slot }, i) => (this.slots[slot] = list[i]));

@@ -115,3 +115,45 @@ iOS의 모든 브라우저는 WebKit 엔진이므로 iPhone Chrome과 Safari의 
   - `screenshots/`
 - 결과 문서([06](06-quality-results.md), [07](07-failure-analysis.md))는 이 폴더를 링크한다.
 - 실패한 시험도 지우지 않는다. 실패도 결과다(과제 명세 §23).
+
+### `stats.csv` 열 (#18)
+
+전문가·현장 화면의 **품질 기록 저장 (CSV)** 으로 받는다. 연결된 동안 1초에 한 줄, 끊긴 동안(`disconnected`, `failed`)도 기록한다. 재연결하면 `sess`가 1 늘어난다. '(1초)'는 직전 줄과의 차이로 구한 그 1초 동안의 값이고, '(누적)'은 연결 시작부터의 합이다. 구현: `client/js/stats.js`.
+
+- 받는 영상: 전문가는 현장 카메라, 현장은 전문가 화면 공유. 보내는 영상은 그 반대.
+- 그래프: `python3 tools/stats/plot_stats.py stats.csv` > 같은 이름의 PNG (받은 비트레이트·fps, RTT·지터, 손실률, 지터 버퍼 지연. 연결이 끊긴 구간은 빨강 띠).
+- 폰 없이 PC에서 확인: `cd server && node e2e/collect-stats.mjs 30 <폴더> B` (Chrome 가짜 카메라로 30초 수집).
+
+| 열 | 뜻 |
+|---|---|
+| `t_s` | 기록 시작부터 초 |
+| `time` | 시각 (ISO) |
+| `sess` | 몇 번째 연결 |
+| `conn` | connectionState |
+| `path` | 선택 경로 내 쪽/상대 쪽 (host, srflx, prflx, relay) |
+| `rtt_ms` | ICE 경로 왕복 시간 |
+| `avail_out_kbps` | 보낼 수 있다고 추정한 대역폭 |
+| `in_slot` | 받는 영상 통로 |
+| `in_w` | 해상도 가로 |
+| `in_h` | 해상도 세로 |
+| `in_fps` | 초당 프레임 (디코딩) |
+| `in_kbps` | 받은 비트레이트 (1초) |
+| `in_lost` | 손실 패킷 (1초) |
+| `in_loss_pct` | 손실률 % (1초) |
+| `in_jitter_ms` | 지터 |
+| `in_jb_ms` | 지터 버퍼 평균 지연 (1초) |
+| `in_decode_ms` | 프레임당 디코딩 시간 (1초) |
+| `in_freezes` | 정지 횟수 (누적, Chrome) |
+| `in_freeze_s` | 정지 시간 합 (누적 초, Chrome) |
+| `in_dropped` | 버린 프레임 (누적) |
+| `in_codec` | 코덱 |
+| `out_slot` | 보내는 영상 통로 |
+| `out_w` | 해상도 가로 |
+| `out_h` | 해상도 세로 |
+| `out_fps` | 초당 프레임 (인코딩) |
+| `out_kbps` | 보낸 비트레이트 (1초) |
+| `out_limit` | 화질을 낮춘 이유 (none, bandwidth, cpu, other) |
+| `out_target_kbps` | 인코더 목표 비트레이트 |
+| `aud_loss_pct` | 음성 손실률 % (1초) |
+| `aud_jitter_ms` | 음성 지터 |
+
