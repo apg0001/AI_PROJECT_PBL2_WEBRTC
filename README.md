@@ -50,6 +50,6 @@ npm run tunnel       # ngrok http 3000 → https://xxxx.ngrok-free.app
 - 폰이 LTE/5G여도 같은 주소로 접속되므로 다른 네트워크 간 연결 시험(#37)에 그대로 쓴다.
 - ngrok 무료 플랜은 실행할 때마다 주소가 바뀐다.
 
-(선택) TURN 중계: 서로 다른 네트워크에서 직접 연결이 안 되면(예: KT LTE ↔ 학교망, #37) TURN이 필요하다. `server/.env.example`을 `server/.env`로 복사하고 Cloudflare TURN 키를 넣은 뒤 서버를 다시 켠다. 브라우저는 `/api/ice`로 접속 정보를 받는다. 시험 옵션: 주소 뒤에 `&relay=1`(TURN만), `&turn=0`(TURN 빼기).
+(선택) TURN 중계: 서로 다른 네트워크에서 직접 연결이 안 되면(예: KT LTE ↔ 학교망, #37) TURN이 필요하다. `server/.env.example`을 `server/.env`로 복사하고 TURN 접속 정보(Metered Open Relay의 주소·username·credential, 또는 Cloudflare TURN 키)를 넣은 뒤 서버를 다시 켠다. 시작 로그의 `ICE 서버:`에 `static` 또는 `cloudflare`가 보이면 적용된 것이다. 브라우저는 `/api/ice`로 접속 정보를 받는다. 시험 옵션: 주소 뒤에 `&relay=1`(TURN만), `&turn=0`(TURN 빼기).
 
 (선택) 동일 LAN 전용 HTTPS: `server/certs/cert.pem`, `server/certs/key.pem`(mkcert 등으로 생성)을 두면 서버가 HTTPS로 뜬다.
