@@ -62,6 +62,33 @@ try {
   await e.waitForFunction(() => document.getElementById('inbound').textContent.includes('fps'), { timeout: 15000 });
   await new Promise((r) => setTimeout(r, 3000));
   await shot(e, 'expert-video.png');
+
+  // 대화, 작업 지시, 포인터, 장비 상태 (#17)
+  const say = async (p, text) => {
+    await p.type('#chatText', text);
+    await p.keyboard.press('Enter');
+    await new Promise((r) => setTimeout(r, 200));
+  };
+  await say(e, '2번 펌프 앞에 서 주세요');
+  await say(f, '도착했습니다. 소리가 큽니다');
+  for (const text of ['전원 차단기를 내리세요', '3번 밸브를 잠그세요']) {
+    await e.type('#instrText', text);
+    await e.click('#instrForm button');
+    await new Promise((r) => setTimeout(r, 300));
+  }
+  await f.evaluate(() => [...document.querySelectorAll('#instr li')].find((li) => li.textContent.includes('전원')).querySelector('button').click());
+  await f.click('#device');
+  const pt = await e.$eval('#vMain', (v) => {
+    v.scrollIntoView({ block: 'center' });
+    const r = v.getBoundingClientRect();
+    return { x: r.left + r.width * 0.62, y: r.top + r.height * 0.4 };
+  });
+  await e.mouse.click(pt.x, pt.y);
+  await new Promise((r) => setTimeout(r, 800));
+  await e.evaluate(() => scrollTo(0, 0));
+  await f.evaluate(() => scrollTo(0, 0));
+  await shot(f, 'field-instructions.png');
+  await shot(e, 'expert-instructions.png');
   await e.click('#screen');
   await f.waitForFunction(() => document.getElementById('stage').classList.contains('sharing') && document.getElementById('vMain').videoWidth > 0, { timeout: 15000 });
   await new Promise((r) => setTimeout(r, 1500));

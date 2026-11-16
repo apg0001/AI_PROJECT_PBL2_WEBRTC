@@ -132,6 +132,23 @@ export async function startApp({ role }) {
     if (slot !== 'audio') ui.log('media', `상대가 ${SLOT_NAME[slot] ?? slot}을(를) ${on ? '켰다' : '껐다'}`);
   });
   link.on('profile', ({ profile: p }) => role === 'field' && applyProfile(p));
+  // ---- 대화, 작업 지시, 장비 상태, 포인터 (#17) ----
+  const notOpen = () => ui.log('data', '데이터 통로가 아직 열리지 않아 보내지 못했습니다');
+  ui.onChat((text) => {
+    const sent = link.chat(text);
+    if (sent) ui.addChat('me', sent);
+    else if (text.trim()) notOpen();
+    return !!sent;
+  });
+  link.on('chat', ({ text }) => ui.addChat('peer', text));
+  ui.onInstruct((text) => !!link.instruct(text)); // 연결 전이면 대기열에 넣고 연결되면 보낸다
+  link.on('instruction-status', (item) => ui.showInstruction(item));
+  link.on('instruction', (m) => ui.addInstruction(m, (id) => link.confirm(id)));
+  ui.onDeviceStatus(() => (link.send('device-status', dummyDevice()) ? ui.log('data', '장비 상태 보냄') : notOpen()));
+  link.on('device-status', (s) => ui.showDevice(s));
+  ui.onPointerInput((p) => link.send('pointer', p));
+  link.on('pointer', (p) => ui.showPointer(p));
+
   link.on('invalid', ({ channel, error }) => ui.log('error', `${channel} 채널: 잘못된 메시지 (${error})`));
 
   async function onConnected(s) {
@@ -194,4 +211,15 @@ export async function startApp({ role }) {
   } catch (err) {
     ui.setStatus('error', err.message);
   }
+}
+
+// PoC용 가짜 장비 상태 (실제 설비 연동은 범위 밖)
+function dummyDevice() {
+  const warn = Math.random() < 0.3;
+  return {
+    equipmentId: 'PUMP-03',
+    state: warn ? '경고' : '정상',
+    errorCode: warn ? 'E-214' : null,
+    temperature: Math.round((warn ? 82 : 64) + Math.random() * 6),
+  };
 }

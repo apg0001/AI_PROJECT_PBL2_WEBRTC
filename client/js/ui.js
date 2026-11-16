@@ -32,6 +32,13 @@ export function createUi({ role, room }) {
     <h2>연결 후보 <span class="muted" id="candSummary"></span></h2>
     <p class="muted small">${TERMS}</p>
     <table id="cands"><thead><tr><th>시각</th><th>쪽</th><th>종류</th><th>방식</th><th>주소</th></tr></thead><tbody></tbody></table>`;
+  const chatBlock = `
+    <h2>대화</h2>
+    <ol class="chat" id="chat" aria-live="polite"></ol>
+    <form class="send" id="chatForm">
+      <input id="chatText" maxlength="500" autocomplete="off" aria-label="보낼 말" placeholder="보낼 말">
+      <button type="submit">보내기</button>
+    </form>`;
   const logBlock = `<details id="logBox"><summary>연결 기록</summary><ol id="log" class="log"></ol></details>`;
 
   // 영상 무대: 큰 화면 하나와 오른쪽 아래 작은 화면 하나
@@ -42,6 +49,7 @@ export function createUi({ role, room }) {
       <video id="vMain" playsinline autoplay muted></video>
       <video id="vPip" class="pip" playsinline autoplay muted hidden></video>
       <p class="stage-note" id="stageNote"></p>
+      <span class="pointer" id="ptr" hidden></span>
     </div>
     <audio id="remoteAudio" autoplay></audio>`;
 
@@ -56,7 +64,11 @@ export function createUi({ role, room }) {
         <button id="flip" disabled>전면 카메라로</button>
         <button id="mic" aria-pressed="false">마이크 켜기</button>
       </div>
+      <h2>받은 지시</h2>
+      <ol class="instr" id="instr"><li class="empty muted">아직 없습니다</li></ol>
+      ${chatBlock}
       <div class="actions">
+        <button id="device">장비 상태 보내기</button>
         <button id="ping">연결 확인</button>
         <button id="leave">나가기</button>
       </div>
@@ -85,6 +97,15 @@ export function createUi({ role, room }) {
               </select>
             </label>
           </div>
+          <p class="muted small">영상을 누르거나 끌면 현장 화면의 같은 위치에 표시됩니다.</p>
+          <h2>작업 지시</h2>
+          <form class="send" id="instrForm">
+            <input id="instrText" maxlength="500" autocomplete="off" aria-label="지시 내용" placeholder="예: 3번 밸브를 잠그세요">
+            <button type="submit">지시 보내기</button>
+          </form>
+          <table id="instrTable"><thead><tr><th>지시</th><th>상태</th></tr></thead><tbody></tbody></table>
+          <p class="muted small" id="device">장비 상태: 받은 것 없음</p>
+          ${chatBlock}
           ${resultTable}
           <div class="actions">
             <button id="ping">연결 확인</button>
@@ -215,6 +236,34 @@ export function createUi({ role, room }) {
   }
   renderStage();
 
+  // ---- 포인터 (#17) ----
+  // 영상은 object-fit: contain이라 위아래나 양옆에 빈 띠가 생길 수 있다. 실제 영상이 그려진 사각형을 구한다.
+  function contentRect(video) {
+    const r = video.getBoundingClientRect();
+    const vw = video.videoWidth || r.width;
+    const vh = video.videoHeight || r.height;
+    const scale = Math.min(r.width / vw, r.height / vh);
+    const w = vw * scale;
+    const h = vh * scale;
+    return { left: r.left + (r.width - w) / 2, top: r.top + (r.height - h) / 2, width: w, height: h };
+  }
+  let ptrTimer = 0;
+  function placePointer(x, y, video) {
+    const ptr = $('ptr');
+    if (!video || video.hidden || !video.videoWidth) return false;
+    const stageBox = $('stage').getBoundingClientRect();
+    const c = contentRect(video);
+    ptr.style.left = `${c.left - stageBox.left + x * c.width}px`;
+    ptr.style.top = `${c.top - stageBox.top + y * c.height}px`;
+    ptr.hidden = false;
+    ptr.classList.remove('fade');
+    clearTimeout(ptrTimer);
+    ptrTimer = setTimeout(() => ptr.classList.add('fade'), 3000); // 3초 동안 움직임이 없으면 흐려진다
+    return true;
+  }
+  const clock = () => new Date().toTimeString().slice(0, 8); // 14:03:18
+  const WHO = { me: '나', peer: role === 'field' ? '전문가' : '현장' };
+
   function pressed(id, on, label) {
     const b = $(id);
     if (!b) return;
@@ -296,6 +345,127 @@ export function createUi({ role, room }) {
     onMic(cb) { $('mic').onclick = cb; },
     onScreen(cb) { $('screen') && ($('screen').onclick = cb); },
     onProfile(cb) { $('profile') && ($('profile').onchange = () => cb($('profile').value)); },
+
+    // ---- 대화 (#17) ----
+    onChat(cb) {
+      $('chatForm').onsubmit = (e) => {
+        e.preventDefault();
+        if (cb($('chatText').value)) $('chatText').value = '';
+      };
+    },
+    addChat(who, text) {
+      const li = document.createElement('li');
+      li.className = who;
+      li.innerHTML = `<span class="who"></span><span class="x"></span><span class="t muted"></span>`;
+      li.querySelector('.who').textContent = WHO[who];
+      li.querySelector('.x').textContent = text;
+      li.querySelector('.t').textContent = clock();
+      $('chat').append(li);
+      while ($('chat').children.length > 50) $('chat').firstElementChild.remove();
+      li.scrollIntoView({ block: 'nearest' });
+      record.events.push({ t: Number(sec()), category: 'chat', text: `${WHO[who]}: ${text}` });
+    },
+
+    // ---- 작업 지시 (#17) ----
+    // 전문가: 보낸 지시와 확인 상태
+    onInstruct(cb) {
+      const form = $('instrForm');
+      if (!form) return;
+      form.onsubmit = (e) => {
+        e.preventDefault();
+        if (cb($('instrText').value)) $('instrText').value = '';
+      };
+    },
+    showInstruction(item) {
+      const body = $('instrTable')?.tBodies[0];
+      if (!body) return;
+      let tr = [...body.rows].find((r) => r.dataset.id === item.id);
+      if (!tr) {
+        tr = body.insertRow(0);
+        tr.dataset.id = item.id;
+        tr.insertCell().textContent = item.text;
+        tr.insertCell();
+      }
+      const state = item.done
+        ? '현장 확인'
+        : item.receivedMs != null
+          ? `도착 (${item.receivedMs} ms), 확인 대기`
+          : item.sent
+            ? '보냄, 도착 대기'
+            : '연결되면 보냄';
+      tr.cells[1].textContent = state;
+      tr.className = item.done ? 'state-connected' : item.receivedMs != null ? '' : 'state-disconnected';
+      log('data', `지시 "${item.text}": ${state}`);
+    },
+    // 현장: 받은 지시와 확인 버튼
+    addInstruction({ id, text }, onConfirm) {
+      $('instr').querySelector('.empty')?.remove();
+      const li = document.createElement('li');
+      li.className = 'todo';
+      li.dataset.id = id;
+      li.innerHTML = `<span class="x"></span><span class="t muted"></span><button aria-pressed="false">확인</button>`;
+      li.querySelector('.x').textContent = text;
+      li.querySelector('.t').textContent = clock();
+      const btn = li.querySelector('button');
+      btn.onclick = () => {
+        if (li.classList.contains('todo') && onConfirm(id)) {
+          li.classList.remove('todo');
+          btn.setAttribute('aria-pressed', 'true');
+          btn.textContent = '확인함';
+          btn.disabled = true;
+        }
+      };
+      $('instr').prepend(li);
+      navigator.vibrate?.(200); // 지원하는 폰(안드로이드)만 진동
+      log('data', `받은 지시: ${text}`);
+    },
+
+    // ---- 장비 상태 (#17, 더미) ----
+    onDeviceStatus(cb) {
+      if (role === 'field') $('device').onclick = cb;
+    },
+    showDevice(s) {
+      const parts = [s.equipmentId, s.state, s.temperature != null ? `${s.temperature}°C` : null, s.errorCode ? `오류 ${s.errorCode}` : null];
+      $('device').textContent = `장비 상태 (${clock()}): ${parts.filter(Boolean).join(', ')}`;
+      $('device').className = s.errorCode ? 'small warn-text' : 'small muted';
+    },
+
+    // ---- 포인터 (#17) ----
+    // 전문가: 받은 영상을 누르거나 끌면 0~1 좌표로 알린다 (초당 최대 30번)
+    onPointerInput(cb) {
+      if (role !== 'expert') return;
+      const v = $('vMain');
+      let down = false;
+      let last = 0;
+      const emit = (e, isDown, force) => {
+        if (v.hidden || !v.videoWidth) return;
+        const c = contentRect(v);
+        const x = (e.clientX - c.left) / c.width;
+        const y = (e.clientY - c.top) / c.height;
+        if (x < 0 || x > 1 || y < 0 || y > 1) return;
+        const now = performance.now();
+        if (!force && now - last < 33) return;
+        last = now;
+        placePointer(x, y, v); // 내 화면에도 표시
+        cb({ x: +x.toFixed(4), y: +y.toFixed(4), down: isDown });
+      };
+      v.addEventListener('pointerdown', (e) => {
+        down = true;
+        v.setPointerCapture(e.pointerId);
+        emit(e, true, true);
+      });
+      v.addEventListener('pointermove', (e) => down && emit(e, true, false));
+      v.addEventListener('pointerup', (e) => {
+        down = false;
+        emit(e, false, true);
+      });
+    },
+    // 현장: 내 카메라 영상 위에 표시. 전면 카메라 미리보기는 거울처럼 뒤집혀 있으므로 x도 뒤집는다
+    showPointer({ x, y }) {
+      const v = [$('vMain'), $('vPip')].find((el) => el.srcObject?.getTracks()[0] === local.camera && !el.hidden);
+      if (!v) return false;
+      return placePointer(local.facing === 'user' && v === $('vMain') ? 1 - x : x, y, v);
+    },
 
     // kind: ok | error | wait | busy | warn
     setStatus(kind, text) {

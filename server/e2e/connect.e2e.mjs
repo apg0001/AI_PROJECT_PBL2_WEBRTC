@@ -134,6 +134,50 @@ try {
   await e.waitForFunction(() => document.getElementById('inbound').textContent.includes('fps'), { timeout: 8000 });
   check('전문가 화면에 받는 영상 품질 표시', true, await e.$eval('#inbound', (x) => x.textContent));
 
+  // #17 대화 (양방향)
+  await e.type('#chatText', '들리세요?');
+  await e.click('#chatForm button');
+  await f.waitForFunction(() => document.getElementById('chat').textContent.includes('들리세요?'), { timeout: 5000 });
+  await f.type('#chatText', '네 잘 보입니다');
+  await f.keyboard.press('Enter');
+  await e.waitForFunction(() => document.getElementById('chat').textContent.includes('네 잘 보입니다'), { timeout: 5000 });
+  check('대화 전문가 > 현장, 현장 > 전문가', true);
+
+  // #17 작업 지시 > 현장 목록 > 현장 확인 > 전문가 표에 '현장 확인'
+  await e.type('#instrText', '전원 차단기를 내리세요');
+  await e.click('#instrForm button');
+  await f.waitForFunction(() => [...document.querySelectorAll('#instr li.todo .x')].some((x) => x.textContent === '전원 차단기를 내리세요'), { timeout: 5000 });
+  await f.evaluate(() => [...document.querySelectorAll('#instr li')].find((li) => li.textContent.includes('전원 차단기')).querySelector('button').click());
+  await e.waitForFunction(() => [...document.querySelectorAll('#instrTable tr')].some((r) => r.textContent.includes('전원 차단기') && r.textContent.includes('현장 확인')), { timeout: 5000 });
+  check('작업 지시 > 현장 표시 > 확인 버튼 > 전문가에 현장 확인', true);
+
+  // #17 포인터: 전문가가 영상의 (0.25, 0.75)를 누르면 현장 카메라 화면의 같은 위치에 표시
+  const target = await e.$eval('#vMain', (v) => {
+    v.scrollIntoView({ block: 'center' }); // 대화 입력으로 페이지가 내려가 있을 수 있다
+    const r = v.getBoundingClientRect();
+    const s = Math.min(r.width / v.videoWidth, r.height / v.videoHeight);
+    const w = v.videoWidth * s, h = v.videoHeight * s;
+    return { x: r.left + (r.width - w) / 2 + 0.25 * w, y: r.top + (r.height - h) / 2 + 0.75 * h };
+  });
+  await e.mouse.click(target.x, target.y);
+  await f.waitForFunction(() => !document.getElementById('ptr').hidden, { timeout: 5000 });
+  const where = await f.evaluate(() => {
+    document.getElementById('vMain').scrollIntoView({ block: 'center' });
+    const v = document.getElementById('vMain');
+    const p = document.getElementById('ptr').getBoundingClientRect();
+    const r = v.getBoundingClientRect();
+    const s = Math.min(r.width / v.videoWidth, r.height / v.videoHeight);
+    const w = v.videoWidth * s, h = v.videoHeight * s;
+    const cx = p.left + p.width / 2, cy = p.top + p.height / 2;
+    return { x: +((cx - r.left - (r.width - w) / 2) / w).toFixed(3), y: +((cy - r.top - (r.height - h) / 2) / h).toFixed(3) };
+  });
+  check('포인터 > 현장 화면 같은 위치', Math.abs(where.x - 0.25) < 0.03 && Math.abs(where.y - 0.75) < 0.03, `현장에서 (${where.x}, ${where.y})`);
+
+  // #17 장비 상태 (더미) 현장 > 전문가
+  await f.click('#device');
+  await e.waitForFunction(() => document.getElementById('device').textContent.includes('PUMP-03'), { timeout: 5000 });
+  check('장비 상태 현장 > 전문가', true, await e.$eval('#device', (x) => x.textContent));
+
   // 화질 변경 요청 > 현장이 카메라를 다시 맞춤
   await e.select('#profile', 'A');
   await f.waitForFunction(() => document.getElementById('log').textContent.includes('화질 변경'), { timeout: 8000 });
