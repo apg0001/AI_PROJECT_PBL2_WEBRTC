@@ -9,6 +9,6 @@
     "tunnel": "ngrok http 3000",
     "e2e": "npm --prefix server run e2e",
     "diagrams": "npm --prefix server run diagrams --",
-    "setup": "python3 -m pip install -r server/requirements.txt"
+    "setup": "python3 -m venv server/.venv && server/.venv/bin/python -m pip install -q -r server/requirements.txt && echo 준비 완료: server/.venv"
   }
 }

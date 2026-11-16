@@ -14,7 +14,7 @@ const CHROME = process.env.CHROME ?? '/Applications/Google Chrome.app/Contents/M
 const BASE = `http://localhost:${PORT}`;
 
 await mkdir(OUT, { recursive: true });
-const server = spawn(process.env.PYTHON ?? 'python3', ['-u', 'server/app.py'], { cwd: REPO, env: { ...process.env, PORT: String(PORT) } });
+const server = spawn('sh', ['server/run.sh', '-u', 'app.py'], { cwd: REPO, env: { ...process.env, PORT: String(PORT) } });
 // 서버가 뜰 때까지 /healthz를 확인한다 (최대 10초)
 for (let i = 0; i < 100; i++) {
   if (await fetch(`http://localhost:${PORT}/healthz`).then((r) => r.ok, () => false)) break;

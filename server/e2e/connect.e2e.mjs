@@ -10,7 +10,7 @@ const PORT = Number(process.env.E2E_PORT ?? 3123);
 const BASE = `http://localhost:${PORT}`;
 const CHROME = process.env.CHROME ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
-const server = spawn(process.env.PYTHON ?? 'python3', ['-u', 'server/app.py'], { cwd: REPO, env: { ...process.env, PORT: String(PORT) } });
+const server = spawn('sh', ['server/run.sh', '-u', 'app.py'], { cwd: REPO, env: { ...process.env, PORT: String(PORT) } });
 const serverLog = [];
 server.stdout.on('data', (d) => serverLog.push(d.toString()));
 // 서버가 뜰 때까지 /healthz를 확인한다 (최대 10초)

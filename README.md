@@ -24,8 +24,8 @@ WebRTC 기반 실시간 원격 현장 지원 시스템. 설치 없이 웹 브라
 요구사항: Python 3.10 이상 + aiohttp(서버), Node.js 20 이상(자동 시험·그림 도구만), (모바일·외부 네트워크 시험 시) ngrok
 
 ```bash
-python3 -m pip install -r server/requirements.txt   # aiohttp
-python3 server/app.py                               # http://localhost:3000 (npm start도 같음)
+npm run setup        # 처음 한 번: server/.venv 가상환경을 만들고 aiohttp 설치
+npm start            # http://localhost:3000 (server/.venv의 Python으로 server/app.py 실행)
 ```
 
 시험:
