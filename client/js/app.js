@@ -29,8 +29,11 @@ export async function startApp({ role }) {
   const mine = { audio: null, camera: null, screen: null };
   let facing = 'environment'; // 현장: 처음에는 후면 카메라
   let profile = params.get('profile') === 'A' ? 'A' : 'B';
+  // ?fake=clock: 카메라 대신 G2G 시계 화면을 보낸다 (카메라·모니터를 뺀 시스템 내부 지연 측정, 자동 시험용)
+  const fakeClock = role === 'field' && params.get('fake') === 'clock';
   const support = mediaSupport();
-  if (!support.camera) {
+  if (fakeClock) ui.setMediaNote('시험 모드: 카메라 대신 G2G 시계를 보냅니다.');
+  else if (!support.camera) {
     ui.setMediaNote('지금은 http 주소라서 카메라와 마이크를 쓸 수 없습니다. ngrok의 https 주소로 여세요.');
     ui.disable('cam', 'https 필요');
     ui.disable('mic', 'https 필요');
@@ -69,7 +72,13 @@ export async function startApp({ role }) {
     }
   }
 
-  ui.onCamera(() => (mine.camera ? setMine('camera', null) : tryGet('camera', () => getCamera({ facingMode: facing, profile }))));
+  const cameraTrack = async () => {
+    if (!fakeClock) return getCamera({ facingMode: facing, profile });
+    const { clockTrack } = await import('/tools/g2g-latency/clock.js');
+    const p = PROFILES[profile];
+    return clockTrack({ width: p.width, height: p.height, fps: p.frameRate });
+  };
+  ui.onCamera(() => (mine.camera ? setMine('camera', null) : tryGet('camera', cameraTrack)));
   ui.onFlip(async () => {
     facing = facing === 'environment' ? 'user' : 'environment';
     mine.camera?.stop(); // iOS는 카메라 두 개를 동시에 못 연다
@@ -88,7 +97,7 @@ export async function startApp({ role }) {
     if (!PROFILES[p] || p === profile) return;
     profile = p;
     ui.log('media', `전문가 요청으로 화질 변경: ${PROFILES[p].label}`);
-    if (mine.camera) await tryGet('camera', () => (mine.camera.stop(), getCamera({ facingMode: facing, profile })));
+    if (mine.camera) await tryGet('camera', () => (mine.camera.stop(), cameraTrack()));
   }
 
   // 통신 품질 (#18): 1초마다 getStats를 한 줄로 기록한다. 끊긴 동안(disconnected, failed)도 기록한다
@@ -110,6 +119,36 @@ export async function startApp({ role }) {
     }
   }, 1000);
   ui.onExportCsv(() => stats.toCsv());
+
+  // 종단 지연 측정 (#19, 전문가). 받은 현장 영상의 QR을 읽는다
+  let meter = null;
+  let meterTimer = 0;
+  const meterShow = () => ui.showG2G(meter.summary(), meter.running, meter.readerName);
+  ui.onG2G({
+    toggle: async () => {
+      if (!meter) {
+        const { G2GMeter } = await import('/tools/g2g-latency/g2g.js');
+        meter = new G2GMeter(document.getElementById('vMain'));
+        window.pbl.g2g = meter;
+      }
+      if (meter.running) {
+        meter.stop();
+        clearInterval(meterTimer);
+        ui.log('media', `G2G 측정 중지: 표본 ${meter.samples.length}개`);
+      } else {
+        try {
+          await meter.start();
+          meterTimer = setInterval(meterShow, 500);
+          ui.log('media', `G2G 측정 시작 (QR 읽기: ${meter.readerName})`);
+        } catch (err) {
+          ui.log('error', `G2G: ${err.message}`);
+        }
+      }
+      meterShow();
+    },
+    reset: () => meter && (meter.reset(), meterShow()),
+    csv: () => meter?.toCsv() ?? '',
+  });
 
   signaling.on('message', ({ direction, msg }) => ui.logSignal(direction, msg));
   signaling.on('close', ({ code }) => {

@@ -108,6 +108,19 @@ export function createUi({ role, room }) {
           </form>
           <table id="instrTable"><thead><tr><th>지시</th><th>상태</th></tr></thead><tbody></tbody></table>
           <p class="muted small" id="device">장비 상태: 받은 것 없음</p>
+          <details id="g2gBox">
+            <summary>종단 지연 측정 (Glass-to-Glass)</summary>
+            <p class="muted small">
+              <a href="/tools/g2g-latency/clock.html" target="_blank" rel="noopener">G2G 시계</a>를 이 PC 화면 왼쪽에 띄우고
+              현장 폰 카메라로 찍게 한 뒤 시작합니다. 받은 영상 속 QR 시각과 이 화면에 표시되는 시각의 차이를 잽니다.
+            </p>
+            <div class="actions">
+              <button id="g2gStart" aria-pressed="false">측정 시작</button>
+              <button id="g2gReset">비우기</button>
+              <button id="g2gCsv">측정값 저장 (CSV)</button>
+            </div>
+            <table class="kv" id="g2g"><tr><td class="muted">측정 전</td></tr></table>
+          </details>
           ${chatBlock}
           ${resultTable}
           <div class="actions">
@@ -578,6 +591,44 @@ export function createUi({ role, room }) {
         a.click();
         setTimeout(() => URL.revokeObjectURL(a.href), 1000);
       };
+    },
+
+    // ---- 종단 지연 (#19) ----
+    onG2G({ toggle, reset, csv }) {
+      if (!$('g2gStart')) return;
+      $('g2gStart').onclick = toggle;
+      $('g2gReset').onclick = reset;
+      $('g2gCsv').onclick = () => {
+        const blob = new Blob([csv()], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `g2g_${room}_${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      };
+    },
+    showG2G(sum, running, readerName) {
+      if (!$('g2g')) return;
+      pressed('g2gStart', running, running ? '측정 중지' : '측정 시작');
+      const fmt = (x) => (x ? `중앙값 ${x.median} ms, p95 ${x.p95} ms (최소 ${x.min}, 최대 ${x.max})` : '-');
+      const rows = [
+        ['표본 수', sum.g2g ? `${sum.g2g.n}개` : '0개'],
+        ['Glass-to-Glass 지연', fmt(sum.g2g)],
+        ['받기 전 (시계 화면, 카메라, 인코딩, 네트워크)', fmt(sum.before)],
+        ['받은 뒤 (지터 버퍼, 디코딩, 표시)', fmt(sum.after)],
+        ['살펴본 프레임', `${sum.frames}개 (QR 못 읽음 ${sum.unread}, 건너뜀 ${sum.skipped}), 읽기 ${readerName}`],
+      ];
+      const t = $('g2g');
+      t.innerHTML = '';
+      for (const [k, v] of rows) {
+        const tr = t.insertRow();
+        const th = document.createElement('th');
+        th.scope = 'row';
+        th.textContent = k;
+        tr.append(th);
+        tr.insertCell().textContent = v;
+      }
+      if (sum.g2g) record.result['G2G 지연'] = fmt(sum.g2g);
     },
 
     onPing(cb) {

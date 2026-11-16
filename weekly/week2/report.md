@@ -14,9 +14,9 @@
 
 | 구분 | 이슈 |
 |---|---|
-| 완료 | #66 시그널링 서버 aiohttp 전환 · #16 DataChannel 프로토콜 · #17 대화·지시·포인터 · #18 품질 기록 |
+| 완료 | #66 시그널링 서버 aiohttp 전환 · #16 DataChannel 프로토콜 · #17 대화·지시·포인터 · #18 품질 기록 · #19 G2G 측정 도구 |
 | 진행 중 | #62 전문가 화면 공유 (실제 폰 표시 확인 남음) |
-| 남음 | #37 · #14 · #19 · #20 |
+| 남음 | #37 · #14 · #20 · 실제 폰 측정(#19 G2G, #62 화면 공유, #17 포인터) |
 
 ## 작업 기록
 
@@ -26,6 +26,7 @@
 | 11/16 | #16 | DataChannel 메시지 프로토콜 `client/js/datachannel.js`: 봉투 `{type, seq, ts, payload}`, 종류 9개(chat, instruction, ack, device-status, media, profile, ping, pong, pointer), 받을 때 형식 검사. 작업 지시는 자동 도착 확인(`received`)과 작업자 확인(`done`) 2단계. 연결이 끊긴 동안의 지시는 재연결 후 다시 보내고 `id`로 중복을 거름. 포인터는 늦게 온 번호를 버림. 기존 화면 제어 메시지(media, profile, ping)도 같은 봉투로 옮김 | E2E 24/24 통과(새 항목 4개: 형식 검사 7가지, 지시 도착 확인 왕복 1 ms, 포인터 5개 도착, 재연결 후 재전송 1회). 스펙: 03 §6, TD-09 |
 | 11/16 | #17 | 대화(양방향, 50개 유지), 작업 지시(전문가 입력 > 현장 목록, 확인 전은 노란 띠, '확인' 버튼 > 전문가 표에 '현장 확인'), 포인터(전문가가 영상을 누르거나 끌면 초당 최대 30번 0~1 좌표 전송, 현장은 내 카메라 영상 위 같은 위치에 노란 고리, 전면 카메라 거울 화면은 x를 뒤집음, 3초 뒤 흐려짐), 장비 상태 더미(PUMP-03). 영상 빈 띠(object-fit: contain)를 빼고 실제 영상 영역 기준으로 좌표 계산 | E2E 28/28 통과(새 항목 4개). 포인터: 전문가 (0.25, 0.75) > 현장 (0.252, 0.753). 화면: `docs/screens/field-instructions.png`, `expert-instructions.png`. 실제 폰 확인 남음 |
 | 11/16 | #18 | 통신 품질 수집 `client/js/stats.js`: 1초마다 getStats를 한 줄(30열)로 기록. 끊긴 동안도 기록하고 재연결은 `sess`로 구분. 화면에 '통신 품질' 표, 'CSV 저장' 버튼. 그래프 스크립트 `tools/stats/plot_stats.py`(matplotlib), PC 안에서 가짜 카메라로 N초 수집하는 `server/e2e/collect-stats.mjs` | E2E 32/32 통과(새 항목 4개). 가짜 카메라 20초 수집: 받는 영상 중앙값 175 kbps·15 fps, 손실 0%, 지터 버퍼 7.6 ms. 연결 직후 현장 송신의 '화질을 낮춘 이유'가 bandwidth로 나옴(대역폭 추정이 낮게 시작) |
+| 11/16 | #19 | Glass-to-Glass 지연 측정 도구 `tools/g2g-latency/`: `clock.html`(지금 시각 ms를 QR과 숫자로 매 프레임), 전문가 화면 '종단 지연 측정'(받은 프레임의 QR을 `BarcodeDetector`로 읽어 `표시 시각 - QR 시각`, 중앙값·p95·받기 전/받은 뒤·CSV). 현장 시험 모드 `?fake=clock`(카메라 대신 시계 캔버스 송출). 절차·수동 검증·오차 요인 README | E2E 34/34 통과. 시험 모드 8초: 표본 108개, 중앙값 49.3 ms, p95 49.9 ms, 받기 전 7.6 ms / 받은 뒤 41.6 ms, 못 읽음 0. 화면: `docs/screens/g2g-clock.png`, `expert-g2g.png`. 실제 폰 카메라 측정은 남음 |
 
 ## 발표자료에 넣을 것
 
@@ -33,4 +34,5 @@
 - DataChannel 두 채널의 차이(순서·재전송)와 작업 지시 확인 흐름 그림 (03 §6)
 - 현장·전문가 화면 캡처(포인터, 지시 확인 상태): `docs/screens/field-instructions.png`, `expert-instructions.png`. 가능하면 실제 폰 캡처로 바꾼다
 - 품질 기록: 화면의 통신 품질 표 캡처(`docs/screens/expert-video.png`)와 CSV로 그린 그래프. 실제 폰 데이터로 다시 그린다
+- G2G 측정 원리 그림(시계 > 폰 카메라 > WebRTC > 같은 PC 화면)과 측정 화면. 실제 폰 측정값과 시험 모드 내부 지연(49 ms)을 나란히
 - 기술 스택 장의 "Node.js + ws" 줄을 "Python aiohttp"로 고친다
