@@ -264,6 +264,28 @@ try {
   const link = await x.$eval('#fieldLink', (a) => a.textContent);
   check('시작 화면 폰 링크(LAN 주소)', !link.includes('localhost'), link);
   check('QR 생성', (await x.$('#qr svg')) !== null);
+
+  // #19 종단 지연 측정: 현장이 카메라 대신 G2G 시계를 보내고(?fake=clock) 전문가가 QR을 읽는다
+  const room2 = `${room}g`;
+  const gf = await b1.newPage();
+  const ge = await b2.newPage();
+  for (const p of [gf, ge]) p.on('pageerror', (err) => errors.push(err.message));
+  await gf.goto(`${BASE}/field.html?room=${room2}&fake=clock`);
+  await ge.goto(`${BASE}/expert.html?room=${room2}`);
+  await Promise.all([waitStatus(gf, '연결됨'), waitStatus(ge, '연결됨')]);
+  await gf.click('#cam');
+  await ge.waitForFunction(() => document.getElementById('vMain').videoWidth > 0, { timeout: 15000 });
+  await ge.evaluate(() => (document.getElementById('g2gBox').open = true));
+  await ge.click('#g2gStart');
+  await sleep(8000);
+  const g = await ge.evaluate(() => ({ s: window.pbl.g2g.summary(), reader: window.pbl.g2g.readerName, table: document.getElementById('g2g').textContent }));
+  check(
+    '종단 지연 측정 (시계 영상, 8초)',
+    g.s.g2g?.n >= 30 && g.s.g2g.median > 0 && g.s.g2g.median < 1000 && g.table.includes('중앙값'),
+    g.s.g2g ? `표본 ${g.s.g2g.n}개, 중앙값 ${g.s.g2g.median} ms, p95 ${g.s.g2g.p95} ms, 받기 전 ${g.s.before?.median} / 받은 뒤 ${g.s.after?.median} ms, 못 읽음 ${g.s.unread}, 읽기 ${g.reader}` : JSON.stringify(g.s),
+  );
+  const g2gCsv = await ge.evaluate(() => window.pbl.g2g.toCsv().trim().split('\n').length - 1);
+  check('종단 지연 CSV', g2gCsv === g.s.g2g?.n || g2gCsv >= 30, `${g2gCsv}줄`);
 } catch (err) {
   check('예외 없이 완료', false, err.message);
 } finally {

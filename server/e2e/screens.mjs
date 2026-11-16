@@ -93,6 +93,29 @@ try {
   await f.waitForFunction(() => document.getElementById('stage').classList.contains('sharing') && document.getElementById('vMain').videoWidth > 0, { timeout: 15000 });
   await new Promise((r) => setTimeout(r, 1500));
   await shot(f, 'field-sharing.png');
+
+  // 종단 지연 측정 (#19): G2G 시계 페이지, 그리고 시계 영상(?fake=clock)을 받은 전문가 화면
+  const clock = await b1.newPage();
+  await clock.setViewport({ width: 1000, height: 560 });
+  await clock.goto(`${BASE}/tools/g2g-latency/clock.html`);
+  await new Promise((r) => setTimeout(r, 1500));
+  await shot(clock, 'g2g-clock.png');
+  const gf = await b1.newPage();
+  const ge = await b2.newPage();
+  await ge.setViewport({ width: 1280, height: 900 });
+  await gf.goto(`${BASE}/field.html?room=g2g-demo&fake=clock`);
+  await ge.goto(`${BASE}/expert.html?room=g2g-demo`);
+  await Promise.all([connected(gf), connected(ge)]);
+  await gf.click('#cam');
+  await ge.waitForFunction(() => document.getElementById('vMain').videoWidth > 0, { timeout: 15000 });
+  await ge.evaluate(() => {
+    document.getElementById('g2gBox').open = true;
+    document.getElementById('g2gStart').click();
+  });
+  await new Promise((r) => setTimeout(r, 8000));
+  await ge.evaluate(() => document.getElementById('g2gBox').scrollIntoView({ block: 'start' }));
+  await ge.screenshot({ path: path.join(OUT, 'expert-g2g.png') });
+  console.log('saved expert-g2g.png');
 } finally {
   await Promise.all([b1.close(), b2.close()]);
   server.kill();

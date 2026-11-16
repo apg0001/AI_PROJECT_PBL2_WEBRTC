@@ -11,6 +11,8 @@
 | `expert-video.png` | 전문가 화면, 현장 카메라 수신과 받는 영상 품질(해상도, fps, kbps, 코덱). 카메라는 Chrome 가짜 장치(초록 시험 패턴) |
 | `field-instructions.png` | 현장 화면, 전문가 포인터(노란 고리)가 내 카메라 위에 표시되고, 받은 지시 목록(확인 전은 왼쪽 노란 띠, 확인한 것은 '확인함'), 대화 |
 | `expert-instructions.png` | 전문가 화면, 영상을 눌러 가리킨 위치, 작업 지시 표(현장 확인 / 도착·확인 대기), 장비 상태, 대화 |
+| `g2g-clock.png` | G2G 시계: 지금 시각(ms)을 QR과 숫자로 매 프레임 갱신. 폰 카메라로 찍는다 |
+| `expert-g2g.png` | 전문가 화면, 종단 지연 측정 결과 (시험 모드 `?fake=clock`: 현장이 카메라 대신 시계를 보냄. 카메라·모니터를 뺀 내부 지연) |
 | `field-sharing.png` | 현장 화면, 전문가 화면 공유가 크게, 내 카메라는 오른쪽 아래 작은 화면. 공유 화면도 가짜 장치 |
 
 다시 캡처: `cd server && node e2e/screens.mjs ../docs/screens`

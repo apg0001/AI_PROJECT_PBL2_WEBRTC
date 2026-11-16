@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>G2G 시계 - 원격 현장지원</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600&display=swap">
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    /* 시계가 화면의 대부분을 차지해야 폰 카메라가 QR을 읽는다 */
+    html, body { height: 100%; }
+    main.clock { max-width: none; height: 100%; display: flex; flex-direction: column; padding: 12px 16px; }
+    main.clock p { margin: 0 0 8px; font-size: 15px; color: var(--steel); }
+    #clock { flex: 1; min-height: 0; width: 100%; display: block; border: 1px solid var(--rule); }
+  </style>
+</head>
+<body>
+  <main class="clock">
+    <p>
+      G2G 시계: 이 창을 화면 왼쪽에, 전문가 화면을 오른쪽에 둡니다. 현장 폰 후면 카메라로 이 QR을 찍고,
+      전문가 화면의 '종단 지연 측정'에서 시작을 누릅니다. <span id="rate"></span>
+    </p>
+    <canvas id="clock"></canvas>
+  </main>
+  <script type="module">
+    import { loadQrLib, startClock } from './clock.js';
+    const canvas = document.getElementById('clock');
+    const fit = () => {
+      const r = canvas.getBoundingClientRect();
+      canvas.width = Math.round(r.width * devicePixelRatio);
+      canvas.height = Math.round(r.height * devicePixelRatio);
+    };
+    addEventListener('resize', fit);
+    fit();
+    await loadQrLib();
+    startClock(canvas);
+    // 화면 새로고침 빈도: 시계 숫자가 바뀌는 간격이 곧 측정 오차의 한 원인이다
+    let n = 0;
+    const t0 = performance.now();
+    const count = () => {
+      n++;
+      if (performance.now() - t0 < 1000) requestAnimationFrame(count);
+      else document.getElementById('rate').textContent = `화면 갱신 약 ${n}Hz (한 칸 ${(1000 / n).toFixed(1)} ms).`;
+    };
+    requestAnimationFrame(count);
+  </script>
+</body>
+</html>
