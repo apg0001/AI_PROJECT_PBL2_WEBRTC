@@ -13,7 +13,7 @@
 | TD-04 | Room 식별 | 추측하기 어려운 Room ID (URL에 포함) | 링크 공유만으로 입장 |
 | TD-05 | Offer 역할 | Room에 먼저 있던 쪽 | glare 방지 |
 | TD-06 | 외부 노출·HTTPS | ngrok 터널 | 모바일 Secure Context + 다른 네트워크 접속을 한 번에 해결 |
-| TD-07 | NAT 통과 | 공용 STUN, TURN은 필요 시 호스팅 | 과제 범위, 비용 없음 |
+| TD-07 | NAT 통과 | 공용 STUN + 호스팅 TURN(Cloudflare, 서버가 짧은 유효기간 접속 정보 발급) | KT LTE ↔ 학교망 P2P 0/10 실패(#37). TURN 자체 구축은 범위 밖 |
 | TD-08 | 영상 기본 프로파일 | 720p / 24~30fps 상한, 혼잡 시 해상도 유지보다 프레임 유지 | 원격지원은 끊김 없는 움직임이 우선 (가설) |
 | TD-09 | 부가 데이터 전송 | DataChannel 2개 (`control` reliable, `pointer` unreliable) | 데이터별 요구 특성이 다름 |
 | TD-10 | 클라이언트 스택 | Vanilla JS ES Modules, 빌드 없음 | PoC 범위, 학습·빌드 비용 0 |
@@ -87,6 +87,10 @@
 | 선택 이유 | 대부분의 가정용 공유기(Cone NAT)는 STUN으로 얻은 공인 주소로 P2P가 된다. 공용 STUN은 비용이 없다. TURN 자체 구축은 과제 범위 밖이다 |
 | 단점 | 이동통신망 CGNAT, Symmetric NAT, UDP 차단 방화벽에서는 STUN만으로 실패한다. 공용 STUN은 SLA가 없다 |
 | 검증 계획 | #37에서 조합별 성공·실패와 Candidate를 기록하고, 실패 조합에 #38 호스팅 TURN을 적용해 비교한다 |
+| 실측 (#37) | KT LTE 폰 ↔ 학교망 PC(공인 IP)에서 STUN만으로 10회 모두 실패. 자세한 분석은 #14 |
+| 호스팅 TURN 선택 (#38) | Cloudflare Realtime TURN. 매달 1,000 GB 무료, UDP·TCP·TLS(443) 포트를 모두 제공해 UDP를 막는 방화벽도 통과할 수 있다. Metered Open Relay는 무료 한도가 작고 고정 접속 정보라 비밀 관리가 어렵다 |
+| 접속 정보 관리 | TURN 키는 서버의 `server/.env`(git 제외)에만 둔다. 브라우저는 연결 전에 `GET /api/ice`로 유효기간 4시간짜리 접속 정보를 받는다(`server/ice.py`). 키가 공개 저장소나 브라우저 코드에 들어가지 않고, 새어도 몇 시간 뒤 쓸 수 없다. 상용 서비스의 방식과 같다 |
+| 시험 옵션 | 주소에 `?relay=1`(TURN만 사용), `?turn=0`(TURN 빼고 STUN만), `?stun=0`(host만) |
 
 ### TD-08 영상 기본 프로파일
 

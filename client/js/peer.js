@@ -14,7 +14,7 @@ export const MEDIA_SLOTS = [
 ];
 
 export class PeerSession extends EventTarget {
-  constructor({ signaling, iceServers = DEFAULT_ICE_SERVERS, marks = {} }) {
+  constructor({ signaling, iceServers = DEFAULT_ICE_SERVERS, iceTransportPolicy = 'all', marks = {} }) {
     super();
     this.signaling = signaling;
     this.marks = marks; // 앱이 t0(join), t1(peer-joined)을 넣어 준다
@@ -26,7 +26,8 @@ export class PeerSession extends EventTarget {
     this.localTracks = { audio: null, camera: null, screen: null };
     this.maxBitrate = {}; // slot > bps
 
-    const pc = new RTCPeerConnection({ iceServers });
+    // iceTransportPolicy 'relay'면 TURN 중계 후보만 쓴다 (#38 시험용)
+    const pc = new RTCPeerConnection({ iceServers, iceTransportPolicy });
     this.pc = pc;
 
     this.control = pc.createDataChannel('control', { negotiated: true, id: 0, ordered: true });
@@ -134,8 +135,15 @@ export class PeerSession extends EventTarget {
     });
     if (!pair) stats.forEach((s) => s.type === 'candidate-pair' && s.nominated && s.state === 'succeeded' && (pair = s));
     if (!pair) return null;
+    // relay 후보면 TURN 서버와 무엇으로 통하는지(relayProtocol: udp, tcp, tls)와 TURN 주소(url)도 남긴다
     const pick = (c) =>
-      c && { type: c.candidateType, address: c.address ?? c.ip, port: c.port, protocol: c.protocol };
+      c && {
+        type: c.candidateType,
+        address: c.address ?? c.ip,
+        port: c.port,
+        protocol: c.protocol,
+        ...(c.candidateType === 'relay' ? { relayProtocol: c.relayProtocol, url: c.url } : {}),
+      };
     return {
       local: pick(stats.get(pair.localCandidateId)),
       remote: pick(stats.get(pair.remoteCandidateId)),

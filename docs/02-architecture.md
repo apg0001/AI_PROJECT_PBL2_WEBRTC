@@ -96,7 +96,7 @@ flowchart TB
 | Signaling Server + 정적 파일 | 개발자 PC (`python3 server/app.py`) | Python aiohttp 단일 프로세스, Room은 메모리에 보관 |
 | 외부 노출 | ngrok (`npm run tunnel`) | 무료 플랜은 실행할 때마다 URL이 바뀜 |
 | STUN | Google 공용 STUN | 비용 없음, SLA 없음 |
-| TURN | 없음 → 필요 시 호스팅 TURN (#38) | 자체 구축 안 함 |
+| TURN | Cloudflare Realtime TURN (#38). 서버가 `/api/ice`로 짧은 유효기간 접속 정보를 발급 | 자체 구축 안 함. 키는 `server/.env`(git 제외) |
 
 ## 6. 실제 서비스 전체 구조 안에서의 PoC 범위
 

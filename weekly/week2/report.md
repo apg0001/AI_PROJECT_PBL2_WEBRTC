@@ -28,6 +28,7 @@
 | 11/16 | #18 | 통신 품질 수집 `client/js/stats.js`: 1초마다 getStats를 한 줄(30열)로 기록. 끊긴 동안도 기록하고 재연결은 `sess`로 구분. 화면에 '통신 품질' 표, 'CSV 저장' 버튼. 그래프 스크립트 `tools/stats/plot_stats.py`(matplotlib), PC 안에서 가짜 카메라로 N초 수집하는 `server/e2e/collect-stats.mjs` | E2E 32/32 통과(새 항목 4개). 가짜 카메라 20초 수집: 받는 영상 중앙값 175 kbps·15 fps, 손실 0%, 지터 버퍼 7.6 ms. 연결 직후 현장 송신의 '화질을 낮춘 이유'가 bandwidth로 나옴(대역폭 추정이 낮게 시작) |
 | 11/16 | #19 | Glass-to-Glass 지연 측정 도구 `tools/g2g-latency/`: `clock.html`(지금 시각 ms를 QR과 숫자로 매 프레임), 전문가 화면 '종단 지연 측정'(받은 프레임의 QR을 `BarcodeDetector`로 읽어 `표시 시각 - QR 시각`, 중앙값·p95·받기 전/받은 뒤·CSV). 현장 시험 모드 `?fake=clock`(카메라 대신 시계 캔버스 송출). 절차·수동 검증·오차 요인 README | E2E 34/34 통과. 시험 모드 8초: 표본 108개, 중앙값 49.3 ms, p95 49.9 ms, 받기 전 7.6 ms / 받은 뒤 41.6 ms, 못 읽음 0. 화면: `docs/screens/g2g-clock.png`, `expert-g2g.png`. 실제 폰 카메라 측정은 남음 |
 | 11/16 | #72 | 실기기 시험 준비 중 `npm start`가 `No module named 'aiohttp'`로 실패. 사용자 터미널의 `python3`는 Homebrew 3.13이고 aiohttp는 anaconda에만 있었다(개발 시험은 anaconda로 해서 놓침). `server/.venv` 가상환경(`npm run setup`), `server/run.sh`가 가상환경 Python을 먼저 고름. E2E·캡처·수집 스크립트도 같은 경로로 서버를 띄움 | Homebrew `python3` 셸에서 `npm test` 통과, 서버 `/healthz` 200, E2E 34/34 통과 |
+| 11/16 | #38 | 호스팅 TURN 지원 준비: 서버 `GET /api/ice`(`server/ice.py`)가 Cloudflare Realtime TURN에서 4시간짜리 접속 정보를 받아 STUN과 함께 내려줌(키는 `server/.env`, git 제외). 고정 TURN 설정도 가능. 브라우저는 연결 전에 받아 씀. 시험 옵션 `?relay=1`, `?turn=0`. 선택된 relay 경로에 TURN까지의 방식(udp/tcp/tls) 표시. 반복 측정 스크립트에 `EXTRA` 옵션 | 단위 시험 11/11(설정 없음, 고정 TURN, 잘못된 Cloudflare 키에서 STUN으로 대체), E2E 35/35. 실제 TURN 연결은 Cloudflare 키 설정 후 |
 
 ## 발표자료에 넣을 것
 

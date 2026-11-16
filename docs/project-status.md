@@ -17,6 +17,8 @@
 - [x] #16 DataChannel 메시지 프로토콜: 봉투 `{type, seq, ts, payload}`, 종류 9개, 작업 지시 2단계 확인(ack), 재연결 후 미확인 지시 재전송, 늦게 온 포인터 버리기 (`client/js/datachannel.js`, 03 §6). E2E 24항목 통과
 - [x] #17 대화(양방향), 작업 지시(현장 확인 버튼, 전문가 표에 도착·확인 상태), 포인터(전문가가 영상을 누르면 현장 카메라 화면의 같은 위치에 노란 고리, 3초 뒤 흐려짐), 장비 상태(더미). E2E 28항목 통과, 위치 오차 0.003. 실제 폰 확인 남음
 - [x] #18 통신 품질 1초 기록과 CSV(30열): 경로, RTT, 받는 영상(해상도, fps, kbps, 손실률, 지터, 지터 버퍼, 디코딩, 정지), 보내는 영상(화질을 낮춘 이유), 음성. 화면 표, CSV 저장, 그래프 스크립트(`tools/stats/plot_stats.py`), PC 수집 스크립트(`server/e2e/collect-stats.mjs`). E2E 32항목 통과
+- [ ] #37 다른 네트워크: KT LTE 폰 ↔ 학교망 PC(유선 공인 IP) STUN만으로 **0/10 실패** (`experiments/2026-11-16_T2-2-lte-school/`). TURN 적용 후 재시험 남음
+- [ ] #38 호스팅 TURN: 코드 준비 완료(`/api/ice`, Cloudflare 짧은 유효기간 접속 정보, `?relay=1`, `?turn=0`). Cloudflare 계정·키 설정과 실측 남음
 - [x] #72 서버 실행 Python 문제: 터미널의 `python3`(Homebrew 3.13)에 aiohttp가 없어 `npm start` 실패 > `server/.venv` 가상환경(`npm run setup`)과 실행 스크립트 `server/run.sh`
 - [x] #19 Glass-to-Glass 지연 측정 도구 (`tools/g2g-latency/`): 시계 페이지(ms QR), 전문가 화면 '종단 지연 측정'(중앙값, p95, 받기 전/받은 뒤, CSV), 시험 모드 `?fake=clock`. E2E에서 8초 표본 108개, 내부 지연 중앙값 49 ms. 실제 폰 측정(100개 이상)과 사진 수동 검증 남음
 

@@ -3,6 +3,7 @@
 // 들어갔다 나오기를 반복하며 Connection Time(join → connected), 선택 경로, RTT, DataChannel 왕복을 기록한다.
 // 실행: node e2e/measure-connection.mjs <baseUrl> <room> <runs> <outDir>
 //   예: node e2e/measure-connection.mjs http://localhost:3001 w1lan 10 ../experiments/2026-11-09_T1-iphone-pc-lan
+//   TURN만: EXTRA='&relay=1' node e2e/measure-connection.mjs ...
 import puppeteer from 'puppeteer-core';
 import { writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -16,7 +17,8 @@ await mkdir(outDir, { recursive: true });
 const browser = await puppeteer.launch({ executablePath: CHROME, headless: true });
 const page = await browser.newPage();
 await page.setViewport({ width: 1100, height: 1100 });
-const url = `${base}/expert.html?room=${encodeURIComponent(room)}`;
+// EXTRA='&relay=1' 처럼 전문가 주소에 시험 옵션을 붙인다 (#38)
+const url = `${base}/expert.html?room=${encodeURIComponent(room)}${process.env.EXTRA ?? ''}`;
 
 const readResult = () =>
   page.evaluate(() => {
@@ -38,7 +40,10 @@ for (let i = 1; i <= RUNS; i++) {
   } catch {
     // 연결 실패도 결과로 남긴다 (예: 폰 페이지가 백그라운드로 가서 닫힘)
     const status = await page.$eval('#status', (e) => e.textContent).catch(() => '?');
-    results.push({ run: i, pathType: '실패', candidates: `연결 안 됨: ${status}` });
+    // 실패 원인 분석(#14)용으로 그때까지의 상태 변화와 후보를 남긴다
+    const r = await readResult().catch(() => ({}));
+    await page.screenshot({ path: path.join(outDir, `expert-fail-run${i}.png`) }).catch(() => {});
+    results.push({ run: i, pathType: '실패', candidates: `연결 안 됨: ${status} / ${r.summary ?? ''}`, states: r.states, cands: r.cands });
     console.log(JSON.stringify(results.at(-1)));
     await save();
     continue;

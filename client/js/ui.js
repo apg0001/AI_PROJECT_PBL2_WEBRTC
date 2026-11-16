@@ -540,7 +540,8 @@ export function createUi({ role, room }) {
 
     showSelectedPair(p) {
       record.selectedPair = p;
-      const fmt = (c) => (c ? `${c.type} ${c.protocol} ${c.address || '숨김'}:${c.port ?? '?'}` : '-');
+      const fmt = (c) =>
+        c ? `${c.type} ${c.protocol} ${c.address || '숨김'}:${c.port ?? '?'}${c.relayProtocol ? ` (TURN까지 ${c.relayProtocol})` : ''}` : '-';
       const relay = p.local?.type === 'relay' || p.remote?.type === 'relay';
       setRow('경로', relay ? 'TURN 서버 중계' : '직접 연결 (서버를 거치지 않음)');
       setRow('내 쪽 주소', fmt(p.local));
