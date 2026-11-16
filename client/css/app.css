@@ -169,3 +169,41 @@ button[aria-pressed="true"]:hover { background: var(--steel); }
 button:disabled { opacity: 0.45; cursor: not-allowed; }
 .select { display: inline-flex; align-items: center; gap: 8px; font-size: 15px; }
 .select select { font: inherit; font-size: 15px; min-height: 44px; padding: 0 8px; border: 1.5px solid var(--ink); border-radius: 2px; background: var(--paper); color: var(--ink); }
+
+/* 포인터 (#17) - 전문가가 가리킨 곳. 어떤 영상 위에서도 보이게 노랑 고리 + 먹 테두리 */
+.pointer {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  margin: -18px 0 0 -18px;
+  border-radius: 50%;
+  border: 5px solid var(--caution);
+  box-shadow: 0 0 0 2px var(--ink), inset 0 0 0 2px var(--ink);
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.pointer[hidden] { display: none; }
+.pointer.fade { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .pointer { transition: none; } }
+body.expert #vMain { cursor: crosshair; touch-action: none; }
+
+/* 받은 지시 (현장) - 작업 지시서처럼 칸 선. 확인 전에는 왼쪽에 노랑 띠(주의) */
+.instr { list-style: none; padding: 0; margin: 0; }
+.instr li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; align-items: center; padding: 10px 0 10px 12px; border-bottom: 1px solid var(--rule); border-left: 6px solid transparent; }
+.instr li.todo { border-left-color: var(--caution); }
+.instr li .x { font-weight: 600; font-size: 20px; }
+.instr li .t { grid-row: 2; font-size: 13px; }
+.instr li button { grid-row: 1 / span 2; grid-column: 2; }
+.instr li.empty { display: block; border-left: 0; padding-left: 0; }
+
+/* 대화 */
+.chat { list-style: none; padding: 0; margin: 0; max-height: 30vh; overflow-y: auto; }
+.chat li { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--rule); }
+.chat .who { color: var(--steel); font-size: 13px; padding-top: 2px; }
+.chat .x { word-break: break-word; }
+.chat .t { font-size: 13px; }
+.send { display: flex; gap: 8px; margin-top: 8px; }
+.send input { flex: 1; min-width: 0; font: inherit; font-size: 16px; min-height: 44px; padding: 0 10px; border: 1.5px solid var(--ink); border-radius: 2px; background: var(--paper); color: var(--ink); }
+.send input:focus-visible { outline: 3px solid var(--caution); outline-offset: 1px; }
+#instrTable { margin-top: 8px; }
+.warn-text { color: var(--caution-ink); font-weight: 600; }
