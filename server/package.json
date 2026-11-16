@@ -4,8 +4,8 @@
   "private": true,
   "description": "Python Signaling Server(app.py)의 실행 단축 명령 + Node 도구(E2E, 화면 캡처, 다이어그램)",
   "scripts": {
-    "start": "python3 app.py",
-    "test": "python3 -m unittest discover -s tests -t .",
+    "start": "sh run.sh -u app.py",
+    "test": "sh run.sh -m unittest discover -s tests -t .",
     "tunnel": "ngrok http 3000",
     "e2e": "node e2e/connect.e2e.mjs",
     "diagrams": "node scripts/render-diagrams.mjs"

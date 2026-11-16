@@ -18,7 +18,7 @@ const BASE = `http://localhost:${PORT}`;
 const CHROME = process.env.CHROME ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
 await mkdir(OUT, { recursive: true });
-const server = spawn(process.env.PYTHON ?? 'python3', ['-u', 'server/app.py'], { cwd: REPO, env: { ...process.env, PORT: String(PORT) }, stdio: 'ignore' });
+const server = spawn('sh', ['server/run.sh', '-u', 'app.py'], { cwd: REPO, env: { ...process.env, PORT: String(PORT) }, stdio: 'ignore' });
 for (let i = 0; i < 100; i++) {
   if (await fetch(`${BASE}/healthz`).then((r) => r.ok, () => false)) break;
   await new Promise((r) => setTimeout(r, 100));
