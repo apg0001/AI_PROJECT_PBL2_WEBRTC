@@ -209,5 +209,43 @@ class StaticTest(AioHTTPTestCase):
         self.assertEqual(res.headers['Cache-Control'], 'no-store')
 
 
+class IceTest(AioHTTPTestCase):
+    """/api/ice: 설정에 따라 STUN만, 또는 STUN+TURN"""
+
+    env = {}
+
+    async def get_application(self):
+        from ice import IceProvider
+        return create_app(log=lambda *a: None, ice=IceProvider(env=self.env))
+
+    async def test_stun_only(self):
+        res = await self.client.get('/api/ice')
+        body = await res.json()
+        self.assertEqual(body['source'], 'stun')
+        self.assertEqual(len(body['iceServers']), 1)
+        self.assertEqual(res.headers['Cache-Control'], 'no-store')
+
+
+class IceStaticTest(IceTest):
+    env = {'TURN_URLS': 'turn:t.example:3478?transport=udp, turns:t.example:443', 'TURN_USERNAME': 'u', 'TURN_CREDENTIAL': 'p'}
+
+    async def test_stun_only(self):  # 이 설정에서는 TURN이 붙는다
+        body = await (await self.client.get('/api/ice')).json()
+        self.assertEqual(body['source'], 'stun+turn(static)')
+        turn = body['iceServers'][1]
+        self.assertEqual(turn['urls'], ['turn:t.example:3478?transport=udp', 'turns:t.example:443'])
+        self.assertEqual((turn['username'], turn['credential']), ('u', 'p'))
+
+
+class IceCloudflareFailTest(IceTest):
+    # 잘못된 키 > Cloudflare 오류 또는 네트워크 오류 > STUN만 주고 이유를 적는다 (서버는 멈추지 않는다)
+    env = {'CF_TURN_KEY_ID': 'invalid', 'CF_TURN_API_TOKEN': 'invalid'}
+
+    async def test_stun_only(self):
+        body = await (await self.client.get('/api/ice')).json()
+        self.assertTrue(body['source'].startswith('stun (TURN 발급 실패'), body['source'])
+        self.assertEqual(len(body['iceServers']), 1)
+
+
 if __name__ == '__main__':
     unittest.main()

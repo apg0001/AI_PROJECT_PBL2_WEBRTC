@@ -19,8 +19,13 @@ export async function startApp({ role }) {
     return;
   }
 
-  // ?stun=0 이면 STUN 없이 host Candidate만 쓴다 (NAT 분석 실험용)
-  const iceServers = params.get('stun') === '0' ? [] : DEFAULT_ICE_SERVERS;
+  // ICE 서버 (#38): 서버의 /api/ice에서 STUN과 TURN(설정된 경우)을 받는다. 시험용 주소 옵션
+  //   ?stun=0   STUN·TURN 없이 host 후보만 (NAT 분석)
+  //   ?turn=0   TURN 빼고 STUN만 (P2P가 되는지 확인)
+  //   ?relay=1  TURN 중계만 (iceTransportPolicy 'relay')
+  const iceTransportPolicy = params.get('relay') === '1' ? 'relay' : 'all';
+  let iceServers = DEFAULT_ICE_SERVERS;
+  let iceSource = 'stun (기본값)';
   const signaling = new SignalingClient();
   let session = null;
   let marks = {};
@@ -158,7 +163,7 @@ export async function startApp({ role }) {
 
   function newSession() {
     session?.close();
-    const s = new PeerSession({ signaling, iceServers, marks });
+    const s = new PeerSession({ signaling, iceServers, iceTransportPolicy, marks });
     ui.attachSession(s);
     ui.resetRemote();
     for (const [slot, track] of Object.entries(mine)) if (track) s.setTrack(slot, track, bitrate(slot));
@@ -256,6 +261,28 @@ export async function startApp({ role }) {
     ui.setStatus('wait', '나왔습니다. 새로고침하면 다시 들어갑니다.');
   });
   addEventListener('pagehide', () => signaling.send({ type: 'leave' }));
+
+  if (params.get('stun') === '0') {
+    iceServers = [];
+    iceSource = '없음 (?stun=0)';
+  } else {
+    try {
+      const res = await fetch('/api/ice', { cache: 'no-store' });
+      const body = await res.json();
+      iceServers = body.iceServers;
+      iceSource = body.source;
+      if (params.get('turn') === '0') {
+        iceServers = iceServers.filter((s) => ![s.urls].flat().some((u) => u.startsWith('turn')));
+        iceSource += ' > TURN 뺌 (?turn=0)';
+      }
+    } catch (err) {
+      ui.log('error', `ICE 서버 목록을 받지 못해 기본 STUN만 씁니다: ${err.message}`);
+    }
+  }
+  ui.log('ice', `ICE 서버: ${iceSource}${iceTransportPolicy === 'relay' ? ', TURN 중계만 사용 (?relay=1)' : ''}`);
+  ui.record.result['ICE 서버'] = iceSource;
+  const hasTurn = iceServers.some((s) => [s.urls].flat().some((u) => u.startsWith('turn')));
+  if (iceTransportPolicy === 'relay' && !hasTurn) ui.setMediaNote('?relay=1이지만 TURN 서버가 설정되어 있지 않아 연결할 수 없습니다.');
 
   try {
     ui.setStatus('busy', '서버에 접속하는 중…');

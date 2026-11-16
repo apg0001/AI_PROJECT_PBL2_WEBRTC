@@ -55,6 +55,8 @@ try {
   await e.goto(`${BASE}/expert.html?room=${room}`);
   await Promise.all([waitStatus(f, '연결됨'), waitStatus(e, '연결됨')]);
   check('양쪽 connected', true);
+  const iceLog = await e.$eval('#log', (x) => [...x.querySelectorAll('li')].map((li) => li.textContent).find((t) => t.includes('ICE 서버')) ?? '');
+  check('ICE 서버 목록 받음 (/api/ice)', iceLog.includes('stun'), iceLog.replace(/^.*ICE 서버/, 'ICE 서버'));
   await new Promise((r) => setTimeout(r, 500));
   console.log('  field :', (await result(f)).join(' | '));
   console.log('  expert:', (await result(e)).join(' | '));

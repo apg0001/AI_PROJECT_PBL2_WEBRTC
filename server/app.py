@@ -19,6 +19,7 @@ from pathlib import Path
 
 from aiohttp import web
 
+from ice import IceProvider, load_env_file
 from signaling import attach_signaling
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -76,6 +77,15 @@ async def healthz(request):
     return web.json_response({'ok': True, 'time': int(time.time() * 1000)})
 
 
+def make_ice(provider):
+    # 브라우저가 RTCPeerConnection을 만들기 전에 받아 간다 (#38). TURN 접속 정보가 들어 있어 저장하지 않게 한다
+    async def ice(request):
+        servers, source = await provider.servers()
+        return web.json_response({'iceServers': servers, 'source': source}, headers=NO_STORE)
+
+    return ice
+
+
 async def info(request):
     # 시작 화면이 폰용 링크(LAN 주소)를 만들 때 쓴다
     return web.json_response({'lan': lan_addresses(), 'port': PORT}, headers=NO_STORE)
@@ -99,16 +109,18 @@ def make_static(mounts):
     return serve
 
 
-def create_app(mounts=MOUNTS, log=log, heartbeat=30.0):
+def create_app(mounts=MOUNTS, log=log, heartbeat=30.0, ice=None):
     app = web.Application()
     app.router.add_get('/healthz', healthz)
     app.router.add_get('/api/info', info)
+    app.router.add_get('/api/ice', make_ice(ice or IceProvider(log=log)))
     attach_signaling(app, log=log, heartbeat=heartbeat)  # /ws
     app.router.add_get('/{tail:.*}', make_static(mounts))
     return app
 
 
 def main():
+    load_env_file(ROOT / 'server' / '.env')  # TURN 설정 (git에 올리지 않는다)
     cert, key = ROOT / 'server' / 'certs' / 'cert.pem', ROOT / 'server' / 'certs' / 'key.pem'
     ssl_ctx = None
     if cert.exists() and key.exists():
@@ -120,6 +132,7 @@ def main():
         log(f'listening on {scheme}://localhost:{PORT}')
         for ip in lan_addresses():
             log(f'  LAN: {scheme}://{ip}:{PORT}')
+        log(f'  ICE 서버: {IceProvider().mode} (TURN 설정은 server/.env)')
         if not ssl_ctx:
             log('  같은 LAN 연결은 위 LAN 주소로 접속. 폰 카메라·다른 네트워크 시험은 HTTPS 필요 → `npm run tunnel`')
 
