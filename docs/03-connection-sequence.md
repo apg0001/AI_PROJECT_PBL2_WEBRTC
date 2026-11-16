@@ -9,7 +9,7 @@
 | Room 정원 | 2명 (현장 1, 전문가 1) | 1:1 지원이 Core 범위 |
 | Offer를 만드는 쪽 | **Room에 먼저 있던 쪽**이 `peer-joined`를 받으면 Offer를 만든다 | 두 쪽이 동시에 Offer를 만드는 충돌(glare)을 구조적으로 막는다. 서버가 `peer-joined`를 기존 참가자에게만 보내므로 Offerer가 항상 한 명이다 |
 | ICE | Trickle ICE: Candidate가 생기는 즉시 보낸다 | 모든 Candidate 수집을 기다리지 않아 연결 시간이 줄어든다 |
-| DataChannel | 양쪽이 `negotiated: true`로 같은 id(0: `control`, 1: `pointer`)를 미리 만든다 | `ondatachannel` 이벤트에 의존하지 않아 Offerer가 누구든 같은 코드로 동작한다 |
+| DataChannel | 양쪽이 `negotiated: true`로 같은 id(0: `control`, 1: `pointer`)를 미리 만든다. 메시지 형식은 §6 | `ondatachannel` 이벤트에 의존하지 않아 Offerer가 누구든 같은 코드로 동작한다 |
 | 서버 역할 | 메시지를 상대에게 그대로 전달할 뿐 SDP·Candidate 내용을 해석하지 않는다 | 서버를 단순하게 유지. 영상은 서버를 지나지 않는다 |
 | 미디어 통로 | Offerer가 첫 offer 전에 송수신 통로 3개(음성, 카메라, 화면 공유)를 연다. 켜고 끌 때는 `replaceTrack`만 하고, 상태는 `control` 채널의 `media` 메시지로 알린다 | 재협상 없이 켜고 끈다 (TD-13). 구현 #15, #62 |
 
@@ -167,3 +167,55 @@ flowchart TD
 - **Connection Time = t5 − t0**: 나중에 들어온 쪽 단말에서 측정한다. t0과 t5가 같은 단말의 시계라 기기 간 시계 동기화가 필요 없다.
 - **Time to First Frame = t7 − t0**: 전문가가 나중에 들어오는 시나리오에서 전문가 단말이 측정한다. 사용자 체감에 가장 가깝다.
 - t1 ~ t4는 지연이 어느 구간(시그널링 왕복, ICE 검사, DTLS)에서 생기는지 나누어 보기 위해 기록한다.
+
+## 6. DataChannel 메시지 스펙 (#16)
+
+구현: `client/js/datachannel.js`. 시그널링 서버를 거치지 않고 두 브라우저 사이에서 직접 오간다.
+
+### 봉투
+
+모든 메시지는 같은 JSON 봉투에 담는다: `{ type, seq, ts, payload }`
+
+| 필드 | 뜻 |
+|---|---|
+| `type` | 메시지 종류 (아래 표) |
+| `seq` | 보내는 쪽이 채널마다 0부터 1씩 올리는 번호. 순서 확인과 늦게 온 포인터 버리기에 쓴다 |
+| `ts` | 보낸 시각(ms, Unix epoch). 기기 시계가 달라 지연 계산에는 쓰지 않고 기록용으로만 쓴다 |
+| `payload` | 종류별 내용 |
+
+받는 쪽은 JSON 형식, `type`, 채널 일치, `seq`, 필수 필드, 좌표 범위(0~1)를 검사하고, 틀리면 버리고 오류 기록에 남긴다.
+
+### 종류
+
+| type | 채널 | payload | 방향 | 설명 |
+|---|---|---|---|---|
+| `chat` | control | `{text}` | 양쪽 | 채팅. 500자 제한 |
+| `instruction` | control | `{id, text}` | 전문가 > 현장 | 작업 지시. 확인(ack)을 받는다 |
+| `ack` | control | `{id, stage}` | 현장 > 전문가 | `stage`: `received`(앱이 받음, 자동) 또는 `done`(작업자가 확인 버튼을 누름) |
+| `device-status` | control | `{equipmentId, state, errorCode, temperature}` | 현장 > 전문가 | 장비 상태 (PoC는 더미 값) |
+| `media` | control | `{slot, on}` | 양쪽 | 카메라·마이크·화면 공유 켜짐 알림 (TD-13) |
+| `profile` | control | `{profile}` | 전문가 > 현장 | 화질 변경 요청 (`A` 또는 `B`) |
+| `ping` / `pong` | control | `{t}` | 양쪽 | 데이터 통로 왕복 시간 확인 |
+| `pointer` | pointer | `{x, y, down}` | 전문가 > 현장 | 영상 위 위치. 영상 크기와 상관없이 0~1로 정규화 |
+
+### 작업 지시의 확인 흐름
+
+```mermaid
+sequenceDiagram
+  participant E as 전문가
+  participant F as 현장
+  E->>F: instruction {id, text} (control, reliable)
+  F-->>E: ack {id, stage: received} (자동, 왕복 시간 측정)
+  Note over F: 작업자가 지시를 읽고 확인 버튼
+  F-->>E: ack {id, stage: done}
+```
+
+- 도착 확인(`received`)을 받지 못한 지시는 대기열에 남는다. 연결이 끊겼다가 다시 열리면 대기열의 지시를 다시 보낸다.
+- 받는 쪽은 `id`로 중복을 거른다. 중복이어도 `ack`는 다시 보내서, 보낸 쪽이 확인을 받게 한다.
+- `control` 채널은 순서 보장과 재전송을 하므로 연결이 살아 있는 동안에는 유실되지 않는다. 대기열은 연결 자체가 끊긴 경우를 위한 것이다.
+
+### 포인터
+
+- `pointer` 채널은 순서를 보장하지 않고 재전송도 하지 않는다(`ordered: false`, `maxRetransmits: 0`).
+- 받는 쪽은 지금까지 받은 가장 큰 `seq`보다 작거나 같은 좌표를 버린다. 건너뛴 번호 수는 유실 추정치로 센다(`counts.pointerGap`).
+- 보내는 쪽 대기열(`bufferedAmount`)이 16KB를 넘으면 새 좌표를 보내지 않는다. 밀린 좌표를 늦게 보내는 것보다 최신 좌표만 보내는 편이 낫다.

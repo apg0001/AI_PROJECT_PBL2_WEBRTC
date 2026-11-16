@@ -5,6 +5,7 @@ import { SignalingClient } from './signaling.js';
 import { PeerSession, DEFAULT_ICE_SERVERS } from './peer.js';
 import { createUi } from './ui.js';
 import { PROFILES, mediaSupport, getCamera, getMic, getScreen, mediaErrorText } from './media.js';
+import { DataLink } from './datachannel.js';
 
 const SLOT_NAME = { audio: '마이크', camera: '카메라', screen: '화면 공유' };
 
@@ -35,7 +36,10 @@ export async function startApp({ role }) {
   }
   if (role === 'expert' && !support.screen) ui.disable('screen', '이 브라우저는 화면 공유를 지원하지 않습니다');
 
-  const announce = (slot) => session?.sendControl({ type: 'media', slot, on: !!mine[slot] });
+  // 데이터 통로 메시지 (#16). 연결이 바뀌어도 하나를 계속 쓴다(대기 중인 지시를 다시 보내기 위해)
+  const link = new DataLink();
+  window.pbl = { link, session: () => session }; // 브라우저 콘솔과 자동 시험에서 쓰는 손잡이
+  const announce = (slot) => link.send('media', { slot, on: !!mine[slot] });
   const bitrate = (slot) => (slot === 'camera' ? { maxBitrate: PROFILES[profile].maxBitrate } : {});
 
   async function setMine(slot, track) {
@@ -74,7 +78,7 @@ export async function startApp({ role }) {
   ui.onScreen(() => (mine.screen ? setMine('screen', null) : tryGet('screen', getScreen)));
   // 전문가가 현장 화질을 고른다 > 현장이 카메라를 다시 맞춘다
   ui.onProfile((p) => {
-    session?.sendControl({ type: 'profile', profile: p });
+    link.send('profile', { profile: p });
     ui.log('media', `현장에 화질 변경 요청: ${PROFILES[p].label}`);
   });
   addEventListener('click', () => ui.resumeAudio(), true);
@@ -116,18 +120,19 @@ export async function startApp({ role }) {
       else if (value === 'disconnected') ui.setStatus('warn', '연결이 불안정합니다');
       else if (value === 'failed') ui.setStatus('error', '연결하지 못했습니다. 연결 후보와 기록을 확인하세요');
     });
-    s.on('control-message', (m) => {
-      if (m.type === 'ping') s.sendControl({ type: 'pong', ts: m.ts });
-      else if (m.type === 'pong') ui.log('data', `데이터 통로 왕복 ${(performance.now() - m.ts).toFixed(1)} ms`);
-      else if (m.type === 'media') {
-        ui.setRemoteOn(m.slot, m.on);
-        if (m.slot !== 'audio') ui.log('media', `상대가 ${SLOT_NAME[m.slot]}을(를) ${m.on ? '켰다' : '껐다'}`);
-      } else if (m.type === 'profile' && role === 'field') applyProfile(m.profile);
-    });
+    link.attach(s);
     s.on('error', ({ where, message }) => ui.log('error', `${where}: ${message}`));
     session = s;
     return s;
   }
+
+  link.on('pong', ({ t }) => ui.log('data', `데이터 통로 왕복 ${(performance.now() - t).toFixed(1)} ms`));
+  link.on('media', ({ slot, on }) => {
+    ui.setRemoteOn(slot, on);
+    if (slot !== 'audio') ui.log('media', `상대가 ${SLOT_NAME[slot] ?? slot}을(를) ${on ? '켰다' : '껐다'}`);
+  });
+  link.on('profile', ({ profile: p }) => role === 'field' && applyProfile(p));
+  link.on('invalid', ({ channel, error }) => ui.log('error', `${channel} 채널: 잘못된 메시지 (${error})`));
 
   async function onConnected(s) {
     ui.setStatus('ok', '연결됨');
@@ -169,7 +174,7 @@ export async function startApp({ role }) {
   });
 
   ui.onPing(() => {
-    if (!session?.sendControl({ type: 'ping', ts: performance.now() })) ui.log('data', '데이터 통로가 아직 열리지 않았습니다');
+    if (!link.send('ping', { t: performance.now() })) ui.log('data', '데이터 통로가 아직 열리지 않았습니다');
   });
   ui.onLeave(() => {
     signaling.send({ type: 'leave' });
