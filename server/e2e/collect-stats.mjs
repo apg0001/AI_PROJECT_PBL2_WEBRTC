@@ -9,6 +9,8 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+// 자동 시험은 PC 안에서 끝나므로 TURN이 필요 없다. server/.env의 TURN 설정을 빈 값으로 덮어 무료 사용량을 쓰지 않는다
+const NO_TURN = { CF_TURN_KEY_ID: '', CF_TURN_API_TOKEN: '', TURN_URLS: '' };
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const SECONDS = Number(process.argv[2] ?? 30);
 const OUT = path.resolve(process.argv[3] ?? 'stats-out');
@@ -18,7 +20,7 @@ const BASE = `http://localhost:${PORT}`;
 const CHROME = process.env.CHROME ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
 await mkdir(OUT, { recursive: true });
-const server = spawn('sh', ['server/run.sh', '-u', 'app.py'], { cwd: REPO, env: { ...process.env, PORT: String(PORT) }, stdio: 'ignore' });
+const server = spawn('sh', ['server/run.sh', '-u', 'app.py'], { cwd: REPO, env: { ...process.env, PORT: String(PORT), ...NO_TURN }, stdio: 'ignore' });
 for (let i = 0; i < 100; i++) {
   if (await fetch(`${BASE}/healthz`).then((r) => r.ok, () => false)) break;
   await new Promise((r) => setTimeout(r, 100));

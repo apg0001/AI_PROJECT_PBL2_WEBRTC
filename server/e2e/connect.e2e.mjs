@@ -5,19 +5,25 @@ import { spawn } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+// 자동 시험은 PC 안에서 끝나므로 TURN이 필요 없다. server/.env의 TURN 설정을 빈 값으로 덮어 무료 사용량을 쓰지 않는다
+const NO_TURN = { CF_TURN_KEY_ID: '', CF_TURN_API_TOKEN: '', TURN_URLS: '' };
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const PORT = Number(process.env.E2E_PORT ?? 3123);
 const BASE = `http://localhost:${PORT}`;
 const CHROME = process.env.CHROME ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
-const server = spawn('sh', ['server/run.sh', '-u', 'app.py'], { cwd: REPO, env: { ...process.env, PORT: String(PORT) } });
 const serverLog = [];
-server.stdout.on('data', (d) => serverLog.push(d.toString()));
-// 서버가 뜰 때까지 /healthz를 확인한다 (최대 10초)
-for (let i = 0; i < 100; i++) {
-  if (await fetch(`http://localhost:${PORT}/healthz`).then((r) => r.ok, () => false)) break;
-  await new Promise((r) => setTimeout(r, 100));
+// 서버를 띄우고 /healthz가 응답할 때까지 기다린다 (최대 10초). 서버 재시작 시험(T5-4)에서 다시 부른다
+async function startServer() {
+  const proc = spawn('sh', ['server/run.sh', '-u', 'app.py'], { cwd: REPO, env: { ...process.env, PORT: String(PORT), ...NO_TURN } });
+  proc.stdout.on('data', (d) => serverLog.push(d.toString()));
+  for (let i = 0; i < 100; i++) {
+    if (await fetch(`http://localhost:${PORT}/healthz`).then((r) => r.ok, () => false)) break;
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  return proc;
 }
+let server = await startServer();
 
 // 가짜 카메라·마이크와 권한 자동 허용. 화면 공유는 탭 캡처를 자동 선택한다.
 const MEDIA_ARGS = [
@@ -252,6 +258,55 @@ try {
     .waitForFunction(() => [...window.pbl.link.pending.values()].some((i) => i.text === '재연결 후 지시' && i.receivedMs != null), { timeout: 8000 })
     .then(() => true, () => false);
   check('연결이 없을 때 보낸 지시 > 재연결 후 자동 재전송', !queued && resent, `처음 전송 ${queued}, 재전송 ${await e.evaluate(() => window.pbl.link.counts.resent)}회`);
+
+  // #34 ICE 재시작: 연결을 새로 만들지 않고 후보만 다시 찾아 경로를 다시 잡는다 (Offerer가 한다)
+  const conn = (p) => p.evaluate(() => ({ state: window.pbl.session()?.pc.connectionState, restarts: window.pbl.session()?.restarts }));
+  const offerer = (await e.evaluate(() => window.pbl.session().isOfferer)) ? e : f;
+  // 앞 단계의 로그가 남아 있으므로 '새로 생긴' 기록을 기다린다
+  const countLog = (p, text) => p.$$eval('#log li', (ls, t) => ls.filter((l) => l.textContent.includes(t)).length, text);
+  const waitMoreLog = async (p, text, before, timeout = 15000) =>
+    p.waitForFunction((t, n) => [...document.querySelectorAll('#log li')].filter((l) => l.textContent.includes(t)).length > n, { timeout }, text, before).then(() => true, () => false);
+  const waitExact = (p, text, timeout = 8000) => p.waitForFunction((t) => document.getElementById('status').textContent === t, { timeout }, text).then(() => true, () => false);
+  const pcIds = async () => Promise.all([f, e].map((p) => p.evaluate(() => (window.pbl.session().pc.__id ??= Math.random()))));
+  const idsBefore = await pcIds();
+  await offerer.evaluate(() => window.pbl.recover());
+  const restarted = await Promise.all(
+    [f, e].map((p) => p.waitForFunction(() => window.pbl.session().restarts >= 1 && window.pbl.session().pc.connectionState === 'connected', { timeout: 10000 }).then(() => true, () => false)),
+  );
+  const instrAfter = await e.evaluate(() => window.pbl.link.instruct('재시작 뒤 지시').id);
+  const deliveredAfter = await e
+    .waitForFunction((id) => window.pbl.link.pending.get(id)?.receivedMs != null, { timeout: 5000 }, instrAfter)
+    .then(() => true, () => false);
+  check('ICE 재시작 왕복, 같은 연결 유지, 데이터 전달', restarted.every(Boolean) && deliveredAfter && JSON.stringify(await pcIds()) === JSON.stringify(idsBefore), JSON.stringify(await Promise.all([f, e].map(conn))));
+
+  // 현장의 서버 연결만 끊김(네트워크 전환 등): 서버가 전문가에게 peer-left(close)를 보내도 영상 연결은 두고,
+  // 현장이 1초 뒤 같은 탭 번호로 다시 들어오면 그대로 이어 간다
+  const keep0 = await Promise.all([f, e].map((p) => countLog(p, '기존 연결 유지')));
+  await f.evaluate(() => window.pbl.signaling.ws.close());
+  await waitStatus(e, '상대가 서버와 끊김', 5000);
+  const kept = await Promise.all([f, e].map(conn));
+  const back = await Promise.all([f, e].map((p, i) => waitMoreLog(p, '기존 연결 유지', keep0[i], 10000)));
+  const ok1 = (await waitExact(f, '연결됨')) && (await waitExact(e, '연결됨'));
+  check('현장 서버 연결만 끊김 > 영상 유지, 자동 재입장', back.every(Boolean) && ok1 && kept.every((c) => c.state === 'connected') && JSON.stringify(await pcIds()) === JSON.stringify(idsBefore), JSON.stringify(kept));
+
+  // T5-4 서버 재시작: 시그널링 서버가 꺼졌다 켜져도 P2P 연결은 그대로이고, 양쪽이 같은 탭 번호로 다시 입장한다
+  server.kill();
+  await new Promise((r) => server.once('exit', r));
+  await Promise.all([waitStatus(f, '다시 접속', 8000), waitStatus(e, '다시 접속', 8000)]);
+  const during = await Promise.all([f, e].map(conn));
+  check('서버가 꺼진 동안 P2P 연결 유지', during.every((c) => c.state === 'connected'), JSON.stringify(during));
+  const keep1 = await Promise.all([f, e].map((p) => countLog(p, '기존 연결 유지')));
+  const downAt = Date.now();
+  server = await startServer();
+  const rejoined = await Promise.all([f, e].map((p, i) => waitMoreLog(p, '기존 연결 유지', keep1[i])));
+  const ok2 = (await waitExact(f, '연결됨')) && (await waitExact(e, '연결됨'));
+  check('서버 재시작 후 같은 연결로 다시 입장', rejoined.every(Boolean) && ok2 && JSON.stringify(await pcIds()) === JSON.stringify(idsBefore), `서버 재기동부터 ${Date.now() - downAt} ms`);
+  const r0 = await e.evaluate(() => window.pbl.session().restarts);
+  await offerer.evaluate(() => window.pbl.recover());
+  const restarted2 = await e
+    .waitForFunction((n) => window.pbl.session().restarts > n && window.pbl.session().pc.connectionState === 'connected', { timeout: 10000 }, r0)
+    .then(() => true, () => false);
+  check('재시작한 서버로 ICE 재시작 중계', restarted2);
 
   const x = await b3.newPage();
   await x.goto(`${BASE}/expert.html?room=${room}`);

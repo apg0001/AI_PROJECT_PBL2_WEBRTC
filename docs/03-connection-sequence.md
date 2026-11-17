@@ -89,8 +89,8 @@ sequenceDiagram
 
 | type | 필드 | 설명 |
 |---|---|---|
-| `join` | `room: string`, `role: "field" \| "expert"`, `name?: string` | Room 입장 |
-| `offer` | `sdp: RTCSessionDescriptionInit` | 상대에게 전달 |
+| `join` | `room: string`, `role: "field" \| "expert"`, `name?: string`, `clientId?: string` | Room 입장. `clientId`는 탭마다 정하는 번호(새로고침하면 바뀜). 서버에 다시 붙을 때 같은 번호로 자리를 이어받는다 (#34) |
+| `offer` | `sdp: RTCSessionDescriptionInit`, `restart?: true` | 상대에게 전달. `restart`는 ICE 재시작 offer (기존 연결에 적용) |
 | `answer` | `sdp: RTCSessionDescriptionInit` | 상대에게 전달 |
 | `ice` | `candidate: RTCIceCandidateInit \| null` | 상대에게 전달. `null`은 수집 완료 |
 | `leave` | — | Room 퇴장 (WebSocket 종료도 퇴장으로 처리) |
@@ -99,10 +99,10 @@ sequenceDiagram
 
 | type | 필드 | 설명 |
 |---|---|---|
-| `joined` | `selfId: string`, `room: string`, `peers: {id, role, name}[]` | 입장 성공. `peers`가 비어 있으면 대기 |
-| `peer-joined` | `peer: {id, role, name}` | 기존 참가자에게만 전송 → 받은 쪽이 Offerer |
+| `joined` | `selfId: string`, `room: string`, `peers: {id, role, name, clientId}[]`, `resumed: boolean` | 입장 성공. `peers`가 비어 있으면 대기. `resumed`는 옛 자리를 이어받았음 |
+| `peer-joined` | `peer: {id, role, name, clientId}`, `resumed: boolean` | 기존 참가자에게만 전송 → 받은 쪽이 Offerer. 지금 연결된 상대와 `clientId`가 같으면 연결을 새로 만들지 않는다 |
 | `offer` / `answer` / `ice` | `from: string` + 원래 필드 | 상대가 보낸 메시지를 그대로 전달 |
-| `peer-left` | `peerId: string` | 상대 퇴장 또는 WebSocket 끊김 |
+| `peer-left` | `peerId: string`, `reason: "leave" \| "close"` | `leave`는 스스로 나감(연결 정리). `close`는 서버 연결만 끊김: P2P가 살아 있으면 60초 동안 유지하고 돌아오기를 기다린다 |
 | `error` | `code: string`, `message: string` | 아래 오류 코드 |
 
 ### 오류 코드
@@ -118,7 +118,42 @@ sequenceDiagram
 
 ### 연결 유지
 
-서버는 30초마다 WebSocket ping을 보내고, pong이 없으면 연결을 닫고 상대에게 `peer-left`를 보낸다. 폰의 화면이 꺼지거나 네트워크가 바뀌어 TCP가 조용히 끊긴 경우를 감지하기 위해서다.
+서버는 30초마다 WebSocket ping을 보내고, pong이 없으면 연결을 닫고 상대에게 `peer-left`(`reason: close`)를 보낸다. 폰의 화면이 꺼지거나 네트워크가 바뀌어 TCP가 조용히 끊긴 경우를 감지하기 위해서다.
+
+### 재접속과 연결 복구 (#24, #34)
+
+시그널링 서버 연결과 P2P 연결은 따로 끊긴다. 둘을 따로 되살린다.
+
+| 끊긴 것 | 감지 | 대응 | 담당 |
+|---|---|---|---|
+| 서버 연결(WebSocket) | `close` 이벤트 | 1, 2, 4, 5, 5…초 뒤 다시 접속, 같은 `clientId`로 `join`. 서버가 옛 연결을 아직 모르면 옛 연결을 닫고 자리를 넘긴다(`resumed`). P2P는 건드리지 않는다 | 양쪽 |
+| P2P (`disconnected`) | `connectionState` | 3초 기다림(저절로 회복하기도 함) > ICE 재시작 | Offerer |
+| P2P (`failed`) | `connectionState` | 바로 ICE 재시작. 8초마다 최대 3번 > 그래도 안 되면 처음부터 다시 연결(새 `RTCPeerConnection`). 10초마다 | Offerer |
+| 상대가 오래 안 돌아옴 | `peer-left(close)` 뒤 60초 | 연결 정리, 재입장 대기 | 양쪽 |
+
+- **ICE 재시작:** 같은 `RTCPeerConnection`에서 `restartIce()`로 후보만 새로 찾는다. 암호화 키와 미디어 통로(TD-13)는 그대로라 화면이 다시 붙는 데 필요한 일이 적다. 네트워크가 바뀌어(Wi-Fi > LTE) 옛 주소가 쓸모없어졌을 때 쓴다.
+- **Offerer만 재시작:** 양쪽이 동시에 offer를 만들면 충돌(glare)한다. 처음 연결 제안을 보낸 쪽이 재시작도 맡는다.
+- **복구 시간(Recovery Time):** 끊김을 감지한 시각부터 다시 `connected`가 된 시각까지. 화면 '연결 결과' 표의 '복구' 행과 기록 JSON의 `recoveries`(`lostAt`, `why`, `recoveryMs`, `how`)에 남는다.
+- 한 번도 연결되지 않은 실패(#37처럼 처음부터 길이 없음)는 복구하지 않고 연결 실패로 남긴다.
+
+```mermaid
+sequenceDiagram
+  participant F as 현장 (Wi-Fi > LTE)
+  participant S as 시그널링 서버
+  participant E as 전문가 (Offerer)
+  Note over F,E: 통화 중 현장 Wi-Fi 꺼짐
+  F--xS: 서버 연결 끊김
+  Note over F,E: P2P disconnected
+  F->>S: 다시 접속 (LTE), join {clientId 같음}
+  S-->>F: joined {resumed: true}
+  S-->>E: peer-joined {clientId 같음}
+  Note over E: 같은 상대 > 연결 유지, 3초 뒤에도 끊겨 있으면
+  E->>S: offer {restart: true}
+  S->>F: offer {restart: true}
+  F->>S: answer
+  S->>E: answer
+  Note over F,E: 새 후보로 연결성 검사 > connected (복구 시간 기록)
+```
 
 ## 4. 실패 분기
 
@@ -132,11 +167,15 @@ flowchart TD
   C --> D["ICE 연결성 검사"]
   D -->|connected| OK["통화"]
   D -->|"failed (수 초 ~ 30초)"| X2["ICE 실패: 수집된 Candidate 종류와 실패 단계 표시<br/>srflx 없음 → STUN 차단 / UDP 차단 의심<br/>srflx 있는데 실패 → Symmetric NAT 의심 → TURN 필요"]
-  OK -->|"disconnected"| R["불안정 표시, 자동 복구 대기 (#24)"]
+  OK -->|"disconnected"| R["불안정 표시, 3초 대기"]
   R -->|connected 복귀| OK
-  R -->|failed| RS["ICE Restart 또는 재입장 (#24, #34)"]
-  OK -->|peer-left| PL["상대 퇴장 표시, 재입장 대기"]
-  OK -->|WebSocket 끊김| WS["통화는 유지 (P2P)<br/>재연결 불가 상태만 표시"]
+  R -->|"3초 지남 또는 failed"| RS["ICE 재시작 최대 3번<br/>그다음 처음부터 다시 연결 (#34)"]
+  RS -->|connected| OK
+  OK -->|"peer-left (leave)"| PL["상대 퇴장 표시, 재입장 대기"]
+  OK -->|"peer-left (close)"| AW["통화 유지, 60초 동안 상대 재접속 대기"]
+  AW -->|같은 clientId 재입장| OK
+  OK -->|WebSocket 끊김| WS["통화는 유지 (P2P)<br/>서버에 자동 재접속 (#34)"]
+  WS -->|다시 join| OK
 ```
 
 | 단계 | 성공 판단 | 실패 시 남길 로그 | 사용자 안내 |

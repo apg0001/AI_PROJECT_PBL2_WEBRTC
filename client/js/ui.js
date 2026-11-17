@@ -524,6 +524,13 @@ export function createUi({ role, room }) {
       s.on('control-open', () => log('data', '데이터 통로 열림'));
     },
 
+    // 연결 복구 기록 (#34): 끊긴 시각, 이유, 복구까지 걸린 시간, 방법
+    showRecovery(list) {
+      record.recoveries = list;
+      const last = list.at(-1);
+      setRow('복구', `${list.length}회, 마지막 ${(last.recoveryMs / 1000).toFixed(1)}초 (${last.how})`);
+    },
+
     showTimings(m) {
       record.marks = { ...m };
       const d = (a, b) => (m[a] != null && m[b] != null ? `${(m[b] - m[a]).toFixed(0)} ms` : '-');
