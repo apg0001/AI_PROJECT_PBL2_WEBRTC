@@ -1,6 +1,7 @@
 # WebSocket Signaling — 메시지 스펙: docs/03-connection-sequence.md §3
 # 서버는 Room 관리와 중계만 한다. SDP·ICE Candidate 내용은 해석하지 않는다.
 
+import asyncio
 import json
 import re
 import uuid
@@ -24,9 +25,11 @@ class Peer:
         self.room = None
         self.role = None
         self.name = ''
+        self.client = ''  # 브라우저 탭이 정한 번호. 같은 탭이 다시 붙으면 자리를 이어받는다 (#34)
+        self.replaced = False
 
     def info(self):
-        return {'id': self.id, 'role': self.role, 'name': self.name}
+        return {'id': self.id, 'role': self.role, 'name': self.name, 'clientId': self.client}
 
 
 class Signaling:
@@ -35,6 +38,7 @@ class Signaling:
         self.heartbeat = heartbeat
         self.rooms: dict[str, dict[str, Peer]] = {}
         self.sockets = weakref.WeakSet()  # 서버 종료 시 닫을 연결
+        self.closing = set()  # 자리를 넘겨 닫는 중인 옛 연결
 
     async def send(self, peer: Peer, msg: dict):
         if peer.ws.closed:
@@ -51,27 +55,39 @@ class Signaling:
     async def join(self, peer: Peer, msg: dict):
         room, role = msg.get('room'), msg.get('role')
         name = msg['name'][:40] if isinstance(msg.get('name'), str) else ''
+        client = msg.get('clientId') if isinstance(msg.get('clientId'), str) and ROOM_RE.fullmatch(msg['clientId']) else ''
         if peer.room:
             return await self.error(peer, 'ALREADY_JOINED', '이미 Room에 들어와 있습니다')
         if not isinstance(room, str) or not ROOM_RE.fullmatch(room) or role not in ROLES:
             return await self.error(peer, 'BAD_MESSAGE', 'room 또는 role이 올바르지 않습니다')
         members = self.rooms.get(room, {})
+        # 재접속 (#34): 같은 탭(clientId)이 같은 역할로 다시 들어오면, 서버가 아직 옛 연결을 끊었다고 모르더라도
+        # 옛 연결을 닫고 자리를 넘긴다. 상대에게 peer-left를 보내지 않으므로 P2P 영상은 그대로 이어진다
+        old = next((m for m in members.values() if client and m.client == client and m.role == role), None)
+        if old:
+            members.pop(old.id, None)
+            old.room, old.replaced = None, True
+            # 옛 연결이 이미 죽었으면 닫기 인사를 기다리느라 몇 초 걸리므로 기다리지 않는다
+            task = asyncio.ensure_future(old.ws.close(code=4000, message=b'replaced'))
+            self.closing.add(task)
+            task.add_done_callback(self.closing.discard)
         if len(members) >= MAX_PEERS:
             return await self.error(peer, 'ROOM_FULL', 'Room 정원(2명)이 찼습니다')
         if any(m.role == role for m in members.values()):
             return await self.error(peer, 'ROLE_TAKEN', f'이미 {role} 참가자가 있습니다')
 
         peers = [m.info() for m in members.values()]
-        peer.room, peer.role, peer.name = room, role, name
+        peer.room, peer.role, peer.name, peer.client = room, role, name, client
         members[peer.id] = peer
         self.rooms[room] = members
 
-        await self.send(peer, {'type': 'joined', 'selfId': peer.id, 'room': room, 'peers': peers})
+        resumed = old is not None
+        await self.send(peer, {'type': 'joined', 'selfId': peer.id, 'room': room, 'peers': peers, 'resumed': resumed})
         # 기존 참가자에게만 알린다 → 받은 쪽이 Offerer (glare 방지)
         for other in list(members.values()):
             if other is not peer:
-                await self.send(other, {'type': 'peer-joined', 'peer': peer.info()})
-        self.log(f'[{room}] join {role} {peer.id} ({len(members)}/{MAX_PEERS})')
+                await self.send(other, {'type': 'peer-joined', 'peer': peer.info(), 'resumed': resumed})
+        self.log(f'[{room}] {"rejoin" if resumed else "join"} {role} {peer.id} tab {client[:8] or "-"} ({len(members)}/{MAX_PEERS})')
 
     async def relay(self, peer: Peer, msg: dict):
         if not peer.room:
@@ -84,6 +100,8 @@ class Signaling:
             out['candidate'] = msg.get('candidate')
         elif 'sdp' in msg:
             out['sdp'] = msg['sdp']
+            if msg.get('restart') is True:  # ICE 재시작 offer (#34): 받는 쪽이 기존 연결에 적용한다
+                out['restart'] = True
         for other in others:
             await self.send(other, out)
         self.log(f'[{peer.room}] {msg["type"]} {peer.role} → {",".join(o.role for o in others)}')
@@ -97,8 +115,9 @@ class Signaling:
         members.pop(peer.id, None)
         if not members:
             del self.rooms[room]
+        # reason: leave = 스스로 나감, close = 연결이 끊김(다시 돌아올 수 있음)
         for other in list(members.values()):
-            await self.send(other, {'type': 'peer-left', 'peerId': peer.id})
+            await self.send(other, {'type': 'peer-left', 'peerId': peer.id, 'reason': reason})
         self.log(f'[{room}] leave {peer.role} {peer.id} ({reason})')
 
     async def dispatch(self, peer: Peer, data: str):
@@ -132,7 +151,8 @@ class Signaling:
                 elif m.type == WSMsgType.BINARY:
                     await self.error(peer, 'BAD_MESSAGE', 'JSON이 아닙니다')
         finally:
-            await self.leave(peer, 'close')
+            if not peer.replaced:
+                await self.leave(peer, 'close')
         return ws
 
     async def close_all(self, app=None):

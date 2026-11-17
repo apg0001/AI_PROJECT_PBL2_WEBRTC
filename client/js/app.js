@@ -29,6 +29,10 @@ export async function startApp({ role }) {
   const signaling = new SignalingClient();
   let session = null;
   let marks = {};
+  // 이 탭의 번호 (#34). 서버에 다시 붙을 때 같은 번호로 들어가 자리를 이어받는다. 새로고침하면 새 번호
+  const clientId = globalThis.crypto?.randomUUID?.() ?? `c${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
+  let remoteClient = null; // 지금 연결된 상대 탭의 번호
+  const join = () => signaling.send({ type: 'join', room, role, clientId });
 
   // 내가 보내는 미디어. 연결 전에 켜 두면 연결될 때 붙는다.
   const mine = { audio: null, camera: null, screen: null };
@@ -47,7 +51,7 @@ export async function startApp({ role }) {
 
   // 데이터 통로 메시지 (#16). 연결이 바뀌어도 하나를 계속 쓴다(대기 중인 지시를 다시 보내기 위해)
   const link = new DataLink();
-  window.pbl = { link, session: () => session }; // 브라우저 콘솔과 자동 시험에서 쓰는 손잡이
+  window.pbl = { link, session: () => session, signaling }; // 브라우저 콘솔과 자동 시험에서 쓰는 손잡이
   const announce = (slot) => link.send('media', { slot, on: !!mine[slot] });
   const bitrate = (slot) => (slot === 'camera' ? { maxBitrate: PROFILES[profile].maxBitrate } : {});
 
@@ -158,8 +162,94 @@ export async function startApp({ role }) {
   signaling.on('message', ({ direction, msg }) => ui.logSignal(direction, msg));
   signaling.on('close', ({ code }) => {
     ui.log('signaling', `서버 연결 끊김 (code ${code}). 이미 연결된 영상·데이터는 그대로 유지된다`);
-    ui.setStatus('warn', session?.pc.connectionState === 'connected' ? '연결됨 (서버와는 끊김)' : '서버와 연결이 끊겼습니다');
+    ui.setStatus('warn', session?.pc.connectionState === 'connected' ? '연결됨 (서버와는 끊김, 다시 접속하는 중)' : '서버와 연결이 끊겼습니다. 다시 접속하는 중…');
   });
+  signaling.on('reconnecting', ({ attempt, delay }) => ui.log('signaling', `서버 재접속 ${attempt}번째 시도 (${delay / 1000}초 뒤)`));
+  signaling.on('reopen', () => {
+    ui.log('signaling', '서버에 다시 붙음. 같은 탭 번호로 다시 입장');
+    join();
+  });
+
+  // ---- 연결 복구 (#24, #34) ----
+  // 1) disconnected: 잠깐 끊긴 것일 수 있으므로 3초 기다린다 (브라우저가 스스로 되살리기도 한다)
+  // 2) 그래도 안 되거나 failed: ICE 재시작 (같은 연결에서 후보만 새로 찾음). 8초마다, 최대 3번
+  // 3) 그래도 안 되면 처음부터 다시 연결 (새 RTCPeerConnection). 10초마다
+  // 재시작은 연결 제안을 보낸 쪽(Offerer)만 한다. 서버 연결이 끊겨 있으면 다시 붙은 뒤에 한다
+  const recovery = { lostAt: null, lostWall: null, why: '', attempts: 0, timer: 0, list: [] };
+  let peerPresent = false; // 상대가 서버(Room)에 있는가
+  let awayTimer = 0; // 상대가 서버에서 끊긴 뒤 돌아오기를 기다리는 시간
+
+  function onLost(s, why) {
+    if (!s.wasConnected) return; // 한 번도 연결되지 않은 실패는 복구가 아니라 연결 실패로 남긴다 (#37 시험)
+    if (recovery.lostAt == null) {
+      recovery.lostAt = performance.now();
+      recovery.lostWall = new Date().toISOString();
+      recovery.why = why;
+      ui.log('state', `연결 끊김 감지 (${why}). 복구를 시작한다`);
+    }
+    if (!s.isOfferer) {
+      ui.setStatus(why === 'failed' ? 'error' : 'warn', '연결이 끊겼습니다. 상대 쪽에서 다시 연결하는 중…');
+      return;
+    }
+    ui.setStatus('warn', '연결이 불안정합니다. 복구를 기다리는 중…');
+    scheduleRecovery(why === 'failed' ? 0 : 3000);
+  }
+
+  function scheduleRecovery(delay) {
+    if (recovery.timer) return;
+    recovery.timer = setTimeout(() => {
+      recovery.timer = 0;
+      tryRecover();
+    }, delay);
+  }
+
+  async function tryRecover(force = false) {
+    const s = session;
+    if (!s || s.closed || !s.isOfferer) return;
+    if (force) {
+      // 자동 시험용: 연결이 멀쩡해도 ICE 재시작 왕복이 되는지 본다 (복구 기록에는 넣지 않는다)
+      ui.log('state', 'ICE 재시작 (수동 시험)');
+      return s.restartIce();
+    }
+    if (s.pc.connectionState === 'connected') return onRecovered();
+    if (!signaling.open) return ui.setStatus('busy', '복구 중… (서버에 다시 붙기를 기다림)'); // reopen > joined에서 다시 부른다
+    if (!peerPresent) return ui.setStatus('busy', '복구 중… (상대가 서버에 다시 들어오기를 기다림)'); // peer-joined에서 다시 부른다
+    recovery.attempts++;
+    try {
+      if (recovery.attempts <= 3) {
+        ui.setStatus('busy', `복구 중… (연결 재시작 ${recovery.attempts}번째)`);
+        ui.log('state', `ICE 재시작 ${recovery.attempts}번째 시도`);
+        await s.restartIce();
+        scheduleRecovery(8000);
+      } else {
+        ui.setStatus('busy', `복구 중… (처음부터 다시 연결, ${recovery.attempts - 3}번째)`);
+        ui.log('state', '처음부터 다시 연결 (새 연결 만들기)');
+        marks = { t0_join: marks.t0_join, t1_peerJoined: performance.now() };
+        await newSession().makeOffer();
+        scheduleRecovery(10000);
+      }
+    } catch (err) {
+      ui.log('error', `복구: ${err.message}`);
+      scheduleRecovery(5000);
+    }
+  }
+
+  function onRecovered() {
+    clearTimeout(recovery.timer);
+    recovery.timer = 0;
+    if (recovery.lostAt == null) return;
+    const ms = Math.round(performance.now() - recovery.lostAt);
+    const how = recovery.attempts === 0 ? '저절로 회복' : recovery.attempts <= 3 ? `ICE 재시작 ${recovery.attempts}회` : '처음부터 다시 연결';
+    const item = { lostAt: recovery.lostWall, why: recovery.why, recoveryMs: ms, how };
+    recovery.list.push(item);
+    ui.showRecovery(recovery.list);
+    ui.log('state', `복구됨: ${(ms / 1000).toFixed(1)}초 (${how})`);
+    Object.assign(recovery, { lostAt: null, lostWall: null, why: '', attempts: 0 });
+  }
+  window.pbl.recover = () => tryRecover(true); // 자동 시험: 연결이 멀쩡해도 ICE 재시작을 해 본다
+  window.pbl.recovery = recovery;
+
+  const alive = () => session && !session.closed && session.wasConnected;
 
   function newSession() {
     session?.close();
@@ -173,11 +263,14 @@ export async function startApp({ role }) {
     });
     s.on('control-open', () => ['audio', 'camera', 'screen'].forEach(announce));
     s.on('state', ({ kind, value }) => {
-      if (kind !== 'connectionState') return;
+      if (kind !== 'connectionState' || s !== session) return;
       if (value === 'connected') onConnected(s);
-      else if (value === 'connecting') ui.setStatus('busy', '연결 중…');
-      else if (value === 'disconnected') ui.setStatus('warn', '연결이 불안정합니다');
-      else if (value === 'failed') ui.setStatus('error', '연결하지 못했습니다. 연결 후보와 기록을 확인하세요');
+      else if (value === 'connecting') recovery.lostAt == null && ui.setStatus('busy', '연결 중…');
+      else if (value === 'disconnected') onLost(s, 'disconnected');
+      else if (value === 'failed') {
+        if (s.wasConnected) onLost(s, 'failed');
+        else ui.setStatus('error', '연결하지 못했습니다. 연결 후보와 기록을 확인하세요');
+      }
     });
     link.attach(s);
     s.on('error', ({ where, message }) => ui.log('error', `${where}: ${message}`));
@@ -211,38 +304,84 @@ export async function startApp({ role }) {
   link.on('invalid', ({ channel, error }) => ui.log('error', `${channel} 채널: 잘못된 메시지 (${error})`));
 
   async function onConnected(s) {
+    s.wasConnected = true;
+    onRecovered();
     ui.setStatus('ok', '연결됨');
     ui.showTimings(marks);
     const pair = await s.selectedPair();
     if (pair) ui.showSelectedPair(pair);
   }
 
-  signaling.on('joined', ({ peers }) => {
+  signaling.on('joined', ({ peers, resumed }) => {
+    const same = peers.find((p) => p.clientId && p.clientId === remoteClient);
+    peerPresent = peers.length > 0;
+    if (alive() && (same || peers.length === 0)) {
+      // 서버에 다시 붙었다 (#34). 연결은 그대로 두고, 끊겨 있으면 복구를 이어 간다
+      ui.log('signaling', `다시 입장${resumed ? ' (서버가 옛 자리를 넘겨줌)' : ''}. 기존 연결 유지`);
+      clearTimeout(awayTimer);
+      if (peers.length === 0) awayTimer = setTimeout(() => !peerPresent && closeForGood(), 60_000); // 서버 재시작 등. 상대가 안 돌아오면 정리
+      if (session.pc.connectionState === 'connected') ui.setStatus('ok', '연결됨');
+      else tryRecover();
+      return;
+    }
+    remoteClient = peers[0]?.clientId ?? null;
     if (peers.length === 0) ui.setStatus('wait', `${role === 'field' ? '전문가' : '현장 작업자'}를 기다리는 중…`);
     else ui.setStatus('busy', '연결하는 중…'); // 나중에 들어온 쪽: Offer를 기다린다
   });
 
   // 먼저 있던 쪽 → Offerer
   signaling.on('peer-joined', async ({ peer }) => {
+    peerPresent = true;
+    clearTimeout(awayTimer);
+    if (alive() && peer.clientId && peer.clientId === remoteClient) {
+      ui.log('signaling', `${peer.role}가 서버에 다시 들어옴. 기존 연결 유지`);
+      if (session.pc.connectionState === 'connected') ui.setStatus('ok', '연결됨');
+      else tryRecover();
+      return;
+    }
+    remoteClient = peer.clientId ?? null;
     ui.log('signaling', `${peer.role} 입장. 먼저 있던 내가 연결 제안(offer)을 보낸다`);
     marks = { t0_join: marks.t0_join, t1_peerJoined: performance.now() };
     ui.setStatus('busy', '연결하는 중…');
     await newSession().makeOffer();
   });
 
-  signaling.on('offer', async ({ sdp }) => {
+  signaling.on('offer', async ({ sdp, restart }) => {
+    if (restart) {
+      // ICE 재시작: 기존 연결에 적용. 연결이 없으면(이미 닫음) 무시하고 상대의 '처음부터 다시 연결'을 기다린다
+      if (!session || session.closed) return ui.log('signaling', 'ICE 재시작 제안을 받았지만 기존 연결이 없어 무시');
+      ui.log('state', '상대가 ICE 재시작을 요청함');
+      return session.handleRestartOffer(sdp).catch((err) => ui.log('error', `ICE 재시작 응답: ${err.message}`));
+    }
     await newSession().handleOffer(sdp);
   });
-  signaling.on('answer', ({ sdp }) => session?.handleAnswer(sdp));
+  signaling.on('answer', ({ sdp }) => session?.handleAnswer(sdp).catch((err) => ui.log('error', `answer: ${err.message}`)));
   signaling.on('ice', ({ candidate }) => session?.handleIce(candidate));
 
-  signaling.on('peer-left', () => {
+  signaling.on('peer-left', ({ reason }) => {
+    peerPresent = false;
+    if (reason === 'close' && alive()) {
+      // 상대의 서버 연결만 끊긴 것일 수 있다(네트워크 전환). 영상 연결은 두고 60초 기다린다
+      ui.log('signaling', '상대의 서버 연결이 끊김. 영상 연결은 두고 돌아오기를 기다린다 (60초)');
+      if (session.pc.connectionState === 'connected') ui.setStatus('warn', '연결됨 (상대가 서버와 끊김)');
+      clearTimeout(awayTimer);
+      awayTimer = setTimeout(() => !peerPresent && closeForGood(), 60_000);
+      return;
+    }
+    closeForGood();
+  });
+
+  function closeForGood() {
+    clearTimeout(recovery.timer);
+    recovery.timer = 0;
+    Object.assign(recovery, { lostAt: null, lostWall: null, why: '', attempts: 0 });
+    remoteClient = null;
     session?.close();
     session = null;
     ui.resetRemote();
     marks = { t0_join: marks.t0_join };
     ui.setStatus('wait', '상대가 나갔습니다. 다시 들어오기를 기다리는 중…');
-  });
+  }
 
   signaling.on('error', ({ code, message }) => {
     ui.log('error', `${code}: ${message}`);
@@ -254,6 +393,8 @@ export async function startApp({ role }) {
   });
   ui.onLeave(() => {
     signaling.send({ type: 'leave' });
+    signaling.close(); // 나간 뒤에는 다시 붙지 않는다
+    clearTimeout(recovery.timer);
     session?.close();
     session = null;
     for (const slot of Object.keys(mine)) if (mine[slot]) setMine(slot, null);
@@ -288,7 +429,7 @@ export async function startApp({ role }) {
     ui.setStatus('busy', '서버에 접속하는 중…');
     await signaling.connect();
     marks.t0_join = performance.now();
-    signaling.send({ type: 'join', room, role });
+    join();
   } catch (err) {
     ui.setStatus('error', err.message);
   }

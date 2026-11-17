@@ -154,7 +154,7 @@ class SignalingTest(AioHTTPTestCase):
         await f.next()
 
         await e.close()  # WebSocket 종료도 퇴장
-        self.assertEqual(await f.next(), {'type': 'peer-left', 'peerId': eid})
+        self.assertEqual(await f.next(), {'type': 'peer-left', 'peerId': eid, 'reason': 'close'})
 
         # 자리가 비었으므로 전문가가 다시 들어올 수 있다
         e2 = await self.connect()
@@ -163,11 +163,58 @@ class SignalingTest(AioHTTPTestCase):
         self.assertEqual((await f.next())['type'], 'peer-joined')
 
         await e2.send({'type': 'leave'})
-        self.assertEqual((await f.next())['type'], 'peer-left')
+        self.assertEqual((await f.next())['reason'], 'leave')
         await f.close()
         await e2.close()
         await asyncio.sleep(0.05)
         self.assertNotIn(r, self.app[SIGNALING].rooms)  # 빈 Room은 지운다
+
+
+class ReconnectTest(AioHTTPTestCase):
+    """재접속 (#34): 같은 clientId는 자리를 이어받고, ICE 재시작 표시는 중계된다"""
+
+    async def get_application(self):
+        return create_app(log=lambda *a: None)
+
+    async def connect(self):
+        return Client(await self.client.ws_connect('/ws'))
+
+    async def test_rejoin_same_client(self):
+        r = room()
+        f = await self.connect()
+        await f.send({'type': 'join', 'room': r, 'role': 'field', 'clientId': 'tab-f'})
+        await f.next()
+        e = await self.connect()
+        await e.send({'type': 'join', 'room': r, 'role': 'expert', 'clientId': 'tab-e'})
+        j = await e.next()
+        self.assertEqual(j['peers'][0]['clientId'], 'tab-f')
+        self.assertFalse(j['resumed'])
+        self.assertEqual((await f.next())['peer']['clientId'], 'tab-e')
+
+        # 서버는 옛 연결(e)이 살아 있다고 알고 있는 상태에서 같은 탭이 새 연결로 다시 들어온다
+        e2 = await self.connect()
+        await e2.send({'type': 'join', 'room': r, 'role': 'expert', 'clientId': 'tab-e'})
+        j2 = await e2.next()
+        self.assertEqual(j2['type'], 'joined')
+        self.assertTrue(j2['resumed'])
+        pj = await f.next()
+        self.assertEqual((pj['type'], pj['resumed']), ('peer-joined', True))  # peer-left 없이 바로
+        # 옛 연결은 서버가 닫는다 (4000 replaced)
+        await e.ws.receive(timeout=1)
+        self.assertEqual(e.ws.close_code, 4000)
+        await asyncio.sleep(0.05)
+        self.assertEqual(len(self.app[SIGNALING].rooms[r]), 2)
+
+        # 다른 탭(clientId 다름)은 여전히 거부
+        x = await self.connect()
+        await x.send({'type': 'join', 'room': r, 'role': 'expert', 'clientId': 'tab-x'})
+        self.assertEqual((await x.next())['code'], 'ROOM_FULL')
+
+        # ICE 재시작 offer는 restart 표시와 함께 중계된다
+        await e2.send({'type': 'offer', 'sdp': {'type': 'offer', 'sdp': 'v=0'}, 'restart': True})
+        self.assertTrue((await f.next())['restart'])
+        for c in (f, e, e2, x):
+            await c.close()
 
 
 class StaticTest(AioHTTPTestCase):

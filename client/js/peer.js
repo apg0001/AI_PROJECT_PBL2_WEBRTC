@@ -25,6 +25,8 @@ export class PeerSession extends EventTarget {
     this.slots = null; // { audio: RTCRtpTransceiver, camera, screen }
     this.localTracks = { audio: null, camera: null, screen: null };
     this.maxBitrate = {}; // slot > bps
+    this.isOfferer = false; // 연결 제안을 보낸 쪽이 ICE 재시작도 맡는다 (양쪽이 동시에 하면 충돌)
+    this.restarts = 0;
 
     // iceTransportPolicy 'relay'면 TURN 중계 후보만 쓴다 (#38 시험용)
     const pc = new RTCPeerConnection({ iceServers, iceTransportPolicy });
@@ -73,6 +75,7 @@ export class PeerSession extends EventTarget {
 
   // Room에 먼저 있던 쪽이 호출한다
   async makeOffer() {
+    this.isOfferer = true;
     const list = MEDIA_SLOTS.map(({ kind }) => this.pc.addTransceiver(kind, { direction: 'sendrecv' }));
     await this.#bindSlots(list);
     const offer = await this.pc.createOffer();
@@ -90,6 +93,27 @@ export class PeerSession extends EventTarget {
       await this.#bindSlots(list);
       for (const [slot, t] of Object.entries(this.slots)) this.#emit('remote-track', { slot, track: t.receiver.track });
     } else this.#emit('error', { where: 'media', message: `상대가 미디어 통로를 ${list.length}개만 열었습니다` });
+    const answer = await this.pc.createAnswer();
+    await this.pc.setLocalDescription(answer);
+    this.signaling.send({ type: 'answer', sdp: this.pc.localDescription.toJSON() });
+  }
+
+  // ICE 재시작 (#34): 같은 연결(암호화 키, 미디어 통로)은 그대로 두고 후보만 새로 찾아 경로를 다시 잡는다.
+  // 네트워크가 바뀌어(Wi-Fi > LTE) 옛 주소가 쓸모없어졌을 때 쓴다. Offerer만 호출한다
+  async restartIce() {
+    this.restarts++;
+    this.pendingRemote = [];
+    this.pc.restartIce();
+    const offer = await this.pc.createOffer({ iceRestart: true });
+    await this.pc.setLocalDescription(offer);
+    this.signaling.send({ type: 'offer', sdp: this.pc.localDescription.toJSON(), restart: true });
+  }
+
+  // 상대가 보낸 ICE 재시작 offer를 기존 연결에 적용한다
+  async handleRestartOffer(sdp) {
+    this.restarts++;
+    await this.pc.setRemoteDescription(sdp);
+    await this.#flushRemote();
     const answer = await this.pc.createAnswer();
     await this.pc.setLocalDescription(answer);
     this.signaling.send({ type: 'answer', sdp: this.pc.localDescription.toJSON() });
